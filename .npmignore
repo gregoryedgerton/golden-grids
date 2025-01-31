@@ -1,0 +1,9 @@
+# Ignore source files and unnecessary configs in npm package
+src/
+node_modules/
+tests/
+.vscode/
+.idea/
+.gitignore
+.npmignore
+*.tsbuildinfo
