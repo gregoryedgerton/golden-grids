@@ -7,6 +7,7 @@ export function fullFibonacciUpTo(n: number): number[] {
 }
 
 export function buildUserSequenceFromBounds(start: number, end: number): number[] {
+
   const fib: number[] = fullFibonacciUpTo(end);
 
   if (fib.indexOf(start) === -1 || fib.indexOf(end) === -1) {

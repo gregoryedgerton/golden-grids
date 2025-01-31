@@ -2,8 +2,8 @@
   "name": "golden-grids",
   "version": "1.0.0",
   "description": "A React library for generating golden ratio grid layouts.",
-  "main": "dist/index.js",
-  "module": "dist/index.esm.js",
+  "main": "dist/golden-grids.cjs.js",
+  "module": "dist/golden-grids.esm.js",
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "vite build",

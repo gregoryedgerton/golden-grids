@@ -10,7 +10,7 @@ interface GridContextProps {
 const GridContext = createContext<GridContextProps>({
     inputControl: {
         first: 1,
-        last: 3,
+        last: 5,
         color: "#7f7ec7",
         mirror: true,
         rotate: 180,
