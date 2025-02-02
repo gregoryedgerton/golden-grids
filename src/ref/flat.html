@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Golden Grids</title>
+<style>
+  body {
+    margin: 0;
+    padding: 0;
+  }
+  .grid-container {
+    margin: 0;
+    padding: 0;
+  }
+
+  .grid-container ol {  
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    position: relative;
+    width: 100%;
+    box-sizing: border-box;
+  }
+  .grid-container ol > li {
+    aspect-ratio: 1 / 1;
+  }
+  .grid-container .placeholder {
+    aspect-ratio: auto;
+  }
+</style>
+</head>
+<body>
+
+<div id="gridsRoot"></div>
+
+<script>
+
+  // Captured in ColorUtils.ts
+  function hexToHsl(hex) {
+    hex = hex.replace(/^#/, '');
+    let r = parseInt(hex.substring(0,2),16) / 255;
+    let g = parseInt(hex.substring(2,4),16) / 255;
+    let b = parseInt(hex.substring(4,6),16) / 255;
+
+    let max = Math.max(r,g,b), min = Math.min(r,g,b);
+    let h, s, l = (max + min) / 2;
+
+    if (max === min) {
+      h = s = 0; 
+    } else {
+      let d = max - min;
+      s = l > 0.5 ? d/(2 - max - min) : d/(max + min);
+      switch(max) {
+        case r: h = (g - b)/d + (g < b ? 6 : 0); break;
+        case g: h = (b - r)/d + 2; break;
+        case b: h = (r - g)/d + 4; break;
+      }
+      h = h / 6;
+    }
+
+    return [h*360, s*100, l*100];
+  }
+
+  function hslToCss(h, s, l) {
+    return `hsl(${h}, ${s}%, ${l}%)`;
+  }
+
+  // Captured in gridGenerator.ts
+  function generateGoldenGridLayout(fibSequence, mirror = false, rotate = 0) {
+    if (fibSequence.length < 2) {
+      throw new Error('Need at least two numbers in the sequence.');
+    }
+
+    const validRotations = [0, 90, 180, 270];
+    if (!validRotations.includes(rotate)) {
+      throw new Error(`Invalid rotation value: ${rotate}. Only 0, 90, 180, and 270 are allowed.`);
+    }
+
+    const squares = [];
+    squares.push({ size: fibSequence[0], x: 0, y: 0 });
+    squares.push({ size: fibSequence[1], x: fibSequence[0], y: 0 });
+
+    const directions = [
+      { dx: 0, dy: 1 },  // bottom
+      { dx: -1, dy: 0 }, // left
+      { dx: 0, dy: -1 }, // top
+      { dx: 1, dy: 0 }   // right
+    ];
+    let dirIndex = 0;
+
+    let layout = { squares }; 
+    function updateBounds() { 
+      layout.minX = Math.min(...squares.map(s => s.x));
+      layout.maxX = Math.max(...squares.map(s => s.x + s.size - 1));
+      layout.minY = Math.min(...squares.map(s => s.y));
+      layout.maxY = Math.max(...squares.map(s => s.y + s.size - 1));
+      layout.width = layout.maxX - layout.minX + 1;
+      layout.height = layout.maxY - layout.minY + 1;  
+    }
+
+    updateBounds();   
+
+    // Captured in gridGenerator.ts
+    for (let i = 2; i < fibSequence.length; i++) {
+      const size = fibSequence[i];
+      const d = directions[dirIndex];
+
+      // Might be missing
+      let xPos, yPos;
+      if (d.dx === 0 && d.dy === 1) {
+        xPos = layout.minX;
+        yPos = layout.maxY + 1;
+      } else if (d.dx === -1 && d.dy === 0) {
+        xPos = layout.minX - size;
+        yPos = layout.maxY - size + 1;
+      } else if (d.dx === 0 && d.dy === -1) {
+        xPos = layout.maxX - size + 1;
+        yPos = layout.minY - size;
+      } else if (d.dx === 1 && d.dy === 0) {
+        xPos = layout.maxX + 1;
+        yPos = layout.minY;
+      }
+
+      squares.push({ size, x: xPos, y: yPos });
+      updateBounds();
+      dirIndex = (dirIndex + 1) % directions.length;
+    }
+
+    // Might be missing
+    if (mirror) {
+      squares.forEach(square => {
+        square.x = -square.x - square.size + 1; // Mirror along the X-axis
+      });
+      updateBounds();
+    }
+
+    // Might be missing
+    if (rotate) {
+      squares.forEach(square => {
+        let tempX = square.x;
+        let tempY = square.y;
+        if (rotate === 90) {
+          square.x = tempY;
+          square.y = -tempX - square.size + 1;
+        } else if (rotate === 180) {
+          square.x = -tempX - square.size + 1;
+          square.y = -tempY - square.size + 1;
+        } else if (rotate === 270) {
+          square.x = -tempY - square.size + 1;
+          square.y = tempX;
+        }
+      });
+      updateBounds();
+    }
+
+    // Captured in gridGenerator.ts
+    return {
+      squares,
+      width: layout.width,
+      height: layout.height,
+      minX: layout.minX,
+      minY: layout.minY
+    };
+  }
+
+  // captured in fibonacci.ts
+  function fullFibonacciUpTo(n) {
+    const arr = [1,1];
+    while (arr[arr.length - 1] < n) {
+      arr.push(arr[arr.length - 1] + arr[arr.length - 2]);
+    }
+    return arr.filter(v => v <= n);
+  }
+
+  // Might be missing parts
+  function buildUserSequenceFromBounds(start, end) {
+    const fib = [1,1];
+    while (fib[fib.length - 1] < end) {
+      fib.push(fib[fib.length - 1] + fib[fib.length - 2]);
+    }
+
+    if (start === 1 && end === 1) {
+      return [1,1];
+    }
+
+    const startInFib = fib.includes(start);
+    const endInFib = fib.includes(end);
+
+    if (!startInFib || !endInFib) {
+      let message = 'Invalid Fibonacci input:\n';
+      if (!startInFib) message += `- ${start} is not a Fibonacci number.\n`;
+      if (!endInFib) message += `- ${end} is not a Fibonacci number.\n`;
+      alert(message);
+      return [];
+    }
+
+    const startIndex = fib.indexOf(start);
+    const endIndex = fib.indexOf(end);
+    if (endIndex < startIndex) {
+      alert('The end value comes before the start value in the Fibonacci sequence.');
+      return [];
+    }
+
+    const sliceResult = fib.slice(startIndex, endIndex + 1);
+    if (sliceResult.length < 2) {
+      alert('Not enough numbers to form a valid sequence from start to end.');
+      return [];
+    }
+
+    return sliceResult;
+  }
+
+  const userInputs = [
+    { first: 1, last: 3, color: '#7f7ec7', mirror: false, rotate: 0 }
+  ];
+
+  const gridsRoot = document.getElementById('gridsRoot');
+
+  userInputs.forEach(({first, last, color, mirror, rotate}) => {
+    let start = first;
+    let end = last;
+    if (start > end) {
+      [start, end] = [end, start];
+    }
+
+    const userSequence = buildUserSequenceFromBounds(start, end);
+    if (userSequence.length < 2) {
+      console.warn('No valid sequence generated for', {start, end});
+      return; 
+    }
+
+    // Might be missing alot
+    const maxRequested = Math.max(...userSequence);
+    const fullSequence = fullFibonacciUpTo(maxRequested);
+
+    const baseColor = color || '#333333';
+    const [h, s, l] = hexToHsl(baseColor);
+    const complementHue = (h + 180) % 360;
+    const layout = generateGoldenGridLayout(fullSequence, mirror, rotate);
+
+    const requestedSquares = layout.squares.filter(sq => userSequence.includes(sq.size));
+    const skippedSquares = layout.squares.filter(sq => !userSequence.includes(sq.size));
+
+    const container = document.createElement('div');
+    container.classList.add('grid-container');
+    const ol = document.createElement('ol');
+    ol.style.gridTemplateColumns = `repeat(${layout.width}, 1fr)`;
+    ol.style.gridTemplateRows = `repeat(${layout.height}, 1fr)`;
+
+    container.appendChild(ol);
+    gridsRoot.appendChild(container);
+
+    // Defintely missing PLaceholder logic
+    let placeholderExists = skippedSquares.length > 0;
+    let placeholderColor = baseColor;
+
+    if (placeholderExists) {
+      const minX = Math.min(...skippedSquares.map(s => s.x));
+      const maxX = Math.max(...skippedSquares.map(s => s.x + s.size - 1));
+      const minY = Math.min(...skippedSquares.map(s => s.y));
+      const maxY = Math.max(...skippedSquares.map(s => s.y + s.size - 1));
+
+      const rowStart = minY - layout.minY + 1;
+      const colStart = minX - layout.minX + 1;
+      const height = (maxY - minY + 1);
+      const width = (maxX - minX + 1);
+
+      const rowEnd = rowStart + height;
+      const colEnd = colStart + width;
+
+      const placeholderLi = document.createElement('li');
+      placeholderLi.classList.add('placeholder');
+      placeholderLi.style.gridArea = `${rowStart} / ${colStart} / ${rowEnd} / ${colEnd}`;
+      placeholderLi.style.background = placeholderColor;
+      ol.appendChild(placeholderLi);
+    }
+
+    const totalRequested = requestedSquares.length;
+    requestedSquares.forEach((sq, seqIndex) => {
+      let currentHue = h;
+      if (totalRequested > 1) {
+        let fraction;
+        if (placeholderExists) {
+          fraction = (seqIndex + 1) / (totalRequested + 1); 
+        } else {
+          fraction = (totalRequested === 1) ? 0 : (seqIndex / (totalRequested - 1));
+        }
+
+        currentHue = h + ((complementHue - h) * fraction);
+        if (currentHue < 0) currentHue += 360;
+        if (currentHue > 360) currentHue -= 360;
+      } else {
+        if (placeholderExists) {
+          let fraction = 0.5;
+          currentHue = h + ((complementHue - h) * fraction);
+        } else {
+          currentHue = h;
+        }
+      }
+
+      const li = document.createElement('li');
+      const rowStart = sq.y - layout.minY + 1;
+      const colStart = sq.x - layout.minX + 1;
+      const rowEnd = rowStart + sq.size;
+      const colEnd = colStart + sq.size;
+      li.style.gridArea = `${rowStart} / ${colStart} / ${rowEnd} / ${colEnd}`;
+      li.style.background = hslToCss(currentHue, s, l);
+      ol.appendChild(li);
+    });
+  });
+</script>
+</body>
+</html>
