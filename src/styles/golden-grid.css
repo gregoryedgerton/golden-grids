@@ -74,12 +74,10 @@ body {
   box-sizing: content-box;
 }
 
-.grid-container ol > li {
+.grid-container ol > li:not(.placeholder) {
   aspect-ratio: 1 / 1;
-  background: rgb(34,193,195);
-  background: radial-gradient(circle, rgba(34,193,195,1) 0%, rgba(253,187,45,1) 100%) !important;
 }
 
 .grid-container .placeholder {
-  background: rgba(255, 0, 0, 0.3) !important;
+  aspect-ratio: auto;
 }

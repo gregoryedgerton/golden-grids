@@ -18,7 +18,7 @@ const GridContext = createContext<GridContextProps | undefined>(undefined);
 
 export const GridProvider: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
     const [inputControl, setInputControl] = useState<InputControlType>({
-        first: 1,
+        first: 2,
         last: 3,
         color: "#7f7ec7",
         mirror: false,

@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from "react";
 import { useGrid } from "../context/GridContext";
 import { generateGoldenGridLayout, fibonacciUpTo } from "../utils/gridGenerator";
+import { generateHarmonicPalette } from "../utils/colorUtils";
 import "../styles/golden-grid.css";
 
 const GoldenGrid: React.FC = (): React.ReactElement<any> => {
@@ -9,7 +10,7 @@ const GoldenGrid: React.FC = (): React.ReactElement<any> => {
 
     useEffect(() => {
         if (gridRef.current) {
-            const { first, last, mirror, rotate } = inputControl;
+            const { first, last, mirror, rotate, color } = inputControl;
 
             console.log("🔵 useEffect Triggered! Input Control:", inputControl);
 
@@ -29,14 +30,21 @@ const GoldenGrid: React.FC = (): React.ReactElement<any> => {
             const layout = generateGoldenGridLayout(fullSequence, mirror, rotate);
             console.log("✅ Generated Grid Layout:", layout);
 
+            // Generate harmonic color palette
+            const colorPalette = generateHarmonicPalette(color, layout.squares.length);
+            console.log("🎨 Generated Color Palette:", colorPalette);
+
             gridRef.current.innerHTML = "";
             const ol = document.createElement("ol");
             ol.style.gridTemplateColumns = `repeat(${layout.width}, 1fr)`;
             ol.style.gridTemplateRows = `repeat(${layout.height}, 1fr)`;
 
-            layout.squares.forEach(sq => {
+            layout.squares.forEach((sq, index) => {
                 const li = document.createElement("li");
                 li.style.gridArea = `${sq.y + 1} / ${sq.x + 1} / span ${sq.size} / span ${sq.size}`;
+
+                const color = colorPalette[index];
+                li.style.backgroundColor = color;
 
                 if (sq.size < first) {
                     console.log(`🟡 Placeholder - Size: ${sq.size}, X: ${sq.x}, Y: ${sq.y}`);
