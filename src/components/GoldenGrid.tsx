@@ -14,19 +14,15 @@ const GoldenGrid: React.FC = (): React.ReactElement<any> => {
 
             console.log("🔵 useEffect Triggered! Input Control:", inputControl);
 
-            // Full Fibonacci sequence from 1 up to the 'last' value
+            // Full Fibonacci sequence up to 'last'
             const fullSequence = fibonacciUpTo(last);
             console.log("✅ Full Fibonacci Sequence:", fullSequence);
 
-            // User's active selection range
+            // User-selected active range
             const userSequence = fullSequence.filter(n => n >= first && n <= last);
             console.log("✅ Fixed User Sequence:", userSequence);
 
-            // Skipped numbers for placeholders
-            const skippedSquares = fullSequence.filter(n => n < first);
-            console.log("🟡 Skipped Squares:", skippedSquares);
-
-            // Build grid layout with the full sequence
+            // Build the full grid layout (now properly bounding the full spiral)
             const layout = generateGoldenGridLayout(fullSequence, mirror, rotate);
             console.log("✅ Generated Grid Layout:", layout);
 
@@ -39,20 +35,34 @@ const GoldenGrid: React.FC = (): React.ReactElement<any> => {
             ol.style.gridTemplateColumns = `repeat(${layout.width}, 1fr)`;
             ol.style.gridTemplateRows = `repeat(${layout.height}, 1fr)`;
 
+            // 🔹 Identify and combine skipped squares into a single placeholder block
+            const skippedSquares = layout.squares.filter(sq => sq.size < first);
+            if (skippedSquares.length > 0) {
+                const minX = Math.min(...skippedSquares.map(sq => sq.x));
+                const minY = Math.min(...skippedSquares.map(sq => sq.y));
+                const maxX = Math.max(...skippedSquares.map(sq => sq.x + sq.size));
+                const maxY = Math.max(...skippedSquares.map(sq => sq.y + sq.size));
+
+                const placeholderLi = document.createElement("li");
+                placeholderLi.classList.add("placeholder");
+                placeholderLi.style.gridArea = `${minY + 1} / ${minX + 1} / ${maxY + 1} / ${maxX + 1}`;
+                placeholderLi.style.backgroundColor = colorPalette[0]; // or choose a neutral color
+
+                console.log(`🟡 Rendering Placeholder Block from (${minX}, ${minY}) to (${maxX}, ${maxY})`);
+                ol.appendChild(placeholderLi);
+            }
+
+            // 🔹 Render only active squares (>= first)
             layout.squares.forEach((sq, index) => {
+                if (sq.size < first) return; // Skip placeholder squares
+
                 const li = document.createElement("li");
                 li.style.gridArea = `${sq.y + 1} / ${sq.x + 1} / span ${sq.size} / span ${sq.size}`;
 
                 const color = colorPalette[index];
                 li.style.backgroundColor = color;
 
-                if (sq.size < first) {
-                    console.log(`🟡 Placeholder - Size: ${sq.size}, X: ${sq.x}, Y: ${sq.y}`);
-                    li.classList.add("placeholder");
-                } else {
-                    console.log(`🟢 Rendering Box - Size: ${sq.size}, X: ${sq.x}, Y: ${sq.y}`);
-                }
-
+                console.log(`🟢 Rendering Box - Size: ${sq.size}, X: ${sq.x}, Y: ${sq.y}`);
                 ol.appendChild(li);
             });
 
