@@ -1,88 +1,97 @@
-interface GridSquare {
-  size: number;
-  x: number;
-  y: number;
-}
-
-interface GridSquare {
-  size: number;
-  x: number;
-  y: number;
-}
-
-export function generateGoldenGridLayout(
-  fibSequence: number[],
-  mirror: boolean = false,
-  rotate: number = 0
-): { squares: GridSquare[]; width: number; height: number; minX: number; minY: number } {
-  if (fibSequence.length < 2) {
-      throw new Error("Need at least two numbers in the sequence.");
+export interface Square {
+    x: number;
+    y: number;
+    size: number;
   }
-
-  const validRotations = [0, 90, 180, 270];
-  if (!validRotations.includes(rotate)) {
-      throw new Error(`Invalid rotation value: ${rotate}. Only 0, 90, 180, and 270 are allowed.`);
+  
+  export interface GridLayout {
+    squares: Square[];
+    width: number;
+    height: number;
+    minX: number;
+    minY: number;
   }
-
-  const squares: GridSquare[] = [];
-  squares.push({ size: fibSequence[0], x: 0, y: 0 });
-  squares.push({ size: fibSequence[1], x: fibSequence[0], y: 0 });
-
-  const directions = [
-      { dx: 0, dy: 1 }, // bottom
-      { dx: -1, dy: 0 }, // left
-      { dx: 0, dy: -1 }, // top
-      { dx: 1, dy: 0 }   // right
-  ];
-  let dirIndex = 0;
-
-  function updateBounds() {
-      const minX = Math.min(...squares.map(s => s.x));
-      const maxX = Math.max(...squares.map(s => s.x + s.size - 1));
-      const minY = Math.min(...squares.map(s => s.y));
-      const maxY = Math.max(...squares.map(s => s.y + s.size - 1));
-
-      return { minX, maxX, minY, maxY, width: maxX - minX + 1, height: maxY - minY + 1 };
+  
+  /**
+   * Generates the Fibonacci sequence up to the max value.
+   */
+  export function fibonacciUpTo(max: number): number[] {
+    const sequence: number[] = [];
+    let a = 1, b = 1;
+    while (a <= max) {
+      sequence.push(a);
+      [a, b] = [b, a + b];
+    }
+    return sequence;
   }
-
-  for (let i = 2; i < fibSequence.length; i++) {
-      console.log(`🟢 Adding square size: ${fibSequence[i]}`);
-      const size = fibSequence[i];
-      const d = directions[dirIndex];
-
-      let xPos: number, yPos: number;
-      if (d.dx === 0 && d.dy === 1) {
-          xPos = squares[squares.length - 1].x;
-          yPos = squares[squares.length - 1].y + squares[squares.length - 1].size;
-      } else if (d.dx === -1 && d.dy === 0) {
-          xPos = squares[squares.length - 1].x - size;
-          yPos = squares[squares.length - 1].y;
-      } else if (d.dx === 0 && d.dy === -1) {
-          xPos = squares[squares.length - 1].x;
-          yPos = squares[squares.length - 1].y - size;
-      } else {
-          xPos = squares[squares.length - 1].x + squares[squares.length - 1].size;
-          yPos = squares[squares.length - 1].y;
+  
+  /**
+   * Generates the golden ratio grid layout based on the provided Fibonacci sequence.
+   */
+  export function generateGoldenGridLayout(
+    sequence: number[],
+    mirror: boolean,
+    rotate: number
+  ): GridLayout {
+    const squares: Square[] = [];
+  
+    let x = 0, y = 0;
+    let direction = 0; // 0 = right, 1 = down, 2 = left, 3 = up
+  
+    sequence.forEach((size, index) => {
+      squares.push({ x, y, size });
+  
+      // Handle directional placement
+      switch (direction) {
+        case 0: // Right
+          x += size;
+          break;
+        case 1: // Down
+          y += size;
+          break;
+        case 2: // Left
+          x -= size;
+          break;
+        case 3: // Up
+          y -= size;
+          break;
       }
-
-      // ✅ Prevent Overlapping
-      if (!squares.some(sq => sq.x === xPos && sq.y === yPos)) {
-          squares.push({ size, x: xPos, y: yPos });
-      } else {
-          console.warn(`Skipping overlapping square at ${xPos},${yPos}`);
-      }
-
-      dirIndex = (dirIndex + 1) % directions.length;
-  }
-
-  const layout = updateBounds();
-
-  return {
+  
+      // Cycle directions, considering rotation
+      direction = (direction + 1) % 4;
+    });
+  
+    // Apply mirror effect (if enabled)
+    if (mirror) {
+      squares.forEach((sq) => {
+        sq.x = -sq.x - sq.size;
+      });
+    }
+  
+    // Apply rotation (if enabled)
+    // ⚠️ NOTE: Rotation effect is not yet debugged and may require matrix transforms.
+    if (rotate !== 0) {
+      const angle = (rotate * Math.PI) / 180;
+      squares.forEach((sq) => {
+        const newX = Math.round(sq.x * Math.cos(angle) - sq.y * Math.sin(angle));
+        const newY = Math.round(sq.x * Math.sin(angle) + sq.y * Math.cos(angle));
+        sq.x = newX;
+        sq.y = newY;
+      });
+    }
+  
+    // Determine grid bounds
+    const minX = Math.min(...squares.map((sq) => sq.x));
+    const minY = Math.min(...squares.map((sq) => sq.y));
+    const maxX = Math.max(...squares.map((sq) => sq.x + sq.size));
+    const maxY = Math.max(...squares.map((sq) => sq.y + sq.size));
+  
+    return {
       squares,
-      width: layout.width,
-      height: layout.height,
-      minX: layout.minX,
-      minY: layout.minY
-  };
-}
-
+      width: maxX - minX,
+      height: maxY - minY,
+      minX,
+      minY,
+    };
+  }
+  

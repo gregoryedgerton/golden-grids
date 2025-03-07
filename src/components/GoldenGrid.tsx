@@ -1,7 +1,6 @@
 import React, { useEffect, useRef } from "react";
 import { useGrid } from "../context/GridContext";
-import { generateGoldenGridLayout } from "../utils/gridGenerator";
-import { buildUserSequenceFromBounds } from "../utils/fibonacci";
+import { generateGoldenGridLayout, fibonacciUpTo } from "../utils/gridGenerator";
 import "../styles/golden-grid.css";
 
 const GoldenGrid: React.FC = (): React.ReactElement<any> => {
@@ -9,21 +8,24 @@ const GoldenGrid: React.FC = (): React.ReactElement<any> => {
     const gridRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
-        console.log("🔵 useEffect Triggered! Input Control:", inputControl);
-
         if (gridRef.current) {
             const { first, last, mirror, rotate } = inputControl;
-            const userSequence = buildUserSequenceFromBounds(first, last);
-            console.log("✅ Generated Fibonacci Sequence:", userSequence);
 
-            if (userSequence.length < 2) {
-                console.warn("No valid sequence generated for", { first, last });
-                return;
-            }
+            console.log("🔵 useEffect Triggered! Input Control:", inputControl);
 
-            const fullSequence = userSequence;
-            console.log("✅ Full Fibonacci Sequence for Grid:", fullSequence);
+            // Full Fibonacci sequence from 1 up to the 'last' value
+            const fullSequence = fibonacciUpTo(last);
+            console.log("✅ Full Fibonacci Sequence:", fullSequence);
 
+            // User's active selection range
+            const userSequence = fullSequence.filter(n => n >= first && n <= last);
+            console.log("✅ Fixed User Sequence:", userSequence);
+
+            // Skipped numbers for placeholders
+            const skippedSquares = fullSequence.filter(n => n < first);
+            console.log("🟡 Skipped Squares:", skippedSquares);
+
+            // Build grid layout with the full sequence
             const layout = generateGoldenGridLayout(fullSequence, mirror, rotate);
             console.log("✅ Generated Grid Layout:", layout);
 
@@ -32,49 +34,21 @@ const GoldenGrid: React.FC = (): React.ReactElement<any> => {
             ol.style.gridTemplateColumns = `repeat(${layout.width}, 1fr)`;
             ol.style.gridTemplateRows = `repeat(${layout.height}, 1fr)`;
 
-            gridRef.current.appendChild(ol);
-
-            // ✅ Placeholder Logic - Identify skipped squares
-            const requestedSquares = layout.squares.filter((sq) => userSequence.includes(sq.size));
-            const skippedSquares = layout.squares.filter((sq) => !userSequence.includes(sq.size));
-            console.log("🟡 Skipped Squares:", skippedSquares);
-
-            let placeholderExists = skippedSquares.length > 0;
-            let placeholderColor = "#CCCCCC"; // Default placeholder color
-
-            if (placeholderExists) {
-                console.log("🟢 Rendering Placeholder");
-
-                const minX = Math.min(...skippedSquares.map((s) => s.x));
-                const maxX = Math.max(...skippedSquares.map((s) => s.x + s.size - 1));
-                const minY = Math.min(...skippedSquares.map((s) => s.y));
-                const maxY = Math.max(...skippedSquares.map((s) => s.y + s.size - 1));
-
-                const rowStart = minY - layout.minY + 1;
-                const colStart = minX - layout.minX + 1;
-                const height = maxY - minY + 1;
-                const width = maxX - minX + 1;
-
-                const rowEnd = rowStart + height;
-                const colEnd = colStart + width;
-
-                const placeholderLi = document.createElement("li");
-                placeholderLi.classList.add("placeholder");
-                placeholderLi.style.gridArea = `${rowStart} / ${colStart} / ${rowEnd} / ${colEnd}`;
-                placeholderLi.style.background = placeholderColor;
-                ol.appendChild(placeholderLi);
-            } else {
-                console.warn("⚠ No Placeholder Needed");
-            }
-
-            // ✅ Render Squares
-            requestedSquares.forEach((sq) => {
-                console.log(`🟢 Rendering Box - Size: ${sq.size}, X: ${sq.x}, Y: ${sq.y}`);
-
+            layout.squares.forEach(sq => {
                 const li = document.createElement("li");
                 li.style.gridArea = `${sq.y + 1} / ${sq.x + 1} / span ${sq.size} / span ${sq.size}`;
+
+                if (sq.size < first) {
+                    console.log(`🟡 Placeholder - Size: ${sq.size}, X: ${sq.x}, Y: ${sq.y}`);
+                    li.classList.add("placeholder");
+                } else {
+                    console.log(`🟢 Rendering Box - Size: ${sq.size}, X: ${sq.x}, Y: ${sq.y}`);
+                }
+
                 ol.appendChild(li);
             });
+
+            gridRef.current.appendChild(ol);
         }
     }, [inputControl]);
 
