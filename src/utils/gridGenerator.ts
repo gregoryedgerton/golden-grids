@@ -8,8 +8,6 @@ export interface Square {
     squares: Square[];
     width: number;
     height: number;
-    minX: number;
-    minY: number;
   }
   
   /**
@@ -26,7 +24,7 @@ export interface Square {
   }
   
   /**
-   * Generate the golden spiral layout with tight bounding box.
+   * Generate the golden spiral layout with exact, tight grid positioning.
    */
   export function generateGoldenGridLayout(
     sequence: number[],
@@ -35,7 +33,7 @@ export interface Square {
   ): GridLayout {
     const squares: Square[] = [];
   
-    if (sequence.length === 0) return { squares: [], width: 0, height: 0, minX: 0, minY: 0 };
+    if (sequence.length === 0) return { squares: [], width: 0, height: 0 };
   
     let x = 0, y = 0;
     let direction = 0; // 0 = right, 1 = down, 2 = left, 3 = up
@@ -59,7 +57,7 @@ export interface Square {
     const maxX = Math.max(...squares.map(sq => sq.x + sq.size));
     const maxY = Math.max(...squares.map(sq => sq.y + sq.size));
   
-    // Offset squares to remove negative coordinates
+    // Shift to positive grid starting at (0,0)
     squares.forEach(sq => {
       sq.x -= minX;
       sq.y -= minY;
@@ -100,9 +98,7 @@ export interface Square {
     return {
       squares,
       width,
-      height,
-      minX: 0,
-      minY: 0,
+      height
     };
   }
   
