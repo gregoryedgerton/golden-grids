@@ -5,15 +5,14 @@ import { GoldenGrid } from "..";
 import "../styles/golden-grid.css";
 
 const ExampleApp = () => {
-    const { inputControl, setInputControl } = useGrid(); // ✅ Use state correctly
+    const { inputControl, setInputControl } = useGrid();
 
     return (
         <div>
             <header className="control-panel">
                 <h1>Make a Golden Grid</h1>
-                <p>Get started by entering a valid fibonacci sequence.</p>
+                <p>Get started by entering a valid Fibonacci sequence.</p>
                 <div className="controls">
-                    {/* ✅ Control Inputs for Updating State */}
                     <label>
                         First Number:
                         <input
@@ -33,11 +32,11 @@ const ExampleApp = () => {
                     </label>
 
                     <button onClick={() => setInputControl({ ...inputControl, mirror: !inputControl.mirror })}>
-                        Mirror
+                        MIRROR [{inputControl.mirror ? "true" : "false"}]
                     </button>
 
                     <button onClick={() => setInputControl({ ...inputControl, rotate: (inputControl.rotate + 90) % 360 })}>
-                        Rotate
+                        ROTATION [{inputControl.rotate}°]
                     </button>
                 </div>
             </header>
