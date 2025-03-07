@@ -1,33 +1,30 @@
 import * as React from "react";
 import { createContext, useContext, useState, ReactNode } from "react";
-import { InputControlType } from "../types/InputControlType";
+
+interface InputControlType {
+    first: number;
+    last: number;
+    color: string;
+    mirror: boolean;
+    rotate: number;
+}
 
 interface GridContextProps {
     inputControl: InputControlType;
     setInputControl: (control: InputControlType) => void;
 }
 
-const GridContext = createContext<GridContextProps>({
-    inputControl: {
-        first: 1,
-        last: 5,
-        color: "#7f7ec7",
-        mirror: true,
-        rotate: 180,
-    },
-    setInputControl: () => {}
-});
+const GridContext = createContext<GridContextProps | undefined>(undefined);
 
-export const GridProvider: React.FC<{ children?: React.ReactNode }> = ({ children }): React.ReactElement => {
-    if (!children) return <></>;
+export const GridProvider: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
     const [inputControl, setInputControl] = useState<InputControlType>({
         first: 1,
         last: 3,
         color: "#7f7ec7",
-        mirror: true,
-        rotate: 180,
+        mirror: false,
+        rotate: 0,
     });
-    
+
     return (
         <GridContext.Provider value={{ inputControl, setInputControl }}>
             {children}

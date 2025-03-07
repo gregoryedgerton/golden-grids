@@ -7,14 +7,24 @@ export function fullFibonacciUpTo(n: number): number[] {
 }
 
 export function buildUserSequenceFromBounds(start: number, end: number): number[] {
-
-  const fib: number[] = fullFibonacciUpTo(end);
-
-  if (fib.indexOf(start) === -1 || fib.indexOf(end) === -1) {
-      throw new Error('Start and end must be Fibonacci numbers');
+  const fib: number[] = [1, 1];
+  
+  // Generate Fibonacci sequence up to the largest number in range
+  while (fib[fib.length - 1] < end) {
+      fib.push(fib[fib.length - 1] + fib[fib.length - 2]);
   }
 
-  const startIndex = fib.indexOf(start);
-  const endIndex = fib.indexOf(end);
-  return fib.slice(startIndex, endIndex + 1);
+  const startIndex = fib.findIndex(n => n === start);
+  const endIndex = fib.findIndex(n => n === end);
+
+  if (startIndex === -1 || endIndex === -1 || endIndex < startIndex) {
+      console.error("Invalid Fibonacci sequence bounds.", { start, end });
+      return [];
+  }
+
+  const sequence = fib.slice(startIndex, endIndex + 1);
+  console.log("✅ Fixed User Sequence:", sequence); // Debugging Output
+  return sequence;
 }
+
+
