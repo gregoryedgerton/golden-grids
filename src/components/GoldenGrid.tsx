@@ -4,6 +4,15 @@ import { generateGoldenGridLayout, fibonacciUpTo } from "../utils/gridGenerator"
 import { generateHarmonicPalette } from "../utils/colorUtils";
 import "../styles/golden-grid.css";
 
+function isValidFibonacci(num: number): boolean {
+  if (num <= 0) return false;
+  let a = 1, b = 1;
+  while (b < num) {
+    [a, b] = [b, a + b];
+  }
+  return b === num;
+}
+
 const GoldenGrid: React.FC = (): React.ReactElement<any> => {
   const { inputControl } = useGrid();
   const gridRef = useRef<HTMLDivElement>(null);
@@ -11,6 +20,11 @@ const GoldenGrid: React.FC = (): React.ReactElement<any> => {
   useEffect(() => {
     if (gridRef.current) {
       const { first, last, mirror, rotate, color } = inputControl;
+
+      if (!isValidFibonacci(first) || !isValidFibonacci(last)) {
+        alert("Please enter valid Fibonacci numbers greater than 0.");
+        return;
+      }
 
       console.log("🔵 useEffect Triggered! Input Control:", inputControl);
 
