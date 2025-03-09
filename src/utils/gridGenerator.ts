@@ -36,17 +36,24 @@ export interface Square {
     if (sequence.length === 0) return { squares: [], width: 0, height: 0 };
   
     let x = 0, y = 0;
-    let direction = 0; // 0 = right, 1 = down, 2 = left, 3 = up
+    let direction = 0; // 0 = up, 1 = right, 2 = down, 3 = up
   
     sequence.forEach(size => {
       squares.push({ x, y, size });
   
       switch (direction) {
-        case 0: x += size; break; // Right
-        case 1: y += size; break; // Down
-        case 2: x -= size; break; // Left
-        case 3: y -= size; break; // Up
+        case 0: y -= size; break; // Up
+        case 1: x += size; break; // Right
+        case 2: y += size; break; // Down
+        case 3: x -= size; break; // Left
       }
+
+      // switch (direction) {
+      //   case 0: x += size; break; // Right
+      //   case 1: y += size; break; // Down
+      //   case 2: x -= size; break; // Left
+      //   case 3: y -= size; break; // Up
+      // }
   
       direction = (direction + 1) % 4;
     });
@@ -54,8 +61,8 @@ export interface Square {
     // Get bounding box
     const minX = Math.min(...squares.map(sq => sq.x));
     const minY = Math.min(...squares.map(sq => sq.y));
-    const maxX = Math.max(...squares.map(sq => sq.x + sq.size));
-    const maxY = Math.max(...squares.map(sq => sq.y + sq.size));
+    const maxX = Math.max(...squares.map(sq => sq.x + sq.size - 1));
+    const maxY = Math.max(...squares.map(sq => sq.y + sq.size - 1));
   
     // Shift to positive grid starting at (0,0)
     squares.forEach(sq => {
@@ -63,8 +70,8 @@ export interface Square {
       sq.y -= minY;
     });
   
-    let width = maxX - minX;
-    let height = maxY - minY;
+    let width = maxX - minX + 1;
+    let height = maxY - minY + 1;
   
     // Mirror (flip horizontally)
     if (mirror) {

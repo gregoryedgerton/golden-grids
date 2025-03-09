@@ -19,10 +19,10 @@ interface GridContextProps {
 const GridContext = createContext<GridContextProps>({
   inputControl: {
     first: 1,
-    last: 3,
+    last: 1,
     color: "#7f7ec7",
-    mirror: true,
-    rotate: 180,
+    mirror: false,
+    rotate: 0,
   },
   setInputControl: () => {},
 });
@@ -32,10 +32,10 @@ export const GridProvider: React.FC<{ children?: React.ReactNode }> = ({ childre
 
   const [inputControl, setInputControl] = useState<InputControlType>({
     first: 1,
-    last: 3,
+    last: 1,
     color: "#7f7ec7",
-    mirror: true,
-    rotate: 180,
+    mirror: false,
+    rotate: 0,
   });
 
   const validatedSetInputControl = (control: InputControlType) => {
