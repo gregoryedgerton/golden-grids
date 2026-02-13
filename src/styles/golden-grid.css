@@ -40,7 +40,38 @@ body {
   font-family: sans-serif;
 }
 
-.controls button {
+.stepper {
+  display: inline-flex;
+  align-items: center;
+  margin-left: 0.5em;
+  border: 2px solid #ccc;
+  background: #f0f0f0;
+}
+
+.stepper span {
+  min-width: 3em;
+  text-align: center;
+  font-size: 1em;
+  padding: 0.5em 0;
+  font-family: sans-serif;
+}
+
+.stepper button {
+  margin: 0;
+  padding: 0.5em 0.75em;
+  border: none;
+  background: #222;
+  color: white;
+  cursor: pointer;
+  font-size: 1em;
+  letter-spacing: 0;
+}
+
+.stepper button:hover {
+  background: #555;
+}
+
+.controls > button {
   margin-left: 0.5em;
   padding: 0.75em 1em;
   border: none;
@@ -52,9 +83,9 @@ body {
   text-transform: uppercase;
 }
 
-.controls button:hover {
+.controls > button:hover {
   background: white;
-  color: #222;;
+  color: #222;
   border: 2px #222 solid;
 }
 
