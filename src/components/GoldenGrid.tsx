@@ -1,79 +1,102 @@
 import React, { useEffect, useRef } from "react";
 import { useGrid } from "../context/GridContext";
-import { generateGoldenGridLayout, fibonacciUpTo } from "../utils/gridGenerator";
-import { generateHarmonicPalette } from "../utils/colorUtils";
+import { generateGoldenGridLayout } from "../utils/gridGenerator";
+import { fullFibonacciUpTo, buildUserSequenceFromBounds } from "../utils/fibonacci";
+import { hexToHsl, hslToCss } from "../utils/colorUtils";
 import "../styles/golden-grid.css";
-
-function isValidFibonacci(num: number): boolean {
-  if (num <= 0) return false;
-  let a = 1, b = 1;
-  while (b < num) {
-    [a, b] = [b, a + b];
-  }
-  return b === num;
-}
 
 const GoldenGrid: React.FC = (): React.ReactElement<any> => {
   const { inputControl } = useGrid();
   const gridRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (gridRef.current) {
-      const { first, last, mirror, rotate, color } = inputControl;
+    if (!gridRef.current) return;
 
-      if (!isValidFibonacci(first) || !isValidFibonacci(last)) {
-        alert("Please enter valid Fibonacci numbers greater than 0.");
-        return;
-      }
+    const { first, last, mirror, rotate, color } = inputControl;
 
-      console.log("🔵 useEffect Triggered! Input Control:", inputControl);
-
-      const fullSequence = fibonacciUpTo(Math.max(first, last));
-      console.log("✅ Full Fibonacci Sequence:", fullSequence);
-
-      const userSequence = fullSequence.filter(n => n >= Math.min(first, last) && n <= Math.max(first, last));
-      console.log("✅ User Sequence:", userSequence);
-
-      const layout = generateGoldenGridLayout(fullSequence, mirror, rotate);
-      console.log("✅ Generated Grid Layout:", layout);
-
-      const colorPalette = generateHarmonicPalette(color, layout.squares.length);
-      console.log("🎨 Generated Color Palette:", colorPalette);
-
-      gridRef.current.innerHTML = "";
-      const ol = document.createElement("ol");
-      ol.style.gridTemplateColumns = `repeat(${layout.width}, 1fr)`;
-      ol.style.gridTemplateRows = `repeat(${layout.height}, 1fr)`;
-
-      const skippedSquares = layout.squares.filter(sq => sq.size < first);
-      if (skippedSquares.length > 0) {
-        const minX = Math.min(...skippedSquares.map(sq => sq.x));
-        const minY = Math.min(...skippedSquares.map(sq => sq.y));
-        const maxX = Math.max(...skippedSquares.map(sq => sq.x + sq.size));
-        const maxY = Math.max(...skippedSquares.map(sq => sq.y + sq.size));
-
-        const placeholderLi = document.createElement("li");
-        placeholderLi.classList.add("placeholder");
-        placeholderLi.style.gridArea = `${minY + 1} / ${minX + 1} / ${maxY + 1} / ${maxX + 1}`;
-        placeholderLi.style.backgroundColor = colorPalette[0];
-
-        console.log(`🟡 Rendering Placeholder Block from (${minX}, ${minY}) to (${maxX}, ${maxY})`);
-        ol.appendChild(placeholderLi);
-      }
-
-      layout.squares.forEach((sq, index) => {
-        if (sq.size < first) return;
-
-        const li = document.createElement("li");
-        li.style.gridArea = `${sq.y + 1} / ${sq.x + 1} / span ${sq.size} / span ${sq.size}`;
-        li.style.backgroundColor = colorPalette[index];
-
-        console.log(`🟢 Rendering Box - Size: ${sq.size}, X: ${sq.x}, Y: ${sq.y}`);
-        ol.appendChild(li);
-      });
-
-      gridRef.current.appendChild(ol);
+    let start = first;
+    let end = last;
+    if (start > end) {
+      [start, end] = [end, start];
     }
+
+    const userSequence = buildUserSequenceFromBounds(start, end);
+    if (userSequence.length < 2) {
+      console.warn('No valid sequence generated for', { start, end });
+      return;
+    }
+
+    const maxRequested = Math.max(...userSequence);
+    const fullSequence = fullFibonacciUpTo(maxRequested);
+
+    const baseColor = color || '#333333';
+    const [h, s, l] = hexToHsl(baseColor);
+    const complementHue = (h + 180) % 360;
+
+    const layout = generateGoldenGridLayout(fullSequence, mirror, rotate);
+
+    const requestedSquares = layout.squares.filter(sq => userSequence.includes(sq.size));
+    const skippedSquares = layout.squares.filter(sq => !userSequence.includes(sq.size));
+
+    gridRef.current.innerHTML = "";
+    const ol = document.createElement("ol");
+    ol.style.gridTemplateColumns = `repeat(${layout.width}, 1fr)`;
+    ol.style.gridTemplateRows = `repeat(${layout.height}, 1fr)`;
+
+    // Placeholder for skipped (smaller) squares
+    const placeholderExists = skippedSquares.length > 0;
+
+    if (placeholderExists) {
+      const pMinX = Math.min(...skippedSquares.map(s => s.x));
+      const pMaxX = Math.max(...skippedSquares.map(s => s.x + s.size - 1));
+      const pMinY = Math.min(...skippedSquares.map(s => s.y));
+      const pMaxY = Math.max(...skippedSquares.map(s => s.y + s.size - 1));
+
+      const rowStart = pMinY - layout.minY + 1;
+      const colStart = pMinX - layout.minX + 1;
+      const pHeight = pMaxY - pMinY + 1;
+      const pWidth = pMaxX - pMinX + 1;
+      const rowEnd = rowStart + pHeight;
+      const colEnd = colStart + pWidth;
+
+      const placeholderLi = document.createElement("li");
+      placeholderLi.classList.add("placeholder");
+      placeholderLi.style.gridArea = `${rowStart} / ${colStart} / ${rowEnd} / ${colEnd}`;
+      placeholderLi.style.background = baseColor;
+      ol.appendChild(placeholderLi);
+    }
+
+    // Render requested squares with color progression
+    const totalRequested = requestedSquares.length;
+    requestedSquares.forEach((sq, seqIndex) => {
+      let currentHue = h;
+      if (totalRequested > 1) {
+        let fraction: number;
+        if (placeholderExists) {
+          fraction = (seqIndex + 1) / (totalRequested + 1);
+        } else {
+          fraction = seqIndex / (totalRequested - 1);
+        }
+        currentHue = h + ((complementHue - h) * fraction);
+        if (currentHue < 0) currentHue += 360;
+        if (currentHue > 360) currentHue -= 360;
+      } else {
+        if (placeholderExists) {
+          currentHue = h + ((complementHue - h) * 0.5);
+        }
+      }
+
+      const li = document.createElement("li");
+      const rowStart = sq.y - layout.minY + 1;
+      const colStart = sq.x - layout.minX + 1;
+      const rowEnd = rowStart + sq.size;
+      const colEnd = colStart + sq.size;
+      li.style.gridArea = `${rowStart} / ${colStart} / ${rowEnd} / ${colEnd}`;
+      li.style.background = hslToCss(currentHue, s, l);
+      ol.appendChild(li);
+    });
+
+    gridRef.current.appendChild(ol);
   }, [inputControl]);
 
   return <div ref={gridRef} className="grid-container"></div>;

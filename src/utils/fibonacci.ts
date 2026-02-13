@@ -14,9 +14,9 @@ export function buildUserSequenceFromBounds(start: number, end: number): number[
       fib.push(fib[fib.length - 1] + fib[fib.length - 2]);
   }
 
-  // if (start === 1 && end === 1) {
-  //   return [1,1];
-  // }
+  if (start === 1 && end === 1) {
+    return [1,1];
+  }
 
   const startIndex = fib.findIndex(n => n === start);
   const endIndex = fib.findIndex(n => n === end);
