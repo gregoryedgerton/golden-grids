@@ -1,7 +1,8 @@
-import React from "react";
+import React, { useState } from "react";
 import { createRoot } from "react-dom/client";
 import { GridProvider, useGrid } from "../context/GridContext";
 import { GoldenGrid } from "..";
+import { generateGridHTML } from "../utils/exportGrid";
 import "../styles/golden-grid.css";
 
 // Pre-computed Fibonacci sequence for stepping through valid values
@@ -25,6 +26,35 @@ function prevFib(current: number): number {
 
 const ExampleApp = () => {
     const { inputControl, setInputControl } = useGrid();
+    const [showExport, setShowExport] = useState(false);
+    const [copyLabel, setCopyLabel] = useState("Copy");
+
+    const html = showExport
+        ? generateGridHTML(
+              inputControl.first,
+              inputControl.last,
+              inputControl.color,
+              inputControl.mirror,
+              inputControl.rotate
+          )
+        : "";
+
+    const handleCopy = () => {
+        navigator.clipboard.writeText(html).then(() => {
+            setCopyLabel("Copied!");
+            setTimeout(() => setCopyLabel("Copy"), 1500);
+        });
+    };
+
+    const handleDownload = () => {
+        const blob = new Blob([html], { type: "text/html" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "golden-grid.html";
+        a.click();
+        URL.revokeObjectURL(url);
+    };
 
     return (
         <div>
@@ -57,10 +87,31 @@ const ExampleApp = () => {
                     <button onClick={() => setInputControl({ ...inputControl, rotate: (inputControl.rotate + 90) % 360 })}>
                         ROTATION [{inputControl.rotate}°]
                     </button>
+
+                    <button onClick={() => setShowExport(true)}>
+                        EXPORT
+                    </button>
                 </div>
             </header>
 
             <GoldenGrid />
+
+            {showExport && (
+                <div className="export-overlay" onClick={(e) => { if (e.target === e.currentTarget) setShowExport(false); }}>
+                    <div className="export-modal">
+                        <textarea
+                            readOnly
+                            value={html}
+                            onFocus={(e) => e.currentTarget.select()}
+                        />
+                        <div className="export-modal-actions">
+                            <button onClick={handleCopy}>{copyLabel}</button>
+                            <button onClick={handleDownload}>Download</button>
+                            <button onClick={() => setShowExport(false)}>Close</button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
