@@ -18,8 +18,8 @@ interface GridContextProps {
 
 const GridContext = createContext<GridContextProps>({
   inputControl: {
-    first: 1,
-    last: 1,
+    from: 1,
+    to: 1,
     color: "#7f7ec7",
     mirror: false,
     rotate: 0,
@@ -31,23 +31,21 @@ export const GridProvider: React.FC<{ children?: React.ReactNode }> = ({ childre
   if (!children) return <></>;
 
   const [inputControl, setInputControl] = useState<InputControlType>({
-    first: 1,
-    last: 3,
+    from: 1,
+    to: 3,
     color: "#7f7ec7",
     mirror: false,
     rotate: 0,
   });
 
   const validatedSetInputControl = (control: InputControlType) => {
-    const { first, last } = control;
+    const { from, to } = control;
 
-    if (!isValidFibonacci(first) || !isValidFibonacci(last)) {
-      alert("Please enter valid Fibonacci numbers greater than 0.");
+    if (!isValidFibonacci(from) || !isValidFibonacci(to)) {
       return;
     }
 
-    if (first === last && first !== 1) {
-      alert("Not enough numbers to form a valid sequence from start to end.");
+    if (from === to && from !== 1) {
       return;
     }
 

@@ -12,10 +12,10 @@ const GoldenGrid: React.FC = (): React.ReactElement<any> => {
   useEffect(() => {
     if (!gridRef.current) return;
 
-    const { first, last, mirror, rotate, color } = inputControl;
+    const { from, to, mirror, rotate, color } = inputControl;
 
-    let start = first;
-    let end = last;
+    let start = from;
+    let end = to;
     if (start > end) {
       [start, end] = [end, start];
     }

@@ -3,14 +3,14 @@ import { generateGoldenGridLayout } from "./gridGenerator";
 import { hexToHsl, hslToCss } from "./colorUtils";
 
 export function generateGridHTML(
-  first: number,
-  last: number,
+  from: number,
+  to: number,
   color: string,
   mirror: boolean,
   rotate: number
 ): string {
-  let start = first;
-  let end = last;
+  let start = from;
+  let end = to;
   if (start > end) {
     [start, end] = [end, start];
   }
