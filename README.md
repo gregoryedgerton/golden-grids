@@ -1,12 +1,14 @@
 # Golden Grids
 How I Learned to Stop Worrying about Rows and Columns and Love the Golden Ratio
 
+[Live Demo](https://gregoryedgerton.github.io/golden-grids/)
+
 | Input | Type | Description |
 | --- | --- | --- |
 | first (required) | `integer` | Pick any number in the Fibonacci Sequence excluding `0`. Your `first` doesn’t have to be smaller than `last`, however the library will sort it smallest to largest before when calcuating. |
 | last (required) | `integer` | Pick any other number in the Fibonacci Sequence, `1` is the only valid duplicate value. |
 | rotation | `integer` | Orientational value of the grid in `90` degree increments [`0`,`90`,`180`,`270`] (defaults to `0`). |
-| mirror | `boolean` | A `true` or `false` value to mirror the rotation angle along the x-axis (defaults to `false`). |
+| clockwise | `boolean` | Sets the spiral direction — `true` for clockwise, `false` for counter-clockwise (defaults to `true`). |
 
 ## How it works?
 Based on your `first` and `last` input values this library will calculate the corresponding slice of the Fibonacci Sequence (`1`, `1`, `2`, `3`, `5`, `8`, `13`, `21`, `34`, `55`, ...), and create a responsive grid based on the golden ratio.  Instead of traditional rows and columns you'll have proportionally aligned boxes that follow the golden ratio. What you do with those boxes is your business, but at least you won't be boring. 
