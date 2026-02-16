@@ -6,162 +6,90 @@ body {
 .control-panel {
   font-family: sans-serif;
   margin: 1.5em;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 1em;
 }
 
-.control-panel h1 { 
-  font-size: 2em;
-  margin: 0;
-  padding: 0;
-  font-family: sans-serif;
-}
-
-.controls {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 1em;
-}
-
-.controls input {
-  margin-left: 0.5em;
-  padding: 0.5em 0.5em;
-  border: none;
-  background: #f0f0f0;
-  border: 2px solid #ccc;
-  color: #222;
-  font-size: 1em;
-  width: 100px;
-  text-align: center;
-  font-family: sans-serif;
-}
-
-.dial-control {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.25em;
-}
-
-.dial-label {
-  font-size: 0.7em;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  color: #666;
-}
-
-.dial-value {
+.mad-lib {
   font-size: 1.4em;
-  font-weight: bold;
-  font-variant-numeric: tabular-nums;
+  line-height: 2.8;
+  margin: 0;
   color: #222;
 }
 
-.dial-strip {
-  width: 200px;
-  height: 44px;
-  touch-action: none;
+.mad-lib-dial {
+  font-family: sans-serif;
+  font-size: 1em;
+  font-weight: bold;
+  padding: 0.15em 1.2em;
+  border: none;
+  border-bottom: 2px solid #222;
+  background: none;
+  color: #222;
   cursor: grab;
-  border-radius: 4px;
-  position: relative;
-  background:
-    repeating-linear-gradient(
-      90deg,
-      rgba(0, 0, 0, 0.4) 0px,
-      rgba(0, 0, 0, 0.4) 1px,
-      transparent 1px,
-      transparent 12px
-    ),
-    linear-gradient(
-      180deg,
-      #333 0%,
-      #999 38%,
-      #aaa 50%,
-      #999 62%,
-      #333 100%
-    );
-  background-size: 12px 100%, 100% 100%;
-  box-shadow:
-    inset 0 2px 4px rgba(0, 0, 0, 0.5),
-    inset 0 -2px 4px rgba(0, 0, 0, 0.5);
+  touch-action: none;
+  font-variant-numeric: tabular-nums;
+  user-select: none;
 }
 
-.dial-strip:focus-visible {
+.mad-lib-dial:hover {
+  background: #222;
+  color: white;
+}
+
+.mad-lib-dial--grabbing {
+  cursor: grabbing;
+  background: #222;
+  color: white;
+}
+
+.mad-lib-dial:focus-visible {
   outline: 2px solid #4a90d9;
   outline-offset: 2px;
 }
 
-.dial-strip--grabbing {
-  cursor: grabbing;
-}
-
-.dial-indicator {
-  position: absolute;
-  left: 50%;
-  top: 0;
-  bottom: 0;
-  width: 2px;
-  margin-left: -1px;
-  background: rgba(255, 255, 255, 0.9);
-  box-shadow: 0 0 6px rgba(255, 255, 255, 0.7);
+.dial-neighbor {
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  font-weight: normal;
   pointer-events: none;
 }
 
-.square-count {
-  font-size: 1.1em;
+.dial-prev {
+  margin-right: 0.3em;
+}
+
+.dial-next {
+  margin-left: 0.3em;
+}
+
+.mad-lib-dial:hover .dial-neighbor,
+.mad-lib-dial--grabbing .dial-neighbor {
+  opacity: 0.5;
+}
+
+.mad-lib-static {
+  font-weight: bold;
   font-variant-numeric: tabular-nums;
-  color: #555;
+}
+
+.mad-lib-btn {
   font-family: sans-serif;
-  white-space: nowrap;
-}
-
-.color-control {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.25em;
-  font-size: 0.7em;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  color: #666;
-  font-family: sans-serif;
-  cursor: pointer;
-}
-
-.color-control input[type="color"] {
-  width: 44px;
-  height: 44px;
-  padding: 0;
-  border: 2px solid #ccc;
-  border-radius: 4px;
-  cursor: pointer;
-  background: none;
-}
-
-.controls > button {
-  margin-left: 0.5em;
-  padding: 0.75em 1em;
+  font-size: 1em;
+  font-weight: bold;
+  padding: 0.1em 0.4em;
   border: none;
-  background: #222;
-  border: 2px #222 solid;
-  color: white;
+  border-bottom: 2px solid #222;
+  background: none;
+  color: #222;
   cursor: pointer;
-  letter-spacing: 0.25em;
-  text-transform: uppercase;
+  font-variant-numeric: tabular-nums;
 }
 
-.controls > button:hover {
-  background: white;
-  color: #222;
-  border: 2px #222 solid;
+.mad-lib-btn:hover {
+  background: #222;
+  color: white;
 }
 
 .grid-container {
-  display: grid;
   position: relative;
   margin: 0;
   padding: 0;
@@ -171,17 +99,13 @@ body {
   list-style: none;
   margin: 0;
   padding: 0;
-  display: grid;
+  position: relative;
   width: 100%;
-  box-sizing: content-box;
+  box-sizing: border-box;
 }
 
-.grid-container ol > li:not(.placeholder) {
-  aspect-ratio: 1 / 1;
-}
-
-.grid-container .placeholder {
-  aspect-ratio: auto;
+.grid-container ol > li {
+  position: absolute;
 }
 
 .export-overlay {
