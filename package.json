@@ -11,7 +11,9 @@
     "test": "jest",
     "prepare": "husky install",
     "dev": "vite",
-    "serve": "vite preview"
+    "serve": "vite preview",
+    "build:demo": "VITE_BUILD_DEMO=1 vite build",
+    "deploy": "npm run build:demo && gh-pages -d dist-demo"
   },
   "dependencies": {
     "@vitejs/plugin-react": "^4.3.4",
@@ -25,6 +27,7 @@
     "@rollup/plugin-typescript": "^12.1.2",
     "@types/react": "^19.0.8",
     "@types/react-dom": "^19.0.3",
+    "gh-pages": "^6.3.0",
     "husky": "^8.0.0",
     "jest": "^27.4.3",
     "react": "^18.3.1",

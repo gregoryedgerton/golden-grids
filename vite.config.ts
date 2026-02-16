@@ -1,17 +1,31 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 
+const isDemo = !!process.env.VITE_BUILD_DEMO;
+
 export default defineConfig(({ command }) => {
+  if (isDemo) {
+    return {
+      plugins: [react()],
+      root: "src/example",
+      base: "/golden-grids/",
+      build: {
+        outDir: "../../dist-demo",
+        emptyOutDir: true,
+      },
+    };
+  }
+
   return {
     plugins: [react()],
-    root: command === "serve" ? "src/example" : ".", // ✅ Dev mode serves example folder
+    root: command === "serve" ? "src/example" : ".",
     server: {
-      open: true, // ✅ Automatically opens the browser
+      open: true,
       port: 5173,
     },
     build: {
       lib: {
-        entry: "src/index.ts", // ✅ Correct entry point for library
+        entry: "src/index.ts",
         name: "GoldenGrids",
         fileName: (format) => `golden-grids.${format}.js`,
       },
