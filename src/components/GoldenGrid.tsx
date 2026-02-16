@@ -32,7 +32,6 @@ const GoldenGrid: React.FC = (): React.ReactElement<any> => {
 
     const baseColor = color || '#333333';
     const [h, s, l] = hexToHsl(baseColor);
-    const complementHue = (h + 180) % 360;
 
     // Single colored square with nothing skipped: render full-width
     if (startIdx === 0 && endIdx === 0) {
@@ -86,30 +85,32 @@ const GoldenGrid: React.FC = (): React.ReactElement<any> => {
 
     // Render requested squares with color progression
     const totalRequested = requestedSquares.length;
+    const hueRange = Math.min(330, 180 + Math.max(0, totalRequested - 4) * 15);
+    const lightnessSpread = Math.min(50, totalRequested * 3);
     requestedSquares.forEach((sq, seqIndex) => {
       let currentHue = h;
+      let fraction = 0;
       if (totalRequested > 1) {
-        let fraction: number;
         if (placeholderExists) {
           fraction = (seqIndex + 1) / (totalRequested + 1);
         } else {
           fraction = seqIndex / (totalRequested - 1);
         }
-        currentHue = h + ((complementHue - h) * fraction);
-        if (currentHue < 0) currentHue += 360;
-        if (currentHue > 360) currentHue -= 360;
+        currentHue = (h + hueRange * fraction) % 360;
       } else {
         if (placeholderExists) {
-          currentHue = h + ((complementHue - h) * 0.5);
+          fraction = 0.5;
+          currentHue = (h + hueRange * 0.5) % 360;
         }
       }
+      const currentL = Math.max(10, Math.min(90, l + lightnessSpread / 2 - fraction * lightnessSpread));
 
       const li = document.createElement("li");
       li.style.left = `${(sq.x - layout.minX) / layout.width * 100}%`;
       li.style.top = `${(sq.y - layout.minY) / layout.height * 100}%`;
       li.style.width = `${sq.size / layout.width * 100}%`;
       li.style.height = `${sq.size / layout.height * 100}%`;
-      li.style.background = hslToCss(currentHue, s, l);
+      li.style.background = hslToCss(currentHue, s, currentL);
       ol.appendChild(li);
     });
 
