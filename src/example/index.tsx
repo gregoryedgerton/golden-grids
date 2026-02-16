@@ -161,13 +161,13 @@ const ExampleApp = () => {
     const start = Math.min(inputControl.from, inputControl.to);
     const end = Math.max(inputControl.from, inputControl.to);
     const range = getGridRange(start, end);
-    let squareCount: number;
+    let boxCount: number;
     if (!range) {
-        squareCount = 0;
+        boxCount = 0;
     } else if (range.startIdx === 0 && range.endIdx === 0) {
-        squareCount = 1;
+        boxCount = 1;
     } else {
-        squareCount = range.userSequence.length + (range.startIdx > 0 ? 1 : 0);
+        boxCount = range.endIdx - range.startIdx + 1 + (range.startIdx > 0 ? 1 : 0);
     }
 
     const html = showExport
@@ -210,8 +210,8 @@ const ExampleApp = () => {
                         onChange={(n) => setInputControl({ ...inputControl, to: n })}
                         format={(idx) => String(FIB_STOPS[idx])} />
                     , it will be{" "}
-                    <span className="mad-lib-static">{squareCount}</span>
-                    {" "}{squareCount === 1 ? "square" : "squares"} and let's set the direction to{" "}
+                    <span className="mad-lib-static">{boxCount}</span>
+                    {" "}{boxCount === 1 ? "box" : "boxes"} and let's set the direction to{" "}
                     <Dial label="Direction" value={inputControl.rotate} stops={ROTATION_STOPS}
                         wrap onChange={(n) => setInputControl({ ...inputControl, rotate: n })}
                         format={(v) => ROTATION_LABELS[v]} />
