@@ -1,15 +1,7 @@
 import * as React from "react";
 import { createContext, useContext, useState, ReactNode } from "react";
 import { InputControlType } from "../types/InputControlType";
-
-function isValidFibonacci(num: number): boolean {
-  if (num <= 0) return false;
-  let a = 1, b = 1;
-  while (b < num) {
-    [a, b] = [b, a + b];
-  }
-  return b === num;
-}
+import { FIB_STOPS } from "../utils/fibonacci";
 
 interface GridContextProps {
   inputControl: InputControlType;
@@ -21,7 +13,7 @@ const GridContext = createContext<GridContextProps>({
     from: 1,
     to: 1,
     color: "#7f7ec7",
-    mirror: false,
+    clockwise: true,
     rotate: 0,
   },
   setInputControl: () => {},
@@ -32,20 +24,19 @@ export const GridProvider: React.FC<{ children?: React.ReactNode }> = ({ childre
 
   const [inputControl, setInputControl] = useState<InputControlType>({
     from: 1,
-    to: 3,
+    to: 4,
     color: "#7f7ec7",
-    mirror: false,
+    clockwise: true,
     rotate: 0,
   });
 
   const validatedSetInputControl = (control: InputControlType) => {
     const { from, to } = control;
 
-    if (!isValidFibonacci(from) || !isValidFibonacci(to)) {
+    if (from < 0 || from >= FIB_STOPS.length || to < 0 || to >= FIB_STOPS.length) {
       return;
     }
-
-    if (from === to && from !== 1) {
+    if (!Number.isInteger(from) || !Number.isInteger(to)) {
       return;
     }
 

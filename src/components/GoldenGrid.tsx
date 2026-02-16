@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from "react";
 import { useGrid } from "../context/GridContext";
 import { generateGoldenGridLayout } from "../utils/gridGenerator";
-import { fullFibonacciUpTo, buildUserSequenceFromBounds } from "../utils/fibonacci";
+import { fullFibonacciUpTo, getGridRange } from "../utils/fibonacci";
 import { hexToHsl, hslToCss } from "../utils/colorUtils";
 import "../styles/golden-grid.css";
 
@@ -12,7 +12,7 @@ const GoldenGrid: React.FC = (): React.ReactElement<any> => {
   useEffect(() => {
     if (!gridRef.current) return;
 
-    const { from, to, mirror, rotate, color } = inputControl;
+    const { from, to, clockwise, rotate, color } = inputControl;
 
     let start = from;
     let end = to;
@@ -20,12 +20,13 @@ const GoldenGrid: React.FC = (): React.ReactElement<any> => {
       [start, end] = [end, start];
     }
 
-    const userSequence = buildUserSequenceFromBounds(start, end);
-    if (userSequence.length < 2) {
-      console.warn('No valid sequence generated for', { start, end });
+    const range = getGridRange(start, end);
+    if (!range) {
+      gridRef.current.innerHTML = "";
       return;
     }
 
+    const { userSequence, startIdx, endIdx } = range;
     const maxRequested = Math.max(...userSequence);
     const fullSequence = fullFibonacciUpTo(maxRequested);
 
@@ -33,35 +34,52 @@ const GoldenGrid: React.FC = (): React.ReactElement<any> => {
     const [h, s, l] = hexToHsl(baseColor);
     const complementHue = (h + 180) % 360;
 
-    const layout = generateGoldenGridLayout(fullSequence, mirror, rotate);
+    // Single colored square with nothing skipped: render full-width
+    if (startIdx === 0 && endIdx === 0) {
+      gridRef.current.innerHTML = "";
+      const ol = document.createElement("ol");
+      ol.style.aspectRatio = "1 / 1";
+      const li = document.createElement("li");
+      li.style.left = "0";
+      li.style.top = "0";
+      li.style.width = "100%";
+      li.style.height = "100%";
+      li.style.background = hslToCss(h, s, l);
+      ol.appendChild(li);
+      gridRef.current.appendChild(ol);
+      return;
+    }
 
-    const requestedSquares = layout.squares.filter(sq => userSequence.includes(sq.size));
-    const skippedSquares = layout.squares.filter(sq => !userSequence.includes(sq.size));
+    const layout = generateGoldenGridLayout(fullSequence, clockwise, rotate);
+
+    const requestedSquares = layout.squares.slice(startIdx, endIdx + 1);
+    const skippedSquares = layout.squares.slice(0, startIdx);
 
     gridRef.current.innerHTML = "";
     const ol = document.createElement("ol");
-    ol.style.gridTemplateColumns = `repeat(${layout.width}, 1fr)`;
-    ol.style.gridTemplateRows = `repeat(${layout.height}, 1fr)`;
+    ol.style.aspectRatio = `${layout.width} / ${layout.height}`;
 
     // Placeholder for skipped (smaller) squares
     const placeholderExists = skippedSquares.length > 0;
 
     if (placeholderExists) {
-      const pMinX = Math.min(...skippedSquares.map(s => s.x));
-      const pMaxX = Math.max(...skippedSquares.map(s => s.x + s.size - 1));
-      const pMinY = Math.min(...skippedSquares.map(s => s.y));
-      const pMaxY = Math.max(...skippedSquares.map(s => s.y + s.size - 1));
+      let pMinX = Infinity, pMaxX = -Infinity, pMinY = Infinity, pMaxY = -Infinity;
+      for (const s of skippedSquares) {
+        if (s.x < pMinX) pMinX = s.x;
+        if (s.x + s.size - 1 > pMaxX) pMaxX = s.x + s.size - 1;
+        if (s.y < pMinY) pMinY = s.y;
+        if (s.y + s.size - 1 > pMaxY) pMaxY = s.y + s.size - 1;
+      }
 
-      const rowStart = pMinY - layout.minY + 1;
-      const colStart = pMinX - layout.minX + 1;
-      const pHeight = pMaxY - pMinY + 1;
       const pWidth = pMaxX - pMinX + 1;
-      const rowEnd = rowStart + pHeight;
-      const colEnd = colStart + pWidth;
+      const pHeight = pMaxY - pMinY + 1;
 
       const placeholderLi = document.createElement("li");
       placeholderLi.classList.add("placeholder");
-      placeholderLi.style.gridArea = `${rowStart} / ${colStart} / ${rowEnd} / ${colEnd}`;
+      placeholderLi.style.left = `${(pMinX - layout.minX) / layout.width * 100}%`;
+      placeholderLi.style.top = `${(pMinY - layout.minY) / layout.height * 100}%`;
+      placeholderLi.style.width = `${pWidth / layout.width * 100}%`;
+      placeholderLi.style.height = `${pHeight / layout.height * 100}%`;
       placeholderLi.style.background = baseColor;
       ol.appendChild(placeholderLi);
     }
@@ -87,11 +105,10 @@ const GoldenGrid: React.FC = (): React.ReactElement<any> => {
       }
 
       const li = document.createElement("li");
-      const rowStart = sq.y - layout.minY + 1;
-      const colStart = sq.x - layout.minX + 1;
-      const rowEnd = rowStart + sq.size;
-      const colEnd = colStart + sq.size;
-      li.style.gridArea = `${rowStart} / ${colStart} / ${rowEnd} / ${colEnd}`;
+      li.style.left = `${(sq.x - layout.minX) / layout.width * 100}%`;
+      li.style.top = `${(sq.y - layout.minY) / layout.height * 100}%`;
+      li.style.width = `${sq.size / layout.width * 100}%`;
+      li.style.height = `${sq.size / layout.height * 100}%`;
       li.style.background = hslToCss(currentHue, s, l);
       ol.appendChild(li);
     });

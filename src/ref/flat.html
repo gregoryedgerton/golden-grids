@@ -14,20 +14,16 @@
     padding: 0;
   }
 
-  .grid-container ol {  
+  .grid-container ol {
     list-style: none;
     margin: 0;
     padding: 0;
-    display: grid;
     position: relative;
     width: 100%;
     box-sizing: border-box;
   }
   .grid-container ol > li {
-    aspect-ratio: 1 / 1;
-  }
-  .grid-container .placeholder {
-    aspect-ratio: auto;
+    position: absolute;
   }
 </style>
 </head>
@@ -68,7 +64,7 @@
   }
 
   // Captured in gridGenerator.ts
-  function generateGoldenGridLayout(fibSequence, mirror = false, rotate = 0) {
+  function generateGoldenGridLayout(fibSequence, clockwise = true, rotate = 0) {
     if (fibSequence.length < 2) {
       throw new Error('Need at least two numbers in the sequence.');
     }
@@ -82,12 +78,9 @@
     squares.push({ size: fibSequence[0], x: 0, y: 0 });
     squares.push({ size: fibSequence[1], x: fibSequence[0], y: 0 });
 
-    const directions = [
-      { dx: 0, dy: 1 },  // bottom
-      { dx: -1, dy: 0 }, // left
-      { dx: 0, dy: -1 }, // top
-      { dx: 1, dy: 0 }   // right
-    ];
+    const directions = clockwise
+      ? [{ dx: 0, dy: 1 }, { dx: -1, dy: 0 }, { dx: 0, dy: -1 }, { dx: 1, dy: 0 }]
+      : [{ dx: 0, dy: -1 }, { dx: -1, dy: 0 }, { dx: 0, dy: 1 }, { dx: 1, dy: 0 }];
     let dirIndex = 0;
 
     let layout = { squares }; 
@@ -128,28 +121,19 @@
       dirIndex = (dirIndex + 1) % directions.length;
     }
 
-    // Might be missing
-    if (mirror) {
-      squares.forEach(square => {
-        square.x = -square.x - square.size + 1; // Mirror along the X-axis
-      });
-      updateBounds();
-    }
-
-    // Might be missing
     if (rotate) {
       squares.forEach(square => {
         let tempX = square.x;
         let tempY = square.y;
         if (rotate === 90) {
-          square.x = tempY;
-          square.y = -tempX - square.size + 1;
+          square.x = -tempY - square.size + 1;
+          square.y = tempX;
         } else if (rotate === 180) {
           square.x = -tempX - square.size + 1;
           square.y = -tempY - square.size + 1;
         } else if (rotate === 270) {
-          square.x = -tempY - square.size + 1;
-          square.y = tempX;
+          square.x = tempY;
+          square.y = -tempX - square.size + 1;
         }
       });
       updateBounds();
@@ -213,12 +197,12 @@
   }
 
   const userInputs = [
-    { from: 1, to: 3, color: '#7f7ec7', mirror: false, rotate: 0 }
+    { from: 1, to: 3, color: '#7f7ec7', clockwise: true, rotate: 0 }
   ];
 
   const gridsRoot = document.getElementById('gridsRoot');
 
-  userInputs.forEach(({from, to, color, mirror, rotate}) => {
+  userInputs.forEach(({from, to, color, clockwise, rotate}) => {
     let start = from;
     let end = to;
     if (start > end) {
@@ -238,7 +222,7 @@
     const baseColor = color || '#333333';
     const [h, s, l] = hexToHsl(baseColor);
     const complementHue = (h + 180) % 360;
-    const layout = generateGoldenGridLayout(fullSequence, mirror, rotate);
+    const layout = generateGoldenGridLayout(fullSequence, clockwise, rotate);
 
     const requestedSquares = layout.squares.filter(sq => userSequence.includes(sq.size));
     const skippedSquares = layout.squares.filter(sq => !userSequence.includes(sq.size));
@@ -246,8 +230,7 @@
     const container = document.createElement('div');
     container.classList.add('grid-container');
     const ol = document.createElement('ol');
-    ol.style.gridTemplateColumns = `repeat(${layout.width}, 1fr)`;
-    ol.style.gridTemplateRows = `repeat(${layout.height}, 1fr)`;
+    ol.style.aspectRatio = `${layout.width} / ${layout.height}`;
 
     container.appendChild(ol);
     gridsRoot.appendChild(container);
@@ -257,22 +240,23 @@
     let placeholderColor = baseColor;
 
     if (placeholderExists) {
-      const minX = Math.min(...skippedSquares.map(s => s.x));
-      const maxX = Math.max(...skippedSquares.map(s => s.x + s.size - 1));
-      const minY = Math.min(...skippedSquares.map(s => s.y));
-      const maxY = Math.max(...skippedSquares.map(s => s.y + s.size - 1));
+      let pMinX = Infinity, pMaxX = -Infinity, pMinY = Infinity, pMaxY = -Infinity;
+      for (const s of skippedSquares) {
+        if (s.x < pMinX) pMinX = s.x;
+        if (s.x + s.size - 1 > pMaxX) pMaxX = s.x + s.size - 1;
+        if (s.y < pMinY) pMinY = s.y;
+        if (s.y + s.size - 1 > pMaxY) pMaxY = s.y + s.size - 1;
+      }
 
-      const rowStart = minY - layout.minY + 1;
-      const colStart = minX - layout.minX + 1;
-      const height = (maxY - minY + 1);
-      const width = (maxX - minX + 1);
-
-      const rowEnd = rowStart + height;
-      const colEnd = colStart + width;
+      const pWidth = pMaxX - pMinX + 1;
+      const pHeight = pMaxY - pMinY + 1;
 
       const placeholderLi = document.createElement('li');
       placeholderLi.classList.add('placeholder');
-      placeholderLi.style.gridArea = `${rowStart} / ${colStart} / ${rowEnd} / ${colEnd}`;
+      placeholderLi.style.left = `${(pMinX - layout.minX) / layout.width * 100}%`;
+      placeholderLi.style.top = `${(pMinY - layout.minY) / layout.height * 100}%`;
+      placeholderLi.style.width = `${pWidth / layout.width * 100}%`;
+      placeholderLi.style.height = `${pHeight / layout.height * 100}%`;
       placeholderLi.style.background = placeholderColor;
       ol.appendChild(placeholderLi);
     }
@@ -283,7 +267,7 @@
       if (totalRequested > 1) {
         let fraction;
         if (placeholderExists) {
-          fraction = (seqIndex + 1) / (totalRequested + 1); 
+          fraction = (seqIndex + 1) / (totalRequested + 1);
         } else {
           fraction = (totalRequested === 1) ? 0 : (seqIndex / (totalRequested - 1));
         }
@@ -301,11 +285,10 @@
       }
 
       const li = document.createElement('li');
-      const rowStart = sq.y - layout.minY + 1;
-      const colStart = sq.x - layout.minX + 1;
-      const rowEnd = rowStart + sq.size;
-      const colEnd = colStart + sq.size;
-      li.style.gridArea = `${rowStart} / ${colStart} / ${rowEnd} / ${colEnd}`;
+      li.style.left = `${(sq.x - layout.minX) / layout.width * 100}%`;
+      li.style.top = `${(sq.y - layout.minY) / layout.height * 100}%`;
+      li.style.width = `${sq.size / layout.width * 100}%`;
+      li.style.height = `${sq.size / layout.height * 100}%`;
       li.style.background = hslToCss(currentHue, s, l);
       ol.appendChild(li);
     });

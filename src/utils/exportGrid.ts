@@ -1,4 +1,4 @@
-import { buildUserSequenceFromBounds, fullFibonacciUpTo } from "./fibonacci";
+import { fullFibonacciUpTo, getGridRange } from "./fibonacci";
 import { generateGoldenGridLayout } from "./gridGenerator";
 import { hexToHsl, hslToCss } from "./colorUtils";
 
@@ -6,7 +6,7 @@ export function generateGridHTML(
   from: number,
   to: number,
   color: string,
-  mirror: boolean,
+  clockwise: boolean,
   rotate: number
 ): string {
   let start = from;
@@ -15,11 +15,12 @@ export function generateGridHTML(
     [start, end] = [end, start];
   }
 
-  const userSequence = buildUserSequenceFromBounds(start, end);
-  if (userSequence.length < 2) {
-    return "<!-- Invalid Fibonacci sequence -->";
+  const range = getGridRange(start, end);
+  if (!range) {
+    return "<!-- No grid to render -->";
   }
 
+  const { userSequence, startIdx, endIdx } = range;
   const maxRequested = Math.max(...userSequence);
   const fullSequence = fullFibonacciUpTo(maxRequested);
 
@@ -27,27 +28,60 @@ export function generateGridHTML(
   const [h, s, l] = hexToHsl(baseColor);
   const complementHue = (h + 180) % 360;
 
-  const layout = generateGoldenGridLayout(fullSequence, mirror, rotate);
+  // Single colored square with nothing skipped: full-width
+  if (startIdx === 0 && endIdx === 0) {
+    const bg = hslToCss(h, s, l);
+    return `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Golden Grid</title>
+  <style>
+    body { margin: 0; padding: 0; }
+    .grid-container ol {
+      list-style: none; margin: 0; padding: 0;
+      position: relative; width: 100%; aspect-ratio: 1 / 1;
+    }
+    .grid-container ol > li { position: absolute; }
+  </style>
+</head>
+<body>
+  <div class="grid-container">
+    <ol>
+      <li style="left: 0; top: 0; width: 100%; height: 100%; background: ${bg};"></li>
+    </ol>
+  </div>
+</body>
+</html>`;
+  }
 
-  const requestedSquares = layout.squares.filter(sq => userSequence.includes(sq.size));
-  const skippedSquares = layout.squares.filter(sq => !userSequence.includes(sq.size));
+  const layout = generateGoldenGridLayout(fullSequence, clockwise, rotate);
+
+  const requestedSquares = layout.squares.slice(startIdx, endIdx + 1);
+  const skippedSquares = layout.squares.slice(0, startIdx);
   const placeholderExists = skippedSquares.length > 0;
 
   const items: string[] = [];
 
   if (placeholderExists) {
-    const pMinX = Math.min(...skippedSquares.map(s => s.x));
-    const pMaxX = Math.max(...skippedSquares.map(s => s.x + s.size - 1));
-    const pMinY = Math.min(...skippedSquares.map(s => s.y));
-    const pMaxY = Math.max(...skippedSquares.map(s => s.y + s.size - 1));
+    let pMinX = Infinity, pMaxX = -Infinity, pMinY = Infinity, pMaxY = -Infinity;
+    for (const s of skippedSquares) {
+      if (s.x < pMinX) pMinX = s.x;
+      if (s.x + s.size - 1 > pMaxX) pMaxX = s.x + s.size - 1;
+      if (s.y < pMinY) pMinY = s.y;
+      if (s.y + s.size - 1 > pMaxY) pMaxY = s.y + s.size - 1;
+    }
 
-    const rowStart = pMinY - layout.minY + 1;
-    const colStart = pMinX - layout.minX + 1;
-    const rowEnd = rowStart + (pMaxY - pMinY + 1);
-    const colEnd = colStart + (pMaxX - pMinX + 1);
+    const pWidth = pMaxX - pMinX + 1;
+    const pHeight = pMaxY - pMinY + 1;
+    const left = (pMinX - layout.minX) / layout.width * 100;
+    const top = (pMinY - layout.minY) / layout.height * 100;
+    const w = pWidth / layout.width * 100;
+    const h_ = pHeight / layout.height * 100;
 
     items.push(
-      `      <li class="placeholder" style="grid-area: ${rowStart} / ${colStart} / ${rowEnd} / ${colEnd}; background: ${baseColor};"></li>`
+      `      <li class="placeholder" style="left: ${left}%; top: ${top}%; width: ${w}%; height: ${h_}%; background: ${baseColor};"></li>`
     );
   }
 
@@ -70,14 +104,14 @@ export function generateGridHTML(
       }
     }
 
-    const rowStart = sq.y - layout.minY + 1;
-    const colStart = sq.x - layout.minX + 1;
-    const rowEnd = rowStart + sq.size;
-    const colEnd = colStart + sq.size;
+    const left = (sq.x - layout.minX) / layout.width * 100;
+    const top = (sq.y - layout.minY) / layout.height * 100;
+    const w = sq.size / layout.width * 100;
+    const h_ = sq.size / layout.height * 100;
     const bg = hslToCss(currentHue, s, l);
 
     items.push(
-      `      <li style="grid-area: ${rowStart} / ${colStart} / ${rowEnd} / ${colEnd}; background: ${bg};"></li>`
+      `      <li style="left: ${left}%; top: ${top}%; width: ${w}%; height: ${h_}%; background: ${bg};"></li>`
     );
   });
 
@@ -90,7 +124,6 @@ export function generateGridHTML(
   <style>
     body { margin: 0; padding: 0; }
     .grid-container {
-      display: grid;
       position: relative;
       margin: 0;
       padding: 0;
@@ -99,17 +132,13 @@ export function generateGridHTML(
       list-style: none;
       margin: 0;
       padding: 0;
-      display: grid;
+      position: relative;
       width: 100%;
-      box-sizing: content-box;
-      grid-template-columns: repeat(${layout.width}, 1fr);
-      grid-template-rows: repeat(${layout.height}, 1fr);
+      box-sizing: border-box;
+      aspect-ratio: ${layout.width} / ${layout.height};
     }
-    .grid-container ol > li:not(.placeholder) {
-      aspect-ratio: 1 / 1;
-    }
-    .grid-container .placeholder {
-      aspect-ratio: auto;
+    .grid-container ol > li {
+      position: absolute;
     }
   </style>
 </head>

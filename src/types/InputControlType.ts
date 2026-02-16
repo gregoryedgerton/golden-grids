@@ -2,6 +2,6 @@ export interface InputControlType {
   from: number;
   to: number;
   color: string;
-  mirror: boolean;
+  clockwise: boolean;
   rotate: number;
 }

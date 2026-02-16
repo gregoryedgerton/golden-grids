@@ -19,7 +19,7 @@ export interface GridLayout {
  */
 export function generateGoldenGridLayout(
   fibSequence: number[],
-  mirror: boolean = false,
+  clockwise: boolean = true,
   rotate: number = 0
 ): GridLayout {
   if (fibSequence.length < 2) {
@@ -33,31 +33,33 @@ export function generateGoldenGridLayout(
 
   const squares: Square[] = [];
 
+  // Incremental bounding box tracking
+  let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+
+  function expandBounds(sq: Square) {
+    if (sq.x < minX) minX = sq.x;
+    if (sq.x + sq.size - 1 > maxX) maxX = sq.x + sq.size - 1;
+    if (sq.y < minY) minY = sq.y;
+    if (sq.y + sq.size - 1 > maxY) maxY = sq.y + sq.size - 1;
+  }
+
+  function recalcBounds() {
+    minX = Infinity; maxX = -Infinity; minY = Infinity; maxY = -Infinity;
+    for (const s of squares) expandBounds(s);
+  }
+
   // Place first two squares explicitly
   squares.push({ size: fibSequence[0], x: 0, y: 0 });
   squares.push({ size: fibSequence[1], x: fibSequence[0], y: 0 });
+  expandBounds(squares[0]);
+  expandBounds(squares[1]);
 
-  // Direction cycle: bottom → left → top → right
-  const directions = [
-    { dx: 0, dy: 1 },   // bottom
-    { dx: -1, dy: 0 },  // left
-    { dx: 0, dy: -1 },  // top
-    { dx: 1, dy: 0 }    // right
-  ];
+  // CW:  bottom → left → top → right
+  // CCW: top → left → bottom → right
+  const directions = clockwise
+    ? [{ dx: 0, dy: 1 }, { dx: -1, dy: 0 }, { dx: 0, dy: -1 }, { dx: 1, dy: 0 }]
+    : [{ dx: 0, dy: -1 }, { dx: -1, dy: 0 }, { dx: 0, dy: 1 }, { dx: 1, dy: 0 }];
   let dirIndex = 0;
-
-  // Track bounding box, updated after each placement
-  let minX = Math.min(...squares.map(s => s.x));
-  let maxX = Math.max(...squares.map(s => s.x + s.size - 1));
-  let minY = Math.min(...squares.map(s => s.y));
-  let maxY = Math.max(...squares.map(s => s.y + s.size - 1));
-
-  function updateBounds() {
-    minX = Math.min(...squares.map(s => s.x));
-    maxX = Math.max(...squares.map(s => s.x + s.size - 1));
-    minY = Math.min(...squares.map(s => s.y));
-    maxY = Math.max(...squares.map(s => s.y + s.size - 1));
-  }
 
   // Place remaining squares against the bounding box edge
   for (let i = 2; i < fibSequence.length; i++) {
@@ -83,17 +85,10 @@ export function generateGoldenGridLayout(
       yPos = minY;
     }
 
-    squares.push({ size, x: xPos, y: yPos });
-    updateBounds();
+    const sq = { size, x: xPos, y: yPos };
+    squares.push(sq);
+    expandBounds(sq);
     dirIndex = (dirIndex + 1) % directions.length;
-  }
-
-  // Mirror (flip horizontally)
-  if (mirror) {
-    squares.forEach(square => {
-      square.x = -square.x - square.size + 1;
-    });
-    updateBounds();
   }
 
   // Rotate using integer coordinate swaps (no floating-point)
@@ -102,17 +97,17 @@ export function generateGoldenGridLayout(
       const tempX = square.x;
       const tempY = square.y;
       if (rotate === 90) {
-        square.x = tempY;
-        square.y = -tempX - square.size + 1;
+        square.x = -tempY - square.size + 1;
+        square.y = tempX;
       } else if (rotate === 180) {
         square.x = -tempX - square.size + 1;
         square.y = -tempY - square.size + 1;
       } else if (rotate === 270) {
-        square.x = -tempY - square.size + 1;
-        square.y = tempX;
+        square.x = tempY;
+        square.y = -tempX - square.size + 1;
       }
     });
-    updateBounds();
+    recalcBounds();
   }
 
   const width = maxX - minX + 1;
