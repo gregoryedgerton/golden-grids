@@ -13,7 +13,7 @@
     "dev": "vite",
     "serve": "vite preview",
     "build:demo": "VITE_BUILD_DEMO=1 vite build",
-    "deploy": "npm run build:demo && gh-pages -d dist-demo"
+    "deploy": "npm run build:demo && gh-pages -d dist-demo -m 'chore: deploy demo to GitHub Pages'"
   },
   "dependencies": {
     "@vitejs/plugin-react": "^4.3.4",
