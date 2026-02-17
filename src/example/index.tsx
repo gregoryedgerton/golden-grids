@@ -165,16 +165,22 @@ const ExampleApp = () => {
     const [showExport, setShowExport] = useState(false);
     const [copyLabel, setCopyLabel] = useState("Copy");
 
-    const start = Math.min(inputControl.from, inputControl.to);
-    const end = Math.max(inputControl.from, inputControl.to);
+    const lowerIdx = Math.min(inputControl.from, inputControl.to);
+    const upperIdx = Math.max(inputControl.from, inputControl.to);
+    const lowerKey = inputControl.from <= inputControl.to ? "from" : "to";
+    const upperKey = lowerKey === "from" ? "to" : "from";
+    const start = lowerIdx;
+    const end = upperIdx;
     const range = getGridRange(start, end);
     let boxCount: number;
+    let hasPlaceholder = false;
     if (!range) {
         boxCount = 0;
     } else if (range.startIdx === 0 && range.endIdx === 0) {
         boxCount = 1;
     } else {
-        boxCount = range.endIdx - range.startIdx + 1 + (range.startIdx > 0 ? 1 : 0);
+        hasPlaceholder = range.startIdx > 0;
+        boxCount = range.endIdx - range.startIdx + 1 + (hasPlaceholder ? 1 : 0);
     }
 
     const html = showExport
@@ -220,21 +226,21 @@ const ExampleApp = () => {
                     <span className="mad-lib-static">{boxCount}</span>
                     {" "}{boxCount === 1 ? "box" : "boxes"} and makes use of the{" "}
                     <span className="mad-lib-ordinal">
-                        <input className="mad-lib-input" type="number" aria-label="From ordinal"
-                            min={0} max={FIB_INDEX_STOPS.length - 1} value={inputControl.from}
+                        <input className="mad-lib-input" type="number" aria-label="Lower ordinal"
+                            min={0} max={FIB_INDEX_STOPS.length - 1} value={lowerIdx}
                             onChange={(e) => {
                                 const v = Math.max(0, Math.min(FIB_INDEX_STOPS.length - 1, parseInt(e.target.value) || 0));
-                                setInputControl({ ...inputControl, from: v });
-                            }} /><sup>{ordinalSuffix(inputControl.from)}</sup>
+                                setInputControl({ ...inputControl, [lowerKey]: v });
+                            }} /><sup>{ordinalSuffix(lowerIdx)}</sup>
                     </span>
-                    {" "}and{" "}
+                    {" "}through{" "}
                     <span className="mad-lib-ordinal">
-                        <input className="mad-lib-input" type="number" aria-label="To ordinal"
-                            min={0} max={FIB_INDEX_STOPS.length - 1} value={inputControl.to}
+                        <input className="mad-lib-input" type="number" aria-label="Upper ordinal"
+                            min={0} max={FIB_INDEX_STOPS.length - 1} value={upperIdx}
                             onChange={(e) => {
                                 const v = Math.max(0, Math.min(FIB_INDEX_STOPS.length - 1, parseInt(e.target.value) || 0));
-                                setInputControl({ ...inputControl, to: v });
-                            }} /><sup>{ordinalSuffix(inputControl.to)}</sup>
+                                setInputControl({ ...inputControl, [upperKey]: v });
+                            }} /><sup>{ordinalSuffix(upperIdx)}</sup>
                     </span>
                     {" "}digits in the Fibonacci sequence. The grid builds out from the{" "}
                     <button className="mad-lib-btn" onClick={() => {
@@ -249,8 +255,11 @@ const ExampleApp = () => {
                       {" "}and spirals{" "}
                     <button className="mad-lib-btn" onClick={() => setInputControl({ ...inputControl, clockwise: !inputControl.clockwise })}>
                         {inputControl.clockwise ? "CLOCKWISE" : "COUNTER-CLOCKWISE"}
-                    </button>. 
-                    Did you know you can
+                    </button>.
+                    {hasPlaceholder && <>{" "}This grid starts on the{" "}
+                        <span className="mad-lib-static">{lowerIdx}{ordinalSuffix(lowerIdx)}</span>
+                        {" "}digit, a non-square box will be added to represent the sequence skipped.</>}
+                    {" "}Did you know you can
                     {" "}<button className="mad-lib-btn" onClick={() => setShowExport(true)}>EXPORT</button> your grid?
                 </p>
             </header>
