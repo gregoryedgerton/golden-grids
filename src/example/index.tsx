@@ -242,7 +242,11 @@ const ExampleApp = () => {
                         const idx = order.indexOf(inputControl.rotate);
                         setInputControl({ ...inputControl, rotate: order[(idx + 1) % order.length] });
                     }}>{ROTATION_LABELS[inputControl.rotate]}</button>
-                    {" "}of the first box placed and spirals{" "}
+                    {" "}of the first box placed {""}
+                    <input className="mad-lib-color" type="color" aria-label="Grid color"
+                        value={inputControl.color}
+                        onChange={(e) => setInputControl({ ...inputControl, color: e.target.value })} />
+                      {" "}and spirals{" "}
                     <button className="mad-lib-btn" onClick={() => setInputControl({ ...inputControl, clockwise: !inputControl.clockwise })}>
                         {inputControl.clockwise ? "CLOCKWISE" : "COUNTER-CLOCKWISE"}
                     </button>. 
