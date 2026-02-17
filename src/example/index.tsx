@@ -174,12 +174,14 @@ const ExampleApp = () => {
     const range = getGridRange(start, end);
     let boxCount: number;
     let hasPlaceholder = false;
+    let skippedDigits: number[] = [];
     if (!range) {
         boxCount = 0;
     } else if (range.startIdx === 0 && range.endIdx === 0) {
         boxCount = 1;
     } else {
         hasPlaceholder = range.startIdx > 0;
+        skippedDigits = FIB_STOPS.slice(1, lowerIdx);
         boxCount = range.endIdx - range.startIdx + 1 + (hasPlaceholder ? 1 : 0);
     }
 
@@ -222,9 +224,9 @@ const ExampleApp = () => {
                     <Dial label="To" value={inputControl.to} stops={FIB_INDEX_STOPS}
                         onChange={(n) => setInputControl({ ...inputControl, to: n })}
                         format={(idx) => String(FIB_STOPS[idx])} />
-                    , it will be{" "}
+                    , comprised of{" "}
                     <span className="mad-lib-static">{boxCount}</span>
-                    {" "}{boxCount === 1 ? "box" : "boxes"} and makes use of the{" "}
+                    {" "}{boxCount === 1 ? "box" : "boxes"} proportional to the{" "} 
                     <span className="mad-lib-ordinal">
                         <input className="mad-lib-input" type="number" aria-label="Lower ordinal"
                             min={0} max={FIB_INDEX_STOPS.length - 1} value={lowerIdx}
@@ -242,23 +244,23 @@ const ExampleApp = () => {
                                 setInputControl({ ...inputControl, [upperKey]: v });
                             }} /><sup>{ordinalSuffix(upperIdx)}</sup>
                     </span>
-                    {" "}digits in the Fibonacci sequence. The grid builds out from the{" "}
+                    {" "}digits of the Fibonacci sequence. The first box placed is colored {" "}
+                    <input className="mad-lib-color" type="color" aria-label="Grid color"
+                        value={inputControl.color}
+                        onChange={(e) => setInputControl({ ...inputControl, color: e.target.value })} />
+                        with the next box placed to the{" "}
                     <button className="mad-lib-btn" onClick={() => {
                         const order = inputControl.clockwise ? ROTATION_STOPS : [...ROTATION_STOPS].reverse();
                         const idx = order.indexOf(inputControl.rotate);
                         setInputControl({ ...inputControl, rotate: order[(idx + 1) % order.length] });
                     }}>{ROTATION_LABELS[inputControl.rotate]}</button>
-                    {" "}of the first box placed {""}
-                    <input className="mad-lib-color" type="color" aria-label="Grid color"
-                        value={inputControl.color}
-                        onChange={(e) => setInputControl({ ...inputControl, color: e.target.value })} />
                       {" "}and spirals{" "}
                     <button className="mad-lib-btn" onClick={() => setInputControl({ ...inputControl, clockwise: !inputControl.clockwise })}>
                         {inputControl.clockwise ? "CLOCKWISE" : "COUNTER-CLOCKWISE"}
                     </button>.
-                    {hasPlaceholder && <>{" "}This grid starts on the{" "}
-                        <span className="mad-lib-static">{lowerIdx}{ordinalSuffix(lowerIdx)}</span>
-                        {" "}digit, a non-square box will be added to represent the sequence skipped.</>}
+                    {hasPlaceholder && <>{" "}Grids that skip{" "}
+                        <span className="mad-lib-static">{skippedDigits.join(", ")}</span>
+                        {" "}will include a single irregular box of the combined relative proprotions to keep the grid golden.</>}
                     {" "}Did you know you can
                     {" "}<button className="mad-lib-btn" onClick={() => setShowExport(true)}>EXPORT</button> your grid?
                 </p>
