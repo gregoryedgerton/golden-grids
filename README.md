@@ -1,4 +1,5 @@
 # Golden Grids
+
 How I Learned to Stop Worrying about Rows and Columns and Love the Golden Ratio
 
 [Live Demo](https://gregoryedgerton.github.io/golden-grids/)
@@ -9,13 +10,13 @@ Golden Grids is a responsive CSS Grid layout library driven by the Fibonacci Seq
 
 ## Configuration
 
-| Input | Type | Description |
-| --- | --- | --- |
-| from (required) | `integer` | The index position (0–78) of a digit in the Fibonacci Sequence. The library sorts your range smallest to largest automatically. |
-| to (required) | `integer` | Another index position (0–78) in the Fibonacci Sequence. Together with `from` this defines your slice of the sequence. |
-| color | `hex string` | The base color for the grid (defaults to `#7f7ec7`). |
-| rotation | `integer` | Starting direction of the spiral in `90` degree increments — `0` (RIGHT), `90` (BOTTOM), `180` (LEFT), `270` (TOP). Defaults to `0`. |
-| clockwise | `boolean` | Sets the spiral direction — `true` for clockwise, `false` for counter-clockwise (defaults to `true`). |
+| Input           | Type         | Description                                                                                                                          |
+| --------------- | ------------ | ------------------------------------------------------------------------------------------------------------------------------------ |
+| from (required) | `integer`    | The index position (0–78) of a digit in the Fibonacci Sequence. The library sorts your range smallest to largest automatically.      |
+| to (required)   | `integer`    | Another index position (0–78) in the Fibonacci Sequence. Together with `from` this defines your slice of the sequence.               |
+| color           | `hex string` | The base color for the grid (defaults to `#7f7ec7`).                                                                                 |
+| rotation        | `integer`    | Starting direction of the spiral in `90` degree increments — `0` (RIGHT), `90` (BOTTOM), `180` (LEFT), `270` (TOP). Defaults to `0`. |
+| clockwise       | `boolean`    | Sets the spiral direction — `true` for clockwise, `false` for counter-clockwise (defaults to `true`).                                |
 
 ## How it works
 
@@ -39,15 +40,13 @@ Golden Grids are responsive and fill 100% of their container width. The proporti
 
 The theoretical maximum is the 78th Fibonacci number: `8,944,394,323,791,464`. That's the largest value that fits within JavaScript's `Number.MAX_SAFE_INTEGER` (`9,007,199,254,740,991`). Beyond this threshold, integer arithmetic loses precision and the sequence values can't be trusted. The library generates all 78 valid stops automatically, giving you index positions 0 through 78 to work with.
 
-That said, the practical limit is lower. Beneath the hood the largest Fibonacci value in your range becomes the CSS Grid row/column count, and browsers start to choke on grids that large. Based on testing, the 34th digit (`5,702,887`) is roughly the largest value that produces a clean grid. At extreme scales, fractional rounding differences between browsers and CSS introduce gaps. If you are an abstract artist, maybe you'd be into that sort of thing.
-
 To be honest it's less about the absolute number and more about controlling the range. After all, a similar range at the start and end of the sequence renders comparably — `8/16` is still `1/2`, same concept. Shorter ranges are easier on the eyes and more practical to use. You can still reach for `5,702,887`, but pair it with the 32nd digit `2,178,309` for a lovely 4-box golden grid.
 
 ## Why did I make this?
 
 We like to think we are mobile first, but we still speak desktop first and cannot let go of traditional print formats on the web. Just like the floppy icon that's now synonymous with "save" to a generation that has never seen a floppy disk, I worry that we've become too comfortable with rows and columns. Whether it's an engineering department at a Fortune 100 crafting a component library, an agency's senior developer on the cutting edge, or someone straight from a bootcamp — I've seen the same patterns play out. The only difference is whether they can do it without negative margins ;)
 
-This library is meant to challenge that notion. Golden Grids isn't for everything. I'm just tired of seeing homogenized design across the web and sometimes the first step is a new tool. Primary company objectives in a 3-up row on desktop, 2-up with 1 orphan on tablet, and stacked on mobile. I do not think that's the fixed-width mindset that motivated Ethan Marcotte when he coined the term "responsive web design" in his [May 2010 article](https://alistapart.com/article/responsive-web-design/) in *A List Apart*. Shout out to the OG [Jeffrey Zeldman](https://en.wikipedia.org/wiki/Jeffrey_Zeldman) — every UX/UI designer and frontend engineer should know his name.
+This library is meant to challenge that notion. Golden Grids isn't for everything. I'm just tired of seeing homogenized design across the web and sometimes the first step is a new tool. Primary company objectives in a 3-up row on desktop, 2-up with 1 orphan on tablet, and stacked on mobile. I do not think that's the fixed-width mindset that motivated Ethan Marcotte when he coined the term "responsive web design" in his [May 2010 article](https://alistapart.com/article/responsive-web-design/) in _A List Apart_. Shout out to the OG [Jeffrey Zeldman](https://en.wikipedia.org/wiki/Jeffrey_Zeldman) — every UX/UI designer and frontend engineer should know his name.
 
 I'll never forget what [Craig Phares](https://x.com/craigphares) said to me when we were neighbors at [Cowerks](https://www.cowerks.com/) in Asbury Park. I asked him if he ever used the custom grid config tool on Bootstrap and he responded: "Do you really need that full 16 column grid, or do you just need two divs at 50%?" He was right. I didn't. Craig, my hatred of rows and columns might have been born that day.
 
