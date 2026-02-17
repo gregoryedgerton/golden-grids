@@ -19,7 +19,7 @@ body {
   font-family: sans-serif;
   font-size: 1em;
   font-weight: bold;
-  padding: 0.15em 1.2em;
+  padding: 0.15em .5em;
   border: none;
   border-bottom: 2px solid #222;
   background: none;
@@ -69,6 +69,49 @@ body {
 .mad-lib-static {
   font-weight: bold;
   font-variant-numeric: tabular-nums;
+}
+
+.mad-lib-ordinal {
+  display: inline-flex;
+  align-items: baseline;
+  border-bottom: 2px solid #222;
+}
+
+.mad-lib-ordinal:hover {
+  background: #222;
+  color: white;
+}
+
+.mad-lib-ordinal sup {
+  font-weight: bold;
+  font-size: 0.65em;
+  line-height: 1;
+  margin-right: 0.25em;
+}
+
+.mad-lib-input {
+  font-family: sans-serif;
+  font-size: 1em;
+  font-weight: bold;
+  width: auto;
+  padding: 0.1em 0;
+  border: none;
+  background: none;
+  color: inherit;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+  -moz-appearance: textfield;
+}
+
+.mad-lib-input::-webkit-outer-spin-button,
+.mad-lib-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.mad-lib-input:focus {
+  outline: 2px solid #4a90d9;
+  outline-offset: 2px;
 }
 
 .mad-lib-btn {

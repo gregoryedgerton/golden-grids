@@ -8,7 +8,14 @@ import "../styles/golden-grid.css";
 
 const FIB_INDEX_STOPS = FIB_STOPS.map((_: number, i: number) => i);
 const ROTATION_STOPS = [0, 90, 180, 270];
-const ROTATION_LABELS: Record<number, string> = { 0: "\u2192", 90: "\u2193", 180: "\u2190", 270: "\u2191" };
+const ROTATION_LABELS: Record<number, string> = { 0: "RIGHT", 90: "BOTTOM", 180: "LEFT", 270: "TOP" };
+
+function ordinalSuffix(n: number): string {
+    const s = ["th", "st", "nd", "rd"];
+    const v = n % 100;
+    return s[(v - 20) % 10] || s[v] || s[0];
+}
+
 const PIXELS_PER_STEP = 72;
 
 interface DialProps {
@@ -201,7 +208,7 @@ const ExampleApp = () => {
         <div>
             <header className="control-panel">
                 <p className="mad-lib">
-                    Make a golden grid from{" "}
+                    Make a Golden Grid from{" "}
                     <Dial label="From" value={inputControl.from} stops={FIB_INDEX_STOPS}
                         onChange={(n) => setInputControl({ ...inputControl, from: n })}
                         format={(idx) => String(FIB_STOPS[idx])} />
@@ -211,15 +218,36 @@ const ExampleApp = () => {
                         format={(idx) => String(FIB_STOPS[idx])} />
                     , it will be{" "}
                     <span className="mad-lib-static">{boxCount}</span>
-                    {" "}{boxCount === 1 ? "box" : "boxes"} and let's set the direction to{" "}
-                    <Dial label="Direction" value={inputControl.rotate} stops={ROTATION_STOPS}
-                        wrap onChange={(n) => setInputControl({ ...inputControl, rotate: n })}
-                        format={(v) => ROTATION_LABELS[v]} />
-                    {" "}spiraling{" "}
+                    {" "}{boxCount === 1 ? "box" : "boxes"} and makes use of the{" "}
+                    <span className="mad-lib-ordinal">
+                        <input className="mad-lib-input" type="number" aria-label="From ordinal"
+                            min={0} max={FIB_INDEX_STOPS.length - 1} value={inputControl.from}
+                            onChange={(e) => {
+                                const v = Math.max(0, Math.min(FIB_INDEX_STOPS.length - 1, parseInt(e.target.value) || 0));
+                                setInputControl({ ...inputControl, from: v });
+                            }} /><sup>{ordinalSuffix(inputControl.from)}</sup>
+                    </span>
+                    {" "}and{" "}
+                    <span className="mad-lib-ordinal">
+                        <input className="mad-lib-input" type="number" aria-label="To ordinal"
+                            min={0} max={FIB_INDEX_STOPS.length - 1} value={inputControl.to}
+                            onChange={(e) => {
+                                const v = Math.max(0, Math.min(FIB_INDEX_STOPS.length - 1, parseInt(e.target.value) || 0));
+                                setInputControl({ ...inputControl, to: v });
+                            }} /><sup>{ordinalSuffix(inputControl.to)}</sup>
+                    </span>
+                    {" "}digits in the Fibonacci sequence. The grid builds out from the{" "}
+                    <button className="mad-lib-btn" onClick={() => {
+                        const order = inputControl.clockwise ? ROTATION_STOPS : [...ROTATION_STOPS].reverse();
+                        const idx = order.indexOf(inputControl.rotate);
+                        setInputControl({ ...inputControl, rotate: order[(idx + 1) % order.length] });
+                    }}>{ROTATION_LABELS[inputControl.rotate]}</button>
+                    {" "}of the first box placed and spirals{" "}
                     <button className="mad-lib-btn" onClick={() => setInputControl({ ...inputControl, clockwise: !inputControl.clockwise })}>
                         {inputControl.clockwise ? "CLOCKWISE" : "COUNTER-CLOCKWISE"}
-                    </button>.
-                    {" "}<button className="mad-lib-btn" onClick={() => setShowExport(true)}>Export</button>
+                    </button>. 
+                    Did you know you can
+                    {" "}<button className="mad-lib-btn" onClick={() => setShowExport(true)}>EXPORT</button> your grid?
                 </p>
             </header>
 
