@@ -19,7 +19,7 @@ const GridContext = createContext<GridContextProps>({
   setInputControl: () => {},
 });
 
-export const GridProvider: React.FC<{ children?: React.ReactNode }> = ({ children }): React.ReactElement => {
+export const GridProvider: React.FC<{ children?: React.ReactNode; initialConfig?: Partial<InputControlType> }> = ({ children, initialConfig }): React.ReactElement => {
   if (!children) return <></>;
 
   const [inputControl, setInputControl] = useState<InputControlType>({
@@ -28,6 +28,7 @@ export const GridProvider: React.FC<{ children?: React.ReactNode }> = ({ childre
     color: "#7f7ec7",
     clockwise: true,
     rotate: 0,
+    ...initialConfig,
   });
 
   const validatedSetInputControl = (control: InputControlType) => {

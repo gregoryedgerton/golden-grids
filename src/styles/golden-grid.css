@@ -161,25 +161,6 @@ body {
   color: white;
 }
 
-.grid-container {
-  position: relative;
-  margin: 0;
-  padding: 0;
-}
-
-.grid-container ol {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  position: relative;
-  width: 100%;
-  box-sizing: border-box;
-}
-
-.grid-container ol > li {
-  position: absolute;
-}
-
 .export-overlay {
   position: fixed;
   inset: 0;

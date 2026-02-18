@@ -1,5 +1,7 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
+import dts from "vite-plugin-dts";
+import cssInjectedByJs from "vite-plugin-css-injected-by-js";
 
 const isDemo = !!process.env.VITE_BUILD_DEMO;
 
@@ -17,7 +19,11 @@ export default defineConfig(({ command }) => {
   }
 
   return {
-    plugins: [react()],
+    plugins: [
+      react(),
+      dts({ rollupTypes: true }),
+      cssInjectedByJs(),
+    ],
     root: command === "serve" ? "src/example" : ".",
     server: {
       open: true,
@@ -28,6 +34,7 @@ export default defineConfig(({ command }) => {
         entry: "src/index.ts",
         name: "GoldenGrids",
         fileName: (format) => `golden-grids.${format}.js`,
+        formats: ["es", "cjs"],
       },
       rollupOptions: {
         external: ["react", "react-dom"],

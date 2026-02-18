@@ -3,16 +3,28 @@ import { useGrid } from "../context/GridContext";
 import { generateGoldenGridLayout } from "../utils/gridGenerator";
 import { fullFibonacciUpTo, getGridRange } from "../utils/fibonacci";
 import { hexToHsl, hslToCss } from "../utils/colorUtils";
-import "../styles/golden-grid.css";
+import "../styles/grid.css";
 
-const GoldenGrid: React.FC = (): React.ReactElement<any> => {
+export interface GoldenGridProps {
+  from?: number;
+  to?: number;
+  color?: string;
+  clockwise?: boolean;
+  rotate?: 0 | 90 | 180 | 270;
+}
+
+const GoldenGrid: React.FC<GoldenGridProps> = (props): React.ReactElement<any> => {
   const { inputControl } = useGrid();
   const gridRef = useRef<HTMLDivElement>(null);
 
+  const from = props.from ?? inputControl.from;
+  const to = props.to ?? inputControl.to;
+  const color = props.color ?? inputControl.color;
+  const clockwise = props.clockwise ?? inputControl.clockwise;
+  const rotate = props.rotate ?? inputControl.rotate;
+
   useEffect(() => {
     if (!gridRef.current) return;
-
-    const { from, to, clockwise, rotate, color } = inputControl;
 
     let start = from;
     let end = to;
@@ -115,7 +127,7 @@ const GoldenGrid: React.FC = (): React.ReactElement<any> => {
     });
 
     gridRef.current.appendChild(ol);
-  }, [inputControl]);
+  }, [from, to, color, clockwise, rotate]);
 
   return <div ref={gridRef} className="grid-container"></div>;
 };
