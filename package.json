@@ -19,7 +19,7 @@
     "serve": "vite preview",
     "build:demo": "VITE_BUILD_DEMO=1 vite build",
     "test": "jest",
-    "prepare": "npm run build",
+    "prepack": "npm run build",
     "prepublishOnly": "npm test",
     "setup": "husky install"
   },
