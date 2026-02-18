@@ -2,99 +2,92 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## Commands
+## Purpose
+
+`@gifcommit/golden-grids` is an npm library that gives developers a **golden-ratio grid layout system for building websites**. A consumer installs the package, configures a grid (via props or a JSON config file), and uses the generated proportional boxes as layout areas to place their own content into.
+
+The spiral grid is the product — not a visualisation tool. The `<li>` boxes that `GoldenGrid` renders are the slots a consuming site maps its content into.
+
+## Consumer workflow
 
 ```bash
-npm run dev          # Start dev server (example app on port 5173)
-npm run build        # Build library for distribution to /dist/
-npm run build:demo   # Build demo site to /dist-demo/ (GitHub Pages)
-npm test             # Run Jest tests
-npm run serve        # Preview production build
-npm run setup        # Install Husky git hooks (run once after cloning)
+npm install @gifcommit/golden-grids
 ```
 
-After cloning, run `npm run setup` to install git hooks. `npm run build` runs automatically on `npm install` (via `prepare`) and before `npm publish` (via `prepublishOnly`, which also runs tests).
-
-## Architecture
-
-**Golden Grids** is a React library that generates CSS Grid layouts using Fibonacci sequence proportions arranged in a golden spiral.
-
-### Consumer API
-
 ```tsx
-import myConfig from './grid.config.json'
-import { GoldenGrid, GridProvider } from 'golden-grids'
+import { GoldenGrid, GridProvider } from '@gifcommit/golden-grids'
+// CSS is auto-injected — no separate import needed
 
-// Props-only (no provider needed):
+// Minimal usage (no provider required):
 <GoldenGrid from={1} to={5} color="#7f7ec7" clockwise={true} rotate={0} />
 
 // From a JSON config file:
+import myConfig from './grid.config.json'
 <GoldenGrid {...myConfig} />
 
-// With provider (for dynamic/interactive use):
+// With provider for dynamic/interactive control:
 <GridProvider initialConfig={myConfig}>
   <GoldenGrid />
 </GridProvider>
 ```
 
-CSS is auto-injected when the module loads — no separate CSS import required.
+`InputControlType` is the config schema:
 
-Also exported for headless use: `generateGoldenGridLayout`, `generateGridHTML`, `useGrid`, and types `GoldenGridProps`, `InputControlType`, `Square`, `GridLayout`.
+```ts
+{
+  from: number;       // FIB_STOPS start index (1–78)
+  to: number;         // FIB_STOPS end index (1–78)
+  color: string;      // Hex base color for the progression
+  clockwise: boolean; // Spiral direction
+  rotate: number;     // Starting orientation — 0 | 90 | 180 | 270
+}
+```
 
-### Library vs. Demo
+Also exported for headless use: `generateGoldenGridLayout` (returns raw coordinates), `generateGridHTML` (standalone HTML string), `useGrid`, and types `GoldenGridProps`, `InputControlType`, `Square`, `GridLayout`.
 
-The repo serves two purposes:
-- **Library** (`src/index.ts` → `dist/`) — exports `GoldenGrid`, `GridProvider`, `useGrid`, `generateGridHTML`
-- **Demo app** (`src/example/index.tsx` → `dist-demo/`) — interactive playground, deployed to GitHub Pages via `.github/workflows/deploy.yml`
+## Commands
 
-Vite switches between these modes via the `VITE_BUILD_DEMO=1` env variable (see `vite.config.ts`).
+```bash
+npm run dev          # Start dev server / interactive demo (port 5173)
+npm run build        # Build library to /dist/
+npm run build:demo   # Build demo site to /dist-demo/ (GitHub Pages)
+npm test             # Run Jest tests
+npm run setup        # Install Husky git hooks (run once after cloning)
+```
 
-### Core Data Flow
+`npm run build` runs automatically via `prepare` on install and before `npm publish`. `prepublishOnly` runs tests before every publish.
 
-1. User configures grid via `InputControlType` (`from`, `to` as FIB_STOPS indices, `color` hex, `clockwise` bool, `rotate` 0/90/180/270)
-2. `GridContext` holds this state; `GridProvider` wraps the app
-3. `GoldenGrid` component reads context, calls `fibonacci.ts` → `gridGenerator.ts` to compute layout
-4. Layout is rendered as an `<ol>` with absolutely-positioned `<li>` items using percentage coordinates
-5. Colors computed in HSL space via `colorUtils.ts`, varying hue across boxes
+## Publishing
 
-### Key Files
+Package is published to npm as `@gifcommit/golden-grids`. Publishing is triggered by creating a GitHub Release — see `.github/workflows/publish.yml`. Requires `NPM_TOKEN` set as a GitHub Actions secret.
+
+## Architecture
+
+### Repo structure
+
+Two targets share the same source:
+- **Library** (`src/index.ts` → `dist/`) — what consumers install from npm
+- **Demo app** (`src/example/index.tsx` → `dist-demo/`) — interactive playground deployed to GitHub Pages
+
+Vite switches between them via `VITE_BUILD_DEMO=1` (see `vite.config.ts`).
+
+### How the grid is generated
+
+1. `from`/`to` indices are looked up in `FIB_STOPS` (79 pre-calculated Fibonacci values) via `getGridRange()` in `fibonacci.ts`
+2. The full Fibonacci sequence up to the max value is computed via `fullFibonacciUpTo()`
+3. `generateGoldenGridLayout()` in `gridGenerator.ts` places squares sequentially — first two explicitly, then each subsequent square flush against the current bounding box, cycling through 4 directions (CW or CCW). Rotation is applied as an integer coordinate transform. Coordinates are normalized to remove negative offsets.
+4. `GoldenGrid` renders the layout as an `<ol>` with absolutely-positioned `<li>` items at percentage coordinates, with an HSL color progression across boxes
+5. When `from > 1`, skipped leading squares are collapsed into a single placeholder `<li>` to preserve spiral proportions
+
+### Key files
 
 | File | Role |
 |------|------|
-| `src/utils/fibonacci.ts` | `FIB_STOPS` (79 pre-calculated values), `getGridRange()`, `fullFibonacciUpTo()` |
-| `src/utils/gridGenerator.ts` | Golden spiral layout algorithm — places squares sequentially, tracks bounding box, normalizes coordinates |
-| `src/components/GoldenGrid.tsx` | Renders the grid; also handles placeholder box for skipped leading digits |
-| `src/context/GridContext.tsx` | React Context + `useGrid()` hook |
+| `src/utils/fibonacci.ts` | `FIB_STOPS`, `getGridRange()`, `fullFibonacciUpTo()` |
+| `src/utils/gridGenerator.ts` | Spiral layout algorithm |
+| `src/components/GoldenGrid.tsx` | React component — accepts props or reads from context |
+| `src/context/GridContext.tsx` | `GridProvider` (accepts `initialConfig`) + `useGrid()` hook |
 | `src/utils/colorUtils.ts` | `hexToHsl()`, `hslToCss()` |
-| `src/utils/exportGrid.ts` | Generates standalone HTML mirroring GoldenGrid rendering |
-| `src/example/index.tsx` | Full demo UI with custom `Dial` slider component and export modal |
-
-### Spiral Layout Algorithm (`gridGenerator.ts`)
-
-Squares are placed sequentially:
-1. First square at (0,0), second adjacent based on initial direction
-2. Each subsequent square placed flush against the current bounding box
-3. Direction cycles through 4 positions (CW or CCW)
-4. Rotation (0°/90°/180°/270°) is applied as integer coordinate transformation
-5. Final coordinates normalized to remove negative offsets
-
-### Skipped Digits
-
-When `from > 1`, a placeholder square is prepended that represents the combined area of skipped Fibonacci numbers. This maintains golden ratio proportions in the spiral.
-
-### Types
-
-```typescript
-// src/types/InputControlType.ts
-interface InputControlType {
-  from: number;       // FIB_STOPS start index (1–78)
-  to: number;         // FIB_STOPS end index (1–78)
-  color: string;      // Hex color for progression base
-  clockwise: boolean;
-  rotate: number;     // 0 | 90 | 180 | 270
-}
-
-// src/types/UserSequence.ts
-interface Square { x: number; y: number; size: number; }
-interface UserSequence { width: number; height: number; squares: Square[]; }
-```
+| `src/utils/exportGrid.ts` | Generates a self-contained HTML file mirroring the grid |
+| `src/example/index.tsx` | Demo app with `Dial` slider, mad-lib UI, and export modal |
+| `src/__tests__/` | Unit tests — 100% statement/line/function coverage |
