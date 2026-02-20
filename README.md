@@ -8,15 +8,54 @@ How I Learned to Stop Worrying about Rows and Columns and Love the Golden Ratio
 
 Golden Grids is a responsive CSS Grid layout library driven by the Fibonacci Sequence. Instead of traditional rows and columns you get proportionally aligned boxes that follow the golden ratio. What you do with those boxes is your business, but at least you won't be boring.
 
+## Installation
+
+```bash
+npm install @gifcommit/golden-grids
+```
+
+## Usage
+
+```tsx
+import { GoldenGrid, GoldenBox, GridProvider } from '@gifcommit/golden-grids'
+// CSS is auto-injected — no separate import needed
+
+// Transparent layout slots (no color):
+<GoldenGrid from={1} to={5} />
+
+// With HSL color progression:
+<GoldenGrid from={1} to={5} color="#7f7ec7" />
+
+// With outline:
+<GoldenGrid from={1} to={5} color="#7f7ec7" outline="2px solid #000000" />
+
+// Compound component — map your content into grid slots:
+<GoldenGrid from={3} to={5} color="#7f7ec7">
+  <GoldenBox placeholder><p>Fills the skipped-range area</p></GoldenBox>
+  <GoldenBox><h1>First visible box</h1></GoldenBox>
+  <GoldenBox><p>Second visible box</p></GoldenBox>
+  <GoldenBox><p>Third visible box</p></GoldenBox>
+</GoldenGrid>
+
+// With provider for dynamic/interactive control:
+<GridProvider initialConfig={myConfig}>
+  <GoldenGrid />
+</GridProvider>
+```
+
+Extra `<GoldenBox>` children beyond the visible slot count are silently ignored, so you can always declare the full set of 78 and let the config control what renders.
+
 ## Configuration
 
-| Input           | Type         | Description                                                                                                                          |
-| --------------- | ------------ | ------------------------------------------------------------------------------------------------------------------------------------ |
-| from (required) | `integer`    | The index position (0–78) of a digit in the Fibonacci Sequence. The library sorts your range smallest to largest automatically.      |
-| to (required)   | `integer`    | Another index position (0–78) in the Fibonacci Sequence. Together with `from` this defines your slice of the sequence.               |
-| color           | `hex string` | The base color for the grid (defaults to `#7f7ec7`).                                                                                 |
-| rotation        | `integer`    | Starting direction of the spiral in `90` degree increments — `0` (RIGHT), `90` (BOTTOM), `180` (LEFT), `270` (TOP). Defaults to `0`. |
-| clockwise       | `boolean`    | Sets the spiral direction — `true` for clockwise, `false` for counter-clockwise (defaults to `true`).                                |
+| Prop        | Type                          | Description                                                                                                                        |
+| ----------- | ----------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| `from`      | `number`                      | Index position (1–78) in the Fibonacci Sequence. The library sorts your range smallest to largest automatically.                   |
+| `to`        | `number`                      | Another index position (1–78). Together with `from` this defines your slice of the sequence.                                      |
+| `color`     | `string` (hex)                | Optional base color for the HSL progression. When omitted, boxes are transparent layout slots.                                    |
+| `outline`   | `string` (CSS border)         | Optional border applied to all box edges — e.g. `"2px solid #000000"`. Shared edges draw a single line (no doubling).             |
+| `rotate`    | `0 \| 90 \| 180 \| 270`      | Starting direction of the spiral — `0` (RIGHT), `90` (BOTTOM), `180` (LEFT), `270` (TOP). Defaults to `0`.                       |
+| `clockwise` | `boolean`                     | Spiral direction — `true` for clockwise, `false` for counter-clockwise. Defaults to `true`.                                       |
+| `children`  | `GoldenBox` elements          | Optional slot content. Each `<GoldenBox>` maps to a visible square in order. Use `<GoldenBox placeholder>` for the skipped area.  |
 
 ## How it works
 
@@ -44,11 +83,9 @@ To be honest it's less about the absolute number and more about controlling the 
 
 ## Why did I make this?
 
-We like to think we are mobile first, but we still speak desktop first and cannot let go of traditional print formats on the web. Just like the floppy icon that's now synonymous with "save" to a generation that has never seen a floppy disk, I worry that we've become too comfortable with rows and columns. Whether it's an engineering department at a Fortune 100 crafting a component library, an agency's senior developer on the cutting edge, or someone straight from a bootcamp — I've seen the same patterns play out. The only difference is whether they can do it without negative margins ;)
-
 This library is meant to challenge that notion. Golden Grids isn't for everything. I'm just tired of seeing homogenized design across the web and sometimes the first step is a new tool. Primary company objectives in a 3-up row on desktop, 2-up with 1 orphan on tablet, and stacked on mobile. I do not think that's the fixed-width mindset that motivated Ethan Marcotte when he coined the term "responsive web design" in his [May 2010 article](https://alistapart.com/article/responsive-web-design/) in _A List Apart_. Shout out to the OG [Jeffrey Zeldman](https://en.wikipedia.org/wiki/Jeffrey_Zeldman) — every UX/UI designer and frontend engineer should know his name.
 
-I'll never forget what [Craig Phares](https://x.com/craigphares) said to me when we were neighbors at [Cowerks](https://www.cowerks.com/) in Asbury Park. I asked him if he ever used the custom grid config tool on Bootstrap and he responded: "Do you really need that full 16 column grid, or do you just need two divs at 50%?" He was right. I didn't. Craig, my hatred of rows and columns might have been born that day.
+I'll never forget what [Craig Phares](https://x.com/craigphares) said to me when we were neighbors at [Cowerks](https://www.cowerks.com/) in Asbury Park. I asked him if he ever used the custom grid config tool on Bootstrap and he responded: "Do you really need that full 12 column grid, or do you just need two divs at 50%?" He was right. I didn't. Craig, my hatred of rows and columns might have been born that day.
 
 ## A long standing obsession with the Golden Ratio
 
