@@ -47,15 +47,15 @@ Extra `<GoldenBox>` children beyond the visible slot count are silently ignored,
 
 ## Configuration
 
-| Prop        | Type                          | Description                                                                                                                        |
-| ----------- | ----------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
-| `from`      | `number`                      | Index position (1–78) in the Fibonacci Sequence. The library sorts your range smallest to largest automatically.                   |
-| `to`        | `number`                      | Another index position (1–78). Together with `from` this defines your slice of the sequence.                                      |
-| `color`     | `string` (hex)                | Optional base color for the HSL progression. When omitted, boxes are transparent layout slots.                                    |
-| `outline`   | `string` (CSS border)         | Optional border applied to all box edges — e.g. `"2px solid #000000"`. Shared edges draw a single line (no doubling).             |
-| `rotate`    | `0 \| 90 \| 180 \| 270`      | Starting direction of the spiral — `0` (RIGHT), `90` (BOTTOM), `180` (LEFT), `270` (TOP). Defaults to `0`.                       |
-| `clockwise` | `boolean`                     | Spiral direction — `true` for clockwise, `false` for counter-clockwise. Defaults to `true`.                                       |
-| `children`  | `GoldenBox` elements          | Optional slot content. Each `<GoldenBox>` maps to a visible square in order. Use `<GoldenBox placeholder>` for the skipped area.  |
+| Prop        | Type                    | Description                                                                                                                      |
+| ----------- | ----------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| `from`      | `number`                | Index position (1–78) in the Fibonacci Sequence. The library sorts your range smallest to largest automatically.                 |
+| `to`        | `number`                | Another index position (1–78). Together with `from` this defines your slice of the sequence.                                     |
+| `color`     | `string` (hex)          | Optional base color for the HSL progression. When omitted, boxes are transparent layout slots.                                   |
+| `outline`   | `string` (CSS border)   | Optional border applied to all box edges — e.g. `"2px solid #000000"`. Shared edges draw a single line (no doubling).            |
+| `rotate`    | `0 \| 90 \| 180 \| 270` | Starting direction of the spiral — `0` (RIGHT), `90` (BOTTOM), `180` (LEFT), `270` (TOP). Defaults to `0`.                       |
+| `clockwise` | `boolean`               | Spiral direction — `true` for clockwise, `false` for counter-clockwise. Defaults to `true`.                                      |
+| `children`  | `GoldenBox` elements    | Optional slot content. Each `<GoldenBox>` maps to a visible square in order. Use `<GoldenBox placeholder>` for the skipped area. |
 
 ## How it works
 
@@ -73,7 +73,7 @@ The `rotation` input determines which side the spiral builds out from (RIGHT, BO
 
 ### Responsiveness
 
-Golden Grids are responsive and fill 100% of their container width. The proportions of the grid shouldn't break — if they do you're stuffing the box with too much content and not accounting for overflow, or you're pushing the limits on your sequence range.
+Golden Grids are responsive and fill 100% of their container width. The proportions of the grid shouldn't break but I intentionally do not clip the box. Overflow management is the importers responsiblity.
 
 ## How big can I go?
 

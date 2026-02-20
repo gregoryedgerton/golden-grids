@@ -218,6 +218,10 @@ body {
   color: #222;
 }
 
+.grid-preview {
+  padding: 1em;
+}
+
 .box-label {
   position: absolute;
   inset: 0;
@@ -225,8 +229,6 @@ body {
   align-items: center;
   justify-content: center;
   font-family: sans-serif;
-  font-size: clamp(0.5rem, 3cqw, 1.5rem);
+  font-size: clamp(1rem, 3cqw, 1.5rem);
   pointer-events: none;
-  mix-blend-mode: multiply;
-  opacity: 0.4;
 }

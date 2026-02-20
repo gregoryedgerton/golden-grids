@@ -300,23 +300,25 @@ const ExampleApp = () => {
                         <span className="mad-lib-static">{skippedDigits.join(", ")}</span>
                         {" "}will include a single irregular box of the combined relative proprotions to keep the grid golden.</>}
                     {" "}Did you know you can
-                    {" "}<button className="mad-lib-btn" onClick={() => setShowExport(true)}>EXPORT</button> your grid?
+                    {" "}<button className="mad-lib-btn" onClick={() => setShowExport(true)}>EXPORT</button> your grid? Don't worry, the roman numerals don't come with it.
                 </p>
             </header>
-
-            <GoldenGrid
-                color={useColor ? inputControl.color : undefined}
-                outline={useOutline ? outlineValue : undefined}
-            >
-                <GoldenBox placeholder>
-                    <span className="box-label" style={{ color: outlineColor }}>I.</span>
-                </GoldenBox>
-                {FIB_STOPS.slice(1).map((_, i) => (
-                    <GoldenBox key={i + 1}>
-                        <span className="box-label" style={{ color: outlineColor }}>{toRoman(i + 1 + (hasPlaceholder ? 1 : 0))}.</span>
+            
+            <section className="grid-preview">
+                <GoldenGrid
+                    color={useColor ? inputControl.color : undefined}
+                    outline={useOutline ? outlineValue : undefined}
+                >
+                    <GoldenBox placeholder>
+                        <span className="box-label" style={{ color: outlineColor }}>I.</span>
                     </GoldenBox>
-                ))}
-            </GoldenGrid>
+                    {FIB_STOPS.slice(1).map((_, i) => (
+                        <GoldenBox key={i + 1}>
+                            <span className="box-label" style={{ color: outlineColor }}>{toRoman(i + 1 + (hasPlaceholder ? 1 : 0))}.</span>
+                        </GoldenBox>
+                    ))}
+                </GoldenGrid>
+            </section>
 
             {showExport && (
                 <div className="export-overlay" onClick={(e) => { if (e.target === e.currentTarget) setShowExport(false); }}>
