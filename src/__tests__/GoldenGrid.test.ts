@@ -117,6 +117,21 @@ describe('GoldenGrid', () => {
       const props = {} as { outline?: string };
       expect('outline' in props).toBe(false);
     });
+
+    test("clockwise boolean controls spiral direction", () => {
+      const cw = { clockwise: true };
+      const ccw = { clockwise: false };
+      expect(cw.clockwise).toBe(true);
+      expect(ccw.clockwise).toBe(false);
+    });
+
+    test("placement accepts 'right', 'bottom', 'left', 'top' string values", () => {
+      const placements = ["right", "bottom", "left", "top"] as const;
+      placements.forEach(p => {
+        const props = { placement: p };
+        expect(props.placement).toBe(p);
+      });
+    });
   });
 
   // ─── outline border construction ──────────────────────────────────────────

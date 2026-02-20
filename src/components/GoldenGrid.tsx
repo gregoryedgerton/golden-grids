@@ -12,10 +12,12 @@ export interface GoldenGridProps {
   to?: number;
   color?: string;
   clockwise?: boolean;
-  rotate?: 0 | 90 | 180 | 270;
+  placement?: "right" | "bottom" | "left" | "top";
   outline?: string; // CSS border shorthand e.g. "2px dashed #ff0000"
   children?: React.ReactNode;
 }
+
+const PLACEMENT_DEG = { right: 0, bottom: 90, left: 180, top: 270 } as const;
 
 const GoldenGrid: React.FC<GoldenGridProps> = (props): React.ReactElement<any> => {
   const { inputControl } = useGrid();
@@ -24,8 +26,9 @@ const GoldenGrid: React.FC<GoldenGridProps> = (props): React.ReactElement<any> =
   const to        = props.to        ?? inputControl.to;
   const color     = 'color' in props ? props.color : inputControl.color;
   const clockwise = props.clockwise ?? inputControl.clockwise;
-  const rotate    = props.rotate    ?? inputControl.rotate;
+  const placement = props.placement ?? inputControl.placement;
   const outline   = 'outline' in props ? props.outline : undefined;
+  const rotateDeg = PLACEMENT_DEG[placement];
   const outlined  = !!outline;
 
   const containerBorder: React.CSSProperties = outline
@@ -74,7 +77,7 @@ const GoldenGrid: React.FC<GoldenGridProps> = (props): React.ReactElement<any> =
     );
   }
 
-  const layout = generateGoldenGridLayout(fullSequence, clockwise, rotate);
+  const layout = generateGoldenGridLayout(fullSequence, clockwise, rotateDeg);
   const requestedSquares = layout.squares.slice(startIdx, endIdx + 1);
   const skippedSquares = layout.squares.slice(0, startIdx);
 

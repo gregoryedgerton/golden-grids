@@ -2,14 +2,17 @@ import { fullFibonacciUpTo, getGridRange } from "./fibonacci";
 import { generateGoldenGridLayout } from "./gridGenerator";
 import { hexToHsl, hslToCss } from "./colorUtils";
 
+const PLACEMENT_DEG = { right: 0, bottom: 90, left: 180, top: 270 } as const;
+
 export function generateGridHTML(
   from: number,
   to: number,
   color: string | undefined,
   clockwise: boolean,
-  rotate: number,
+  placement: "right" | "bottom" | "left" | "top",
   outline?: string
 ): string {
+  const rotateDeg = PLACEMENT_DEG[placement];
   let start = from;
   let end = to;
   if (start > end) {
@@ -59,7 +62,7 @@ export function generateGridHTML(
 </html>`;
   }
 
-  const layout = generateGoldenGridLayout(fullSequence, clockwise, rotate);
+  const layout = generateGoldenGridLayout(fullSequence, clockwise, rotateDeg);
 
   const requestedSquares = layout.squares.slice(startIdx, endIdx + 1);
   const skippedSquares = layout.squares.slice(0, startIdx);

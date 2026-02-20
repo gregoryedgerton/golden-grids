@@ -4,8 +4,7 @@ import { GridProvider, useGrid, GoldenGrid, GoldenBox, generateGridHTML, getGrid
 import "./golden-grid.css";
 
 const FIB_INDEX_STOPS = FIB_STOPS.map((_: number, i: number) => i);
-const ROTATION_STOPS = [0, 90, 180, 270];
-const ROTATION_LABELS: Record<number, string> = { 0: "RIGHT", 90: "BOTTOM", 180: "LEFT", 270: "TOP" };
+const PLACEMENT_STOPS = ["right", "bottom", "left", "top"] as const;
 const OUTLINE_STYLES = ['solid', 'dashed', 'dotted', 'double', 'groove', 'ridge', 'inset', 'outset'];
 const OUTLINE_WIDTH_STOPS = [1, 2, 3, 4, 5, 6, 7, 8];
 
@@ -206,8 +205,8 @@ const ExampleApp = () => {
               inputControl.from,
               inputControl.to,
               useColor ? inputControl.color : undefined,
-              inputControl.clockwise,
               inputControl.rotate,
+              inputControl.placement,
               useOutline ? outlineValue : undefined
           )
         : "";
@@ -288,10 +287,10 @@ const ExampleApp = () => {
                         onChange={(e) => setInputControl({ ...inputControl, color: e.target.value })} />
                     </>}{boxCount > 1 && <>{" "}with the second box placed to the{" "}
                     <button className="mad-lib-btn" onClick={() => {
-                        const order = inputControl.clockwise ? ROTATION_STOPS : [...ROTATION_STOPS].reverse();
-                        const idx = order.indexOf(inputControl.rotate);
-                        setInputControl({ ...inputControl, rotate: order[(idx + 1) % order.length] });
-                    }}>{ROTATION_LABELS[inputControl.rotate]}</button>
+                        const order = inputControl.clockwise ? PLACEMENT_STOPS : [...PLACEMENT_STOPS].reverse();
+                        const idx = order.indexOf(inputControl.placement);
+                        setInputControl({ ...inputControl, placement: order[(idx + 1) % order.length] });
+                    }}>{inputControl.placement.toUpperCase()}</button>
                       {" "}and spirals{" "}
                     <button className="mad-lib-btn" onClick={() => setInputControl({ ...inputControl, clockwise: !inputControl.clockwise })}>
                         {inputControl.clockwise ? "CLOCKWISE" : "COUNTER-CLOCKWISE"}
@@ -308,6 +307,8 @@ const ExampleApp = () => {
                 <GoldenGrid
                     color={useColor ? inputControl.color : undefined}
                     outline={useOutline ? outlineValue : undefined}
+                    rotate={inputControl.rotate}
+                    placement={inputControl.placement}
                 >
                     <GoldenBox placeholder>
                         <span className="box-label" style={{ color: outlineColor }}>I.</span>

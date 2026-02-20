@@ -14,7 +14,7 @@ const GridContext = createContext<GridContextProps>({
     to: 1,
     color: "#7f7ec7",
     clockwise: true,
-    rotate: 0,
+    placement: "right",
   },
   setInputControl: () => {},
 });
@@ -27,7 +27,7 @@ export const GridProvider: React.FC<{ children?: React.ReactNode; initialConfig?
     to: 4,
     color: "#7f7ec7",
     clockwise: true,
-    rotate: 0,
+    placement: "right",
     ...initialConfig,
   });
 
