@@ -61,7 +61,7 @@ Extra `<GoldenBox>` children beyond the visible slot count are silently ignored,
 
 Based on your `from` and `to` index positions, the library calculates the corresponding slice of the Fibonacci Sequence (`1`, `1`, `2`, `3`, `5`, `8`, `13`, `21`, `34`, `55`, ...) and creates a responsive grid based on the golden ratio. Each number in your selected range becomes a proportionally sized square box in the grid.
 
-A `1, 1` grid gives you two equal squares (side by side or stacked depending on your `rotation` value), while a `1, 3` grid produces 4 boxes where each gets progressively larger (`1`, `1`, `2`, `3`). The Fibonacci values are used as relative ratios for each box.
+A `1, 1` grid gives you two equal squares (side by side or stacked depending on your `placement` value), while a `1, 3` grid produces 4 boxes where each gets progressively larger (`1`, `1`, `2`, `3`). The Fibonacci values are used as relative ratios for each box.
 
 ### Skipping digits
 
