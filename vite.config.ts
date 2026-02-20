@@ -2,17 +2,23 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import dts from "vite-plugin-dts";
 import cssInjectedByJs from "vite-plugin-css-injected-by-js";
+import path from "path";
 
 const isDemo = !!process.env.VITE_BUILD_DEMO;
+
+const exampleAlias = {
+  "@gifcommit/golden-grids": path.resolve(__dirname, "src/index.ts"),
+};
 
 export default defineConfig(({ command }) => {
   if (isDemo) {
     return {
       plugins: [react()],
-      root: "src/example",
+      root: "example",
       base: "/golden-grids/",
+      resolve: { alias: exampleAlias },
       build: {
-        outDir: "../../dist-demo",
+        outDir: "../dist-demo",
         emptyOutDir: true,
       },
     };
@@ -24,7 +30,8 @@ export default defineConfig(({ command }) => {
       dts({ rollupTypes: true }),
       cssInjectedByJs(),
     ],
-    root: command === "serve" ? "src/example" : ".",
+    root: command === "serve" ? "example" : ".",
+    resolve: command === "serve" ? { alias: exampleAlias } : {},
     server: {
       open: true,
       port: 5173,

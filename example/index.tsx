@@ -1,10 +1,7 @@
 import React, { useState, useRef, useCallback } from "react";
 import { createRoot } from "react-dom/client";
-import { GridProvider, useGrid } from "../context/GridContext";
-import { GoldenGrid } from "..";
-import { generateGridHTML } from "../utils/exportGrid";
-import { getGridRange, FIB_STOPS } from "../utils/fibonacci";
-import "../styles/golden-grid.css";
+import { GridProvider, useGrid, GoldenGrid, GoldenBox, generateGridHTML, getGridRange, FIB_STOPS } from "@gifcommit/golden-grids";
+import "./golden-grid.css";
 
 const FIB_INDEX_STOPS = FIB_STOPS.map((_: number, i: number) => i);
 const ROTATION_STOPS = [0, 90, 180, 270];
@@ -16,6 +13,16 @@ function ordinalSuffix(n: number): string {
     const s = ["th", "st", "nd", "rd"];
     const v = n % 100;
     return s[(v - 20) % 10] || s[v] || s[0];
+}
+
+function toRoman(n: number): string {
+    const vals = [1000, 900, 500, 400, 100, 90, 50, 40, 10, 9, 5, 4, 1];
+    const syms = ['M', 'CM', 'D', 'CD', 'C', 'XC', 'L', 'XL', 'X', 'IX', 'V', 'IV', 'I'];
+    let result = '';
+    for (let i = 0; i < vals.length; i++) {
+        while (n >= vals[i]) { result += syms[i]; n -= vals[i]; }
+    }
+    return result;
 }
 
 const PIXELS_PER_STEP = 72;
@@ -300,7 +307,16 @@ const ExampleApp = () => {
             <GoldenGrid
                 color={useColor ? inputControl.color : undefined}
                 outline={useOutline ? outlineValue : undefined}
-            />
+            >
+                <GoldenBox placeholder>
+                    <span className="box-label" style={{ color: outlineColor }}>I.</span>
+                </GoldenBox>
+                {FIB_STOPS.slice(1).map((_, i) => (
+                    <GoldenBox key={i + 1}>
+                        <span className="box-label" style={{ color: outlineColor }}>{toRoman(i + 1 + (hasPlaceholder ? 1 : 0))}.</span>
+                    </GoldenBox>
+                ))}
+            </GoldenGrid>
 
             {showExport && (
                 <div className="export-overlay" onClick={(e) => { if (e.target === e.currentTarget) setShowExport(false); }}>

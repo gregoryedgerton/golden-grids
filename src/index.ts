@@ -4,6 +4,7 @@ export { GoldenBox } from "./components/GoldenBox";
 export type { GoldenBoxProps } from "./components/GoldenBox";
 export { GridProvider, useGrid } from "./context/GridContext";
 export { generateGridHTML } from "./utils/exportGrid";
+export { FIB_STOPS, getGridRange } from "./utils/fibonacci";
 export { generateGoldenGridLayout } from "./utils/gridGenerator";
 export type { Square, GridLayout } from "./utils/gridGenerator";
 export type { InputControlType } from "./types/InputControlType";

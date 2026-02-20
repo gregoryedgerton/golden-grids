@@ -9,6 +9,10 @@
     "forceConsistentCasingInFileNames": true,
     "lib": ["ESNext", "DOM", "DOM.Iterable"],
     "types": ["react", "react-dom", "jest"],
-    "moduleResolution": "Node"
+    "moduleResolution": "Node",
+    "baseUrl": ".",
+    "paths": {
+      "@gifcommit/golden-grids": ["src/index.ts"]
+    }
   }
 }
