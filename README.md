@@ -83,7 +83,7 @@ To be honest it's less about the absolute number and more about controlling the 
 
 ## Why did I make this?
 
-Part of me doesn't accept myself as a true engineer. It's harsh but It's how I feel. If I was a musician I would feel the same if I hadn't wrote a song. I'm not saying that's your life, but that's mine. While coding has been my trade for many years there's one last hurtle I have yet to climb. The release of an open-source project. I have a lot of things I want to make with this repo, but time is precisious and I can't keep it all to myslef. Better the community have it then just I.
+Part of me doesn't accept myself as a true engineer. It's harsh but It's how I feel. If I was a musician I would feel the same if I hadn't wrote a song. I'm not saying that's your life, but that's mine. While coding has been my trade for many years there's one last hurtle I have yet to climb. The release of an open-source project. I have a lot of things I want to make with this repo, but time is precisious and I can't keep it all to myslef. Better the community have it.
 
 This library is meant to challenge the status quo, that all things web must submit to rows and columns. Fuck that, this isn't 1984, [think different](https://www.youtube.com/watch?v=5sMBhDv4sik). Ask your [is Golden Grids for you?](https://youtu.be/pRIIwJh1DDQ?si=LHKhOkO-RctUPEGA&t=210).
 
