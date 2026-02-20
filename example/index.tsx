@@ -205,7 +205,7 @@ const ExampleApp = () => {
               inputControl.from,
               inputControl.to,
               useColor ? inputControl.color : undefined,
-              inputControl.rotate,
+              inputControl.clockwise,
               inputControl.placement,
               useOutline ? outlineValue : undefined
           )
@@ -307,7 +307,6 @@ const ExampleApp = () => {
                 <GoldenGrid
                     color={useColor ? inputControl.color : undefined}
                     outline={useOutline ? outlineValue : undefined}
-                    rotate={inputControl.rotate}
                     placement={inputControl.placement}
                 >
                     <GoldenBox placeholder>
