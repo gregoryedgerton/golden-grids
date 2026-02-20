@@ -1,3 +1,37 @@
+/**
+ * Compute the effective rotation (in degrees) to pass to generateGoldenGridLayout
+ * so that the first *requested* square appears at the `placement` side of the
+ * placeholder (or of square[0] when nothing is skipped).
+ *
+ * Without any skipped squares the spiral always places square[1] to the RIGHT
+ * of square[0], so a simple PLACEMENT_DEG lookup suffices.  When squares are
+ * skipped the spiral has already turned (startIdx - 2) extra times before
+ * reaching the first requested square, meaning the "natural" direction it would
+ * arrive from differs from RIGHT.  We subtract that natural angle from the
+ * desired angle so the final rotation corrects for it.
+ */
+export function placementToRotateDeg(
+  placement: "right" | "bottom" | "left" | "top",
+  clockwise: boolean,
+  startIdx: number
+): number {
+  const PLACEMENT_DEG = { right: 0, bottom: 90, left: 180, top: 270 } as const;
+  const desiredDeg = PLACEMENT_DEG[placement];
+
+  // For startIdx 0 or 1 the first visible box is square[0] or square[1];
+  // square[1] is always placed to the right of square[0] by construction.
+  if (startIdx < 2) return (desiredDeg + 360) % 360;
+
+  // From square index 2 onward, directions cycle (modulo 4).
+  // CW  base order:  bottom(90) → left(180) → top(270) → right(0)
+  // CCW base order:  top(270)   → left(180) → bottom(90) → right(0)
+  const cwNatural  = [90, 180, 270, 0] as const;
+  const ccwNatural = [270, 180, 90, 0] as const;
+  const naturalDeg = (clockwise ? cwNatural : ccwNatural)[(startIdx - 2) % 4];
+
+  return (desiredDeg - naturalDeg + 360) % 360;
+}
+
 export interface Square {
   x: number;
   y: number;

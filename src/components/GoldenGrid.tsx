@@ -1,6 +1,6 @@
 import React from "react";
 import { useGrid } from "../context/GridContext";
-import { generateGoldenGridLayout } from "../utils/gridGenerator";
+import { generateGoldenGridLayout, placementToRotateDeg } from "../utils/gridGenerator";
 import { fullFibonacciUpTo, getGridRange } from "../utils/fibonacci";
 import { hexToHsl, hslToCss } from "../utils/colorUtils";
 import { GoldenBox } from "./GoldenBox";
@@ -17,8 +17,6 @@ export interface GoldenGridProps {
   children?: React.ReactNode;
 }
 
-const PLACEMENT_DEG = { right: 0, bottom: 90, left: 180, top: 270 } as const;
-
 const GoldenGrid: React.FC<GoldenGridProps> = (props): React.ReactElement<any> => {
   const { inputControl } = useGrid();
 
@@ -28,7 +26,6 @@ const GoldenGrid: React.FC<GoldenGridProps> = (props): React.ReactElement<any> =
   const clockwise = props.clockwise ?? inputControl.clockwise;
   const placement = props.placement ?? inputControl.placement;
   const outline   = 'outline' in props ? props.outline : undefined;
-  const rotateDeg = PLACEMENT_DEG[placement];
   const outlined  = !!outline;
 
   const containerBorder: React.CSSProperties = outline
@@ -58,6 +55,7 @@ const GoldenGrid: React.FC<GoldenGridProps> = (props): React.ReactElement<any> =
   }
 
   const { userSequence, startIdx, endIdx } = range;
+  const rotateDeg = placementToRotateDeg(placement, clockwise, startIdx);
   const maxRequested = Math.max(...userSequence);
   const fullSequence = fullFibonacciUpTo(maxRequested);
 
