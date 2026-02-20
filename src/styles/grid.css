@@ -1,11 +1,4 @@
-.grid-container {
-  position: relative;
-  margin: 0;
-  padding: 0;
-}
-
-.grid-container ol {
-  list-style: none;
+.golden-grid {
   margin: 0;
   padding: 0;
   position: relative;
@@ -13,6 +6,10 @@
   box-sizing: border-box;
 }
 
-.grid-container ol > li {
+.golden-grid > .golden-grid__box {
   position: absolute;
+}
+
+.golden-grid--outlined > .golden-grid__box {
+  box-sizing: border-box;
 }

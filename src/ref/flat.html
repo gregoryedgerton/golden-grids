@@ -14,7 +14,7 @@
     padding: 0;
   }
 
-  .grid-container ol {
+  .golden-grid {
     list-style: none;
     margin: 0;
     padding: 0;
@@ -22,14 +22,14 @@
     width: 100%;
     box-sizing: border-box;
   }
-  .grid-container ol > li {
+  .golden-grid > .golden-grid__box {
     position: absolute;
   }
 </style>
 </head>
 <body>
 
-<div id="gridsRoot"></div>
+<div id="placeGoldenGrid"></div>
 
 <script>
 
@@ -200,7 +200,7 @@
     { from: 1, to: 3, color: '#7f7ec7', clockwise: true, rotate: 0 }
   ];
 
-  const gridsRoot = document.getElementById('gridsRoot');
+  const placeGoldenGrid = document.getElementById('placeGoldenGrid');
 
   userInputs.forEach(({from, to, color, clockwise, rotate}) => {
     let start = from;
@@ -232,7 +232,7 @@
     ol.style.aspectRatio = `${layout.width} / ${layout.height}`;
 
     container.appendChild(ol);
-    gridsRoot.appendChild(container);
+    placeGoldenGrid.appendChild(container);
 
     // Defintely missing PLaceholder logic
     let placeholderExists = skippedSquares.length > 0;

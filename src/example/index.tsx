@@ -3,12 +3,14 @@ import { createRoot } from "react-dom/client";
 import { GridProvider, useGrid } from "../context/GridContext";
 import { GoldenGrid } from "..";
 import { generateGridHTML } from "../utils/exportGrid";
-import { getGridRange, fullFibonacciUpTo, FIB_STOPS } from "../utils/fibonacci";
+import { getGridRange, FIB_STOPS } from "../utils/fibonacci";
 import "../styles/golden-grid.css";
 
 const FIB_INDEX_STOPS = FIB_STOPS.map((_: number, i: number) => i);
 const ROTATION_STOPS = [0, 90, 180, 270];
 const ROTATION_LABELS: Record<number, string> = { 0: "RIGHT", 90: "BOTTOM", 180: "LEFT", 270: "TOP" };
+const OUTLINE_STYLES = ['solid', 'dashed', 'dotted', 'double', 'groove', 'ridge', 'inset', 'outset'];
+const OUTLINE_WIDTH_STOPS = [1, 2, 3, 4, 5, 6, 7, 8];
 
 function ordinalSuffix(n: number): string {
     const s = ["th", "st", "nd", "rd"];
@@ -164,6 +166,11 @@ const ExampleApp = () => {
     const { inputControl, setInputControl } = useGrid();
     const [showExport, setShowExport] = useState(false);
     const [copyLabel, setCopyLabel] = useState("Copy");
+    const [useOutline, setUseOutline] = useState(false);
+    const [outlineWidth, setOutlineWidth] = useState(1);
+    const [outlineStyle, setOutlineStyle] = useState('solid');
+    const [outlineColor, setOutlineColor] = useState('#000000');
+    const [useColor, setUseColor] = useState(true);
 
     const lowerIdx = Math.min(inputControl.from, inputControl.to);
     const upperIdx = Math.max(inputControl.from, inputControl.to);
@@ -185,13 +192,16 @@ const ExampleApp = () => {
         boxCount = range.endIdx - range.startIdx + 1 + (hasPlaceholder ? 1 : 0);
     }
 
+    const outlineValue = `${outlineWidth}px ${outlineStyle} ${outlineColor}`;
+
     const html = showExport
         ? generateGridHTML(
               inputControl.from,
               inputControl.to,
-              inputControl.color,
+              useColor ? inputControl.color : undefined,
               inputControl.clockwise,
-              inputControl.rotate
+              inputControl.rotate,
+              useOutline ? outlineValue : undefined
           )
         : "";
 
@@ -244,11 +254,32 @@ const ExampleApp = () => {
                                 setInputControl({ ...inputControl, [upperKey]: v });
                             }} /><sup>{ordinalSuffix(upperIdx)}</sup>
                     </span>
-                    {" "}digits of the Fibonacci sequence. The first box placed is colored {" "}
+                    {" "}digits of the Fibonacci sequence, rendered with{" "}
+                    <button className="mad-lib-btn" onClick={() => setUseOutline(o => !o)}>
+                        {useOutline ? "AN OUTLINE" : "NO OUTLINE"}
+                    </button>
+                    {useOutline && <>{" "}that's{" "}
+                    <Dial label="Outline width" value={outlineWidth} stops={OUTLINE_WIDTH_STOPS}
+                        onChange={setOutlineWidth}
+                        format={(v) => `${v}px`} />
+                    {" "}thick{" "}
+                    <button className="mad-lib-btn" onClick={() => {
+                        const idx = OUTLINE_STYLES.indexOf(outlineStyle);
+                        setOutlineStyle(OUTLINE_STYLES[(idx + 1) % OUTLINE_STYLES.length]);
+                    }}>{outlineStyle.toUpperCase()}</button>
+                    {" "}and{" "}
+                    <input className="mad-lib-color" type="color" aria-label="Outline color"
+                        value={outlineColor}
+                        onChange={(e) => setOutlineColor(e.target.value)} /></>}
+                    {boxCount === 1 ? ", and a " : ", and "}
+                    <button className="mad-lib-btn" onClick={() => setUseColor(c => !c)}>
+                        {useColor ? "COLORED" : "TRANSPARENT"}
+                    </button>
+                    {" "}{boxCount === 1 ? "box" : "boxes"}{useColor && <>{" "}{boxCount === 1 ? "starting with" : "starting from"}{" "}
                     <input className="mad-lib-color" type="color" aria-label="Grid color"
                         value={inputControl.color}
                         onChange={(e) => setInputControl({ ...inputControl, color: e.target.value })} />
-                        with the next box placed to the{" "}
+                    </>}{boxCount > 1 && <>{" "}with the second box placed to the{" "}
                     <button className="mad-lib-btn" onClick={() => {
                         const order = inputControl.clockwise ? ROTATION_STOPS : [...ROTATION_STOPS].reverse();
                         const idx = order.indexOf(inputControl.rotate);
@@ -257,7 +288,7 @@ const ExampleApp = () => {
                       {" "}and spirals{" "}
                     <button className="mad-lib-btn" onClick={() => setInputControl({ ...inputControl, clockwise: !inputControl.clockwise })}>
                         {inputControl.clockwise ? "CLOCKWISE" : "COUNTER-CLOCKWISE"}
-                    </button>.
+                    </button></>}.
                     {hasPlaceholder && <>{" "}Grids that skip{" "}
                         <span className="mad-lib-static">{skippedDigits.join(", ")}</span>
                         {" "}will include a single irregular box of the combined relative proprotions to keep the grid golden.</>}
@@ -266,7 +297,10 @@ const ExampleApp = () => {
                 </p>
             </header>
 
-            <GoldenGrid />
+            <GoldenGrid
+                color={useColor ? inputControl.color : undefined}
+                outline={useOutline ? outlineValue : undefined}
+            />
 
             {showExport && (
                 <div className="export-overlay" onClick={(e) => { if (e.target === e.currentTarget) setShowExport(false); }}>

@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 `@gifcommit/golden-grids` is an npm library that gives developers a **golden-ratio grid layout system for building websites**. A consumer installs the package, configures a grid (via props or a JSON config file), and uses the generated proportional boxes as layout areas to place their own content into.
 
-The spiral grid is the product — not a visualisation tool. The `<li>` boxes that `GoldenGrid` renders are the slots a consuming site maps its content into.
+The spiral grid is the product — not a visualisation tool. The `<div>` boxes that `GoldenGrid` renders are the slots a consuming site maps its content into.
 
 ## Consumer workflow
 
@@ -35,11 +35,11 @@ import myConfig from './grid.config.json'
 
 ```ts
 {
-  from: number;       // FIB_STOPS start index (1–78)
-  to: number;         // FIB_STOPS end index (1–78)
-  color: string;      // Hex base color for the progression
+  from: number; // FIB_STOPS start index (1–78)
+  to: number; // FIB_STOPS end index (1–78)
+  color: string; // Hex base color for the progression
   clockwise: boolean; // Spiral direction
-  rotate: number;     // Starting orientation — 0 | 90 | 180 | 270
+  rotate: number; // Starting orientation — 0 | 90 | 180 | 270
 }
 ```
 
@@ -66,6 +66,7 @@ Package is published to npm as `@gifcommit/golden-grids`. Publishing is triggere
 ### Repo structure
 
 Two targets share the same source:
+
 - **Library** (`src/index.ts` → `dist/`) — what consumers install from npm
 - **Demo app** (`src/example/index.tsx` → `dist-demo/`) — interactive playground deployed to GitHub Pages
 
@@ -76,18 +77,18 @@ Vite switches between them via `VITE_BUILD_DEMO=1` (see `vite.config.ts`).
 1. `from`/`to` indices are looked up in `FIB_STOPS` (79 pre-calculated Fibonacci values) via `getGridRange()` in `fibonacci.ts`
 2. The full Fibonacci sequence up to the max value is computed via `fullFibonacciUpTo()`
 3. `generateGoldenGridLayout()` in `gridGenerator.ts` places squares sequentially — first two explicitly, then each subsequent square flush against the current bounding box, cycling through 4 directions (CW or CCW). Rotation is applied as an integer coordinate transform. Coordinates are normalized to remove negative offsets.
-4. `GoldenGrid` renders the layout as an `<ol>` with absolutely-positioned `<li>` items at percentage coordinates, with an HSL color progression across boxes
-5. When `from > 1`, skipped leading squares are collapsed into a single placeholder `<li>` to preserve spiral proportions
+4. `GoldenGrid` renders the layout as a relative containing `<div>` with absolutely-positioned `<div>` boxes at percentage coordinates, with an HSL color progression across boxes
+5. When `from > 1`, skipped leading squares are collapsed into a single placeholder `<div>` to preserve spiral proportions
 
 ### Key files
 
-| File | Role |
-|------|------|
-| `src/utils/fibonacci.ts` | `FIB_STOPS`, `getGridRange()`, `fullFibonacciUpTo()` |
-| `src/utils/gridGenerator.ts` | Spiral layout algorithm |
-| `src/components/GoldenGrid.tsx` | React component — accepts props or reads from context |
-| `src/context/GridContext.tsx` | `GridProvider` (accepts `initialConfig`) + `useGrid()` hook |
-| `src/utils/colorUtils.ts` | `hexToHsl()`, `hslToCss()` |
-| `src/utils/exportGrid.ts` | Generates a self-contained HTML file mirroring the grid |
-| `src/example/index.tsx` | Demo app with `Dial` slider, mad-lib UI, and export modal |
-| `src/__tests__/` | Unit tests — 100% statement/line/function coverage |
+| File                            | Role                                                        |
+| ------------------------------- | ----------------------------------------------------------- |
+| `src/utils/fibonacci.ts`        | `FIB_STOPS`, `getGridRange()`, `fullFibonacciUpTo()`        |
+| `src/utils/gridGenerator.ts`    | Spiral layout algorithm                                     |
+| `src/components/GoldenGrid.tsx` | React component — accepts props or reads from context       |
+| `src/context/GridContext.tsx`   | `GridProvider` (accepts `initialConfig`) + `useGrid()` hook |
+| `src/utils/colorUtils.ts`       | `hexToHsl()`, `hslToCss()`                                  |
+| `src/utils/exportGrid.ts`       | Generates a self-contained HTML file mirroring the grid     |
+| `src/example/index.tsx`         | Demo app with `Dial` slider, mad-lib UI, and export modal   |
+| `src/__tests__/`                | Unit tests — 100% statement/line/function coverage          |
