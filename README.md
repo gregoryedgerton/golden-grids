@@ -83,9 +83,9 @@ To be honest it's less about the absolute number and more about controlling the 
 
 ## Why did I make this?
 
-This library is meant to challenge the status quo that all things web must submit to rows and columns. Golden Grids isn't for everything, I'm just tired of seeing homogenized design across the web. Time is a pendulumm and we've swung back to the fixed-width mindset that motivated Ethan Marcotte when he coined the term "responsive web design" in his [May 2010 article](https://alistapart.com/article/responsive-web-design/) in _A List Apart_. Shout out to the OG [Jeffrey Zeldman](https://en.wikipedia.org/wiki/Jeffrey_Zeldman) — every UX/UI designer and frontend engineer should know his name. Is Golden Grids for you?[I leave you with this](https://youtu.be/pRIIwJh1DDQ?si=LHKhOkO-RctUPEGA&t=210).
+Part of me doesn't accept myself as a true engineer. It's harsh but It's how I feel. If I was a musician I would feel the same if I hadn't wrote a song. I'm not saying that's your life, but that's mine. While coding has been my trade for many years there's one last hurtle I have yet to climb. The release of an open-source project. I have a lot of things I want to make with this repo, but time is precisious and I can't keep it all to myslef. Better the community have it then just I.
 
-I'll never forget what [Craig Phares](https://x.com/craigphares) said to me when we were neighbors at [Cowerks](https://www.cowerks.com/) in Asbury Park circa 2013. I asked him if he ever used the custom grid config tool on Bootstrap and he responded: "Do you really need that full 12 column grid, or do you just need two divs at 50%?" He was right. I didn't. Craig, my hatred of rows and columns might have been born that day.
+This library is meant to challenge the status quo, that all things web must submit to rows and columns. Fuck that, this isn't 1984, [think different](https://www.youtube.com/watch?v=5sMBhDv4sik). Ask your [is Golden Grids for you?](https://youtu.be/pRIIwJh1DDQ?si=LHKhOkO-RctUPEGA&t=210).
 
 ## A long standing obsession with the Golden Ratio
 
