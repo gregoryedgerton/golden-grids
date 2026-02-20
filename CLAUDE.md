@@ -22,7 +22,7 @@ import { GoldenGrid, GoldenBox, GridProvider } from '@gifcommit/golden-grids'
 <GoldenGrid from={1} to={5} />
 
 // With HSL color progression:
-<GoldenGrid from={1} to={5} color="#7f7ec7" clockwise={true} rotate={0} />
+<GoldenGrid from={1} to={5} color="#7f7ec7" clockwise={true} placement="right" />
 
 // With outline (CSS border shorthand — no double borders on shared edges):
 <GoldenGrid from={1} to={5} color="#7f7ec7" outline="2px solid #000000" />
@@ -49,7 +49,7 @@ import { GoldenGrid, GoldenBox, GridProvider } from '@gifcommit/golden-grids'
   color?: string;             // Hex base color — presence = HSL progression, absence = transparent
   outline?: string;           // CSS border shorthand e.g. "2px solid #000000"
   clockwise?: boolean;        // Spiral direction
-  rotate?: 0 | 90 | 180 | 270; // Starting orientation
+  placement?: "right" | "bottom" | "left" | "top"; // Starting orientation
   children?: React.ReactNode; // GoldenBox children map to grid slots in order
 }
 ```
@@ -61,12 +61,12 @@ import { GoldenGrid, GoldenBox, GridProvider } from '@gifcommit/golden-grids'
   from: number;       // FIB_STOPS start index (1–78)
   to: number;         // FIB_STOPS end index (1–78)
   color: string;      // Hex base color
-  clockwise: boolean; // Spiral direction
-  rotate: number;     // Starting orientation — 0 | 90 | 180 | 270
+  clockwise: boolean;   // Spiral direction
+  placement: PlacementValue; // Starting orientation — "right" | "bottom" | "left" | "top"
 }
 ```
 
-Also exported: `GoldenBox`, `GoldenBoxProps`, `generateGoldenGridLayout` (raw coordinates), `generateGridHTML` (standalone HTML string), `FIB_STOPS` (array of 79 pre-calculated values), `getGridRange` (range resolver), `useGrid`, and types `Square`, `GridLayout`, `InputControlType`.
+Also exported: `GoldenBox`, `GoldenBoxProps`, `generateGoldenGridLayout` (raw coordinates), `generateGridHTML` (standalone HTML string), `FIB_STOPS` (array of 79 pre-calculated values), `getGridRange` (range resolver), `useGrid`, and types `Square`, `GridLayout`, `InputControlType`, `PlacementValue`.
 
 ## Commands
 

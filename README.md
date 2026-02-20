@@ -53,7 +53,7 @@ Extra `<GoldenBox>` children beyond the visible slot count are silently ignored,
 | `to`        | `number`                | Another index position (1–78). Together with `from` this defines your slice of the sequence.                                     |
 | `color`     | `string` (hex)          | Optional base color for the HSL progression. When omitted, boxes are transparent layout slots.                                   |
 | `outline`   | `string` (CSS border)   | Optional border applied to all box edges — e.g. `"2px solid #000000"`. Shared edges draw a single line (no doubling).            |
-| `rotate`    | `0 \| 90 \| 180 \| 270` | Starting direction of the spiral — `0` (RIGHT), `90` (BOTTOM), `180` (LEFT), `270` (TOP). Defaults to `0`.                       |
+| `placement` | `"right" \| "bottom" \| "left" \| "top"` | Starting direction of the spiral. Defaults to `"right"`.                                                         |
 | `clockwise` | `boolean`               | Spiral direction — `true` for clockwise, `false` for counter-clockwise. Defaults to `true`.                                      |
 | `children`  | `GoldenBox` elements    | Optional slot content. Each `<GoldenBox>` maps to a visible square in order. Use `<GoldenBox placeholder>` for the skipped area. |
 
@@ -67,9 +67,9 @@ A `1, 1` grid gives you two equal squares (side by side or stacked depending on 
 
 Golden Grids lets you skip numbers in the sequence and that can add just the [right amount of flair](https://www.youtube.com/watch?v=F7SNEdjftno) to your grid. When your range doesn't start at the 1st digit, the preceding space is still accounted for — not as a perfect 1:1 square, but as a single irregular box that proportionally represents all the sequenced values that were skipped. This keeps the grid golden.
 
-### Rotation and spiral direction
+### Placement and spiral direction
 
-The `rotation` input determines which side the spiral builds out from (RIGHT, BOTTOM, LEFT, or TOP) and `clockwise` controls the spiral direction. Using these values you can create landscape and portrait grids. Think of how we declare `padding` or `margin` — we list values top, right, bottom, left. Golden Grids uses this same approach to place boxes which create our spiral. By default the first grid item is placed to the RIGHT, then the next box goes to the BOTTOM, then LEFT, then TOP, and repeat. With `rotation` you shift that starting direction and `clockwise` reverses the flow.
+The `placement` prop determines which side the spiral builds out from (`"right"`, `"bottom"`, `"left"`, or `"top"`) and `clockwise` controls the spiral direction. Using these values you can create landscape and portrait grids. Think of how we declare `padding` or `margin` — we list values top, right, bottom, left. Golden Grids uses this same approach to place boxes which create our spiral. By default the first grid item is placed to the `"right"`, then the next box goes to the `"bottom"`, then `"left"`, then `"top"`, and repeat. With `placement` you shift that starting direction and `clockwise` reverses the flow.
 
 ### Responsiveness
 
