@@ -1,3 +1,10 @@
+# [1.1.0](https://github.com/gregoryedgerton/golden-grids/compare/v1.0.0...v1.1.0) (2026-02-26)
+
+
+### Features
+
+* **demo:** toggle roman numerals in export output ([390619c](https://github.com/gregoryedgerton/golden-grids/commit/390619cbdf2be70ddc61eb10f8227613f1c1b8a7))
+
 # 1.0.0 (2026-02-26)
 
 
