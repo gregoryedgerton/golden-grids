@@ -177,6 +177,7 @@ const ExampleApp = () => {
     const [outlineStyle, setOutlineStyle] = useState('solid');
     const [outlineColor, setOutlineColor] = useState('#000000');
     const [useColor, setUseColor] = useState(true);
+    const [useRomanNumerals, setUseRomanNumerals] = useState(false);
 
     const lowerIdx = Math.min(inputControl.from, inputControl.to);
     const upperIdx = Math.max(inputControl.from, inputControl.to);
@@ -200,7 +201,7 @@ const ExampleApp = () => {
 
     const outlineValue = `${outlineWidth}px ${outlineStyle} ${outlineColor}`;
 
-    const html = showExport
+    const baseHtml = showExport
         ? generateGridHTML(
               inputControl.from,
               inputControl.to,
@@ -210,6 +211,17 @@ const ExampleApp = () => {
               useOutline ? outlineValue : undefined
           )
         : "";
+
+    const html = useRomanNumerals && baseHtml
+        ? (() => {
+              let counter = 0;
+              const labelStyle = `position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:sans-serif;font-size:clamp(1rem,3cqw,1.5rem);pointer-events:none;color:${outlineColor};`;
+              return baseHtml.replace(
+                  /(<div class="golden-grid__box[^"]*"[^>]*>)<\/div>/g,
+                  (_match, openTag) => `${openTag}<span style="${labelStyle}">${toRoman(++counter)}.</span></div>`
+              );
+          })()
+        : baseHtml;
 
     const handleCopy = () => {
         navigator.clipboard.writeText(html).then(() => {
@@ -299,7 +311,10 @@ const ExampleApp = () => {
                         <span className="mad-lib-static">{skippedDigits.join(", ")}</span>
                         {" "}will include a single irregular box of the combined relative proprotions to keep the grid golden.</>}
                     {" "}Did you know you can
-                    {" "}<button className="mad-lib-btn" onClick={() => setShowExport(true)}>EXPORT</button> your grid? Don't worry, the roman numerals don't come with it.
+                    {" "}<button className="mad-lib-btn" onClick={() => setShowExport(true)}>EXPORT</button> your grid? Don't worry, the roman numerals{" "}
+                    <button className="mad-lib-btn" onClick={() => setUseRomanNumerals(n => !n)}>
+                        {useRomanNumerals ? "COME" : "DON'T COME"}
+                    </button> with it.
                 </p>
             </header>
             
