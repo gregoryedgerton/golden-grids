@@ -1,25 +1,39 @@
-name: Publish to npm
+name: Release
 
 on:
-  release:
-    types: [published]
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Dry run (no publish, just verify token + version)'
+        type: boolean
+        default: true
+
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
 
 jobs:
-  publish:
+  release:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           registry-url: https://registry.npmjs.org
           cache: npm
 
       - run: npm ci
 
-      - run: npm run build
-
-      - run: npm publish --access public
+      - name: Release (or dry run)
+        run: npx semantic-release ${{ inputs.dry_run == true && '--dry-run' || '' }}
         env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
