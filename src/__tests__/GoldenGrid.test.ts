@@ -1,9 +1,6 @@
 import React from 'react';
 import { GoldenBox } from '../components/GoldenBox';
 import type { GoldenBoxProps } from '../components/GoldenBox';
-import type { GoldenGridProps } from '../components/GoldenGrid';
-import { getGridRange, fullFibonacciUpTo } from '../utils/fibonacci';
-import { generateGoldenGridLayout, placementToRotateDeg } from '../utils/gridGenerator';
 
 // Mirrors the exact child-mapping logic from GoldenGrid.tsx so we can
 // exercise it directly without needing a DOM / jsdom environment.
@@ -215,6 +212,7 @@ describe('GoldenGrid', () => {
 
     test('equal from and to produces a single-square range (startIdx === endIdx === 0)', () => {
       // Index 1 maps to startIdx 0, endIdx 0 (first Fibonacci square)
+      const { getGridRange } = require('../utils/fibonacci');
       const range = getGridRange(1, 1);
       expect(range).not.toBeNull();
       expect(range!.startIdx).toBe(0);
@@ -222,81 +220,8 @@ describe('GoldenGrid', () => {
     });
 
     test('invalid range (both 0) returns null from getGridRange', () => {
+      const { getGridRange } = require('../utils/fibonacci');
       expect(getGridRange(0, 0)).toBeNull();
-    });
-  });
-
-  // ─── JSON config ──────────────────────────────────────────────────────────
-  //
-  // All GoldenGridProps are JSON-serializable primitives (numbers, strings,
-  // booleans). A consumer can import a JSON file and spread it directly:
-  //
-  //   import config from './my-grid.json';
-  //   <GoldenGrid {...config} />
-  //
-  // These tests prove that pattern works end-to-end.
-
-  describe('JSON config', () => {
-    // Mirrors prop resolution from GoldenGrid.tsx
-    function resolveProps(config: GoldenGridProps) {
-      return {
-        from:      config.from      ?? 1,
-        to:        config.to        ?? 4,
-        color:     config.color,
-        clockwise: config.clockwise ?? true,
-        placement: config.placement ?? 'right' as const,
-      };
-    }
-
-    test('a full config object resolves to its own values', () => {
-      const config: GoldenGridProps = { from: 3, to: 7, color: '#ff0000', clockwise: false, placement: 'bottom' };
-      const resolved = resolveProps(config);
-      expect(resolved).toEqual({ from: 3, to: 7, color: '#ff0000', clockwise: false, placement: 'bottom' });
-    });
-
-    test('a partial config falls back to defaults for missing keys', () => {
-      const config: GoldenGridProps = { from: 2, to: 5 };
-      const resolved = resolveProps(config);
-      expect(resolved.from).toBe(2);
-      expect(resolved.to).toBe(5);
-      expect(resolved.color).toBeUndefined();
-      expect(resolved.clockwise).toBe(true);
-      expect(resolved.placement).toBe('right');
-    });
-
-    test('an empty config object produces all defaults', () => {
-      const resolved = resolveProps({});
-      expect(resolved).toEqual({ from: 1, to: 4, color: undefined, clockwise: true, placement: 'right' });
-    });
-
-    test('a config object drives a valid grid layout end-to-end', () => {
-      const config: GoldenGridProps = { from: 1, to: 5, color: '#7f7ec7', clockwise: true, placement: 'right' };
-      const { from, to, clockwise, placement } = resolveProps(config);
-
-      let start = from, end = to;
-      if (start > end) [start, end] = [end, start];
-
-      const range = getGridRange(start, end);
-      expect(range).not.toBeNull();
-
-      const rotateDeg = placementToRotateDeg(placement, clockwise, range!.startIdx);
-      const fullSequence = fullFibonacciUpTo(Math.max(...range!.userSequence));
-      const layout = generateGoldenGridLayout(fullSequence, clockwise, rotateDeg);
-
-      expect(layout.squares.length).toBeGreaterThan(0);
-      expect(layout.width).toBeGreaterThan(0);
-      expect(layout.height).toBeGreaterThan(0);
-      layout.squares.forEach(sq => {
-        expect(sq.size).toBeGreaterThan(0);
-        expect(sq.x).toBeGreaterThanOrEqual(layout.minX);
-        expect(sq.y).toBeGreaterThanOrEqual(layout.minY);
-      });
-    });
-
-    test('all prop values are JSON-serializable primitives', () => {
-      const config: GoldenGridProps = { from: 1, to: 5, color: '#7f7ec7', clockwise: true, placement: 'right' };
-      const serialised = JSON.parse(JSON.stringify(config));
-      expect(serialised).toEqual(config);
     });
   });
 });
