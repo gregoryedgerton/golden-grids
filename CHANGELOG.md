@@ -1,3 +1,18 @@
+# [2.0.0](https://github.com/gregoryedgerton/golden-grids/compare/v1.2.0...v2.0.0) (2026-02-28)
+
+
+* feat!: remove demo utilities from library exports ([fcbc962](https://github.com/gregoryedgerton/golden-grids/commit/fcbc96229bb2e01e356d79525ce9a3c065b6246a))
+
+
+### BREAKING CHANGES
+
+* GridProvider, useGrid, InputControlType, generateGridHTML,
+FIB_STOPS, and getGridRange are no longer exported. GoldenGrid is now purely
+prop-driven with hardcoded defaults. generateGoldenGridLayout, Square, GridLayout,
+and PlacementValue remain exported for non-React use cases (Canvas, SSR, custom renderers).
+
+Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>
+
 # [1.2.0](https://github.com/gregoryedgerton/golden-grids/compare/v1.1.0...v1.2.0) (2026-02-28)
 
 
