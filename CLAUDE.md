@@ -15,7 +15,7 @@ npm install @gifcommit/golden-grids
 ```
 
 ```tsx
-import { GoldenGrid, GoldenBox, GridProvider } from '@gifcommit/golden-grids'
+import { GoldenGrid, GoldenBox } from '@gifcommit/golden-grids'
 // CSS is auto-injected — no separate import needed
 
 // Transparent layout slots:
@@ -33,40 +33,25 @@ import { GoldenGrid, GoldenBox, GridProvider } from '@gifcommit/golden-grids'
   <GoldenBox><h1>First visible slot</h1></GoldenBox>
   <GoldenBox><p>Second visible slot</p></GoldenBox>
 </GoldenGrid>
-
-// With provider for dynamic/interactive control:
-<GridProvider initialConfig={myConfig}>
-  <GoldenGrid />
-</GridProvider>
 ```
 
 `GoldenGridProps`:
 
 ```ts
 {
-  from?: number;              // FIB_STOPS start index (1–78)
-  to?: number;                // FIB_STOPS end index (1–78)
+  from?: number;              // FIB_STOPS start index (1–78), default 1
+  to?: number;                // FIB_STOPS end index (1–78), default 4
   color?: string;             // Hex base color — presence = HSL progression, absence = transparent
   outline?: string;           // CSS border shorthand e.g. "2px solid #000000"
-  clockwise?: boolean;        // Spiral direction
-  placement?: "right" | "bottom" | "left" | "top"; // Starting orientation
+  clockwise?: boolean;        // Spiral direction, default true
+  placement?: PlacementValue; // Starting orientation, default "right"
   children?: React.ReactNode; // GoldenBox children map to grid slots in order
 }
 ```
 
-`InputControlType` is the context/provider config schema (all fields required):
+Exported from the library: `GoldenGrid`, `GoldenGridProps`, `GoldenBox`, `GoldenBoxProps`, `generateGoldenGridLayout` (raw coordinates for non-React use cases), and types `Square`, `GridLayout`, `PlacementValue`.
 
-```ts
-{
-  from: number;       // FIB_STOPS start index (1–78)
-  to: number;         // FIB_STOPS end index (1–78)
-  color: string;      // Hex base color
-  clockwise: boolean;   // Spiral direction
-  placement: PlacementValue; // Starting orientation — "right" | "bottom" | "left" | "top"
-}
-```
-
-Also exported: `GoldenBox`, `GoldenBoxProps`, `generateGoldenGridLayout` (raw coordinates), `generateGridHTML` (standalone HTML string), `FIB_STOPS` (array of 79 pre-calculated values), `getGridRange` (range resolver), `useGrid`, and types `Square`, `GridLayout`, `InputControlType`, `PlacementValue`.
+`GridProvider`, `useGrid`, `InputControlType`, `generateGridHTML`, `FIB_STOPS`, and `getGridRange` are **not exported** — they are demo-only internals.
 
 ## Commands
 
@@ -82,7 +67,7 @@ npm run setup        # Install Husky git hooks (run once after cloning)
 
 ## Publishing
 
-Package is published to npm as `@gifcommit/golden-grids`. Publishing is triggered by creating a GitHub Release — see `.github/workflows/publish.yml`. Requires `NPM_TOKEN` set as a GitHub Actions secret.
+Package is published to npm as `@gifcommit/golden-grids`. Publishing is triggered by creating a GitHub Release — see `.github/workflows/publish.yml`. Requires `NPM_TOKEN` set as a GitHub Actions secret. Uses semantic-release — a `feat!` commit with `BREAKING CHANGE:` footer triggers a major version bump.
 
 ## Architecture
 
@@ -91,7 +76,7 @@ Package is published to npm as `@gifcommit/golden-grids`. Publishing is triggere
 Library and demo are fully separated:
 
 - **Library** (`src/` → `dist/`) — what consumers install from npm. No knowledge of the demo.
-- **Demo app** (`example/` → `dist-demo/`) — interactive playground deployed to GitHub Pages. Imports only from `@gifcommit/golden-grids` exactly as a real consumer would.
+- **Demo app** (`example/` → `dist-demo/`) — interactive playground deployed to GitHub Pages. Imports `GoldenGrid`/`GoldenBox` from `@gifcommit/golden-grids`, and imports demo utilities directly from `../src/utils/*` (via Vite alias) rather than through the public API.
 
 Vite switches between them via `VITE_BUILD_DEMO=1` (see `vite.config.ts`). A resolve alias maps `@gifcommit/golden-grids` → `src/index.ts` during dev and demo builds. `tsconfig.json` mirrors this via `paths` for IDE support.
 
@@ -104,18 +89,29 @@ Vite switches between them via `VITE_BUILD_DEMO=1` (see `vite.config.ts`). A res
 5. When `from > 1`, skipped leading squares are collapsed into a single placeholder `<div class="golden-grid__box golden-grid__box--placeholder">` to preserve spiral proportions
 6. `GoldenBox` children map into slots in order. A `<GoldenBox placeholder>` targets the placeholder slot. Extra children beyond the visible count are silently ignored.
 
+### CSS strategy
+
+There are three layers of CSS — only the first is "externalizable":
+
+1. **`src/styles/grid.css`** — 5 structural rules (`position: relative`, `position: absolute`, `box-sizing`). Auto-injected into `<head>` at runtime via `vite-plugin-css-injected-by-js`. No separate CSS import needed.
+2. **Inline `style=` attributes** — all slot positioning (`left`, `top`, `width`, `height`, `aspectRatio`, `background`, borders) are computed at render time from Fibonacci coordinates and user props. These cannot be externalized; they are inherently dynamic. This is standard practice for computed-layout libraries.
+3. **`<style>` block in `generateGridHTML()`** — the demo's HTML export tool embeds structural CSS inline so the exported file is fully self-contained. This is correct by design and unrelated to the library's CSS strategy.
+
+A dual CSS approach (injected + separate `dist/style.css`) was considered and rejected: the static CSS is trivially small and the dynamic inline styles can't be moved to a stylesheet anyway, so the complexity buys nothing.
+
 ### Key files
 
-| File                            | Role                                                                          |
-| ------------------------------- | ----------------------------------------------------------------------------- |
-| `src/utils/fibonacci.ts`        | `FIB_STOPS`, `getGridRange()`, `fullFibonacciUpTo()`                          |
-| `src/utils/gridGenerator.ts`    | Spiral layout algorithm                                                       |
-| `src/components/GoldenGrid.tsx` | Main React component — declarative JSX, child mapping, color + outline logic  |
-| `src/components/GoldenBox.tsx`  | Slot marker component — fills 100%×100% of its positioned parent              |
-| `src/context/GridContext.tsx`   | `GridProvider` (accepts `initialConfig`) + `useGrid()` hook                   |
-| `src/utils/colorUtils.ts`       | `hexToHsl()`, `hslToCss()`                                                    |
-| `src/utils/exportGrid.ts`       | Generates a self-contained HTML string mirroring the grid (color + outline)   |
-| `src/styles/grid.css`           | Library CSS — injected automatically by the bundler                           |
-| `example/index.tsx`             | Demo app — consumes `@gifcommit/golden-grids` only, mad-lib UI, export modal  |
-| `example/golden-grid.css`       | Demo-only styles — not part of the distributed library                        |
-| `src/__tests__/`                | Unit tests — 100% statement/branch/function/line coverage                     |
+| File                              | Role                                                                              |
+| --------------------------------- | --------------------------------------------------------------------------------- |
+| `src/utils/fibonacci.ts`          | `FIB_STOPS`, `getGridRange()`, `fullFibonacciUpTo()` — internal, not exported    |
+| `src/utils/gridGenerator.ts`      | Spiral layout algorithm — `generateGoldenGridLayout` is exported                 |
+| `src/components/GoldenGrid.tsx`   | Main React component — declarative JSX, child mapping, color + outline logic     |
+| `src/components/GoldenBox.tsx`    | Slot marker component — fills 100%×100% of its positioned parent                 |
+| `src/utils/colorUtils.ts`         | `hexToHsl()`, `hslToCss()` — internal, not exported                              |
+| `src/styles/grid.css`             | Library CSS — injected automatically by the bundler                               |
+| `example/GridContext.tsx`         | Demo-only `GridProvider` + `useGrid()` hook + `InputControlType`                 |
+| `example/exportGrid.ts`           | Demo-only — generates a self-contained HTML string for the export modal           |
+| `example/index.tsx`               | Demo app — mad-lib UI, export modal, label cycle                                  |
+| `example/golden-grid.css`         | Demo-only styles — not part of the distributed library                            |
+| `src/__tests__/`                  | Library unit tests — 100% statement/branch/function/line coverage                 |
+| `example/__tests__/`              | Demo unit tests — `exportGrid` and `GridContext` validation                       |
