@@ -73,7 +73,32 @@ The `placement` prop determines which side the spiral builds out from (`"right"`
 
 ### Responsiveness
 
-Golden Grids are responsive and fill 100% of their container width. The proportions of the grid shouldn't break but I intentionally do not clip the box. Overflow management is the importers responsiblity.
+Golden Grids fill 100% of their container width and maintain proportions at any size. Overflow is not clipped — that's the consumer's responsibility.
+
+The library deliberately does not enforce responsive breakpoints or automatically adjust the grid range as the viewport narrows. Deciding which boxes to show at which breakpoint is a content and product decision, not a layout math decision — the library has no way of knowing which of your boxes matters most on a small screen.
+
+Instead, use `GridProvider` and `setInputControl` to swap configs dynamically. Drive it however fits your stack:
+
+```tsx
+// With a media query listener
+const isNarrow = window.matchMedia('(max-width: 768px)').matches;
+
+<GridProvider initialConfig={isNarrow ? mobileConfig : desktopConfig}>
+  <GoldenGrid />
+</GridProvider>
+
+// Or reactively with a resize observer / matchMedia event
+const { setInputControl } = useGrid();
+useEffect(() => {
+  const mq = window.matchMedia('(max-width: 768px)');
+  const handler = (e: MediaQueryListEvent) =>
+    setInputControl(e.matches ? mobileConfig : desktopConfig);
+  mq.addEventListener('change', handler);
+  return () => mq.removeEventListener('change', handler);
+}, []);
+```
+
+This keeps the library as a pure layout primitive and gives you full control over what "responsive" means for your content.
 
 ## How big can I go?
 
