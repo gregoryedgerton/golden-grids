@@ -2,6 +2,7 @@ import React, { useState, useRef, useCallback } from "react";
 import { createRoot } from "react-dom/client";
 import { GridProvider, useGrid, GoldenGrid, GoldenBox, generateGridHTML, getGridRange, FIB_STOPS } from "@gifcommit/golden-grids";
 import "./golden-grid.css";
+import { LabelMode, LABEL_MODES, getLabel } from "./labelUtils";
 
 const FIB_INDEX_STOPS = FIB_STOPS.map((_: number, i: number) => i);
 const PLACEMENT_STOPS = ["right", "bottom", "left", "top"] as const;
@@ -12,16 +13,6 @@ function ordinalSuffix(n: number): string {
     const s = ["th", "st", "nd", "rd"];
     const v = n % 100;
     return s[(v - 20) % 10] || s[v] || s[0];
-}
-
-function toRoman(n: number): string {
-    const vals = [1000, 900, 500, 400, 100, 90, 50, 40, 10, 9, 5, 4, 1];
-    const syms = ['M', 'CM', 'D', 'CD', 'C', 'XC', 'L', 'XL', 'X', 'IX', 'V', 'IV', 'I'];
-    let result = '';
-    for (let i = 0; i < vals.length; i++) {
-        while (n >= vals[i]) { result += syms[i]; n -= vals[i]; }
-    }
-    return result;
 }
 
 const PIXELS_PER_STEP = 72;
@@ -177,7 +168,7 @@ const ExampleApp = () => {
     const [outlineStyle, setOutlineStyle] = useState('solid');
     const [outlineColor, setOutlineColor] = useState('#000000');
     const [useColor, setUseColor] = useState(true);
-    const [useRomanNumerals, setUseRomanNumerals] = useState(false);
+    const [labelMode, setLabelMode] = useState<LabelMode>('ROMAN NUMERALS');
 
     const lowerIdx = Math.min(inputControl.from, inputControl.to);
     const upperIdx = Math.max(inputControl.from, inputControl.to);
@@ -212,13 +203,13 @@ const ExampleApp = () => {
           )
         : "";
 
-    const html = useRomanNumerals && baseHtml
+    const html = labelMode !== 'NOTHING' && baseHtml
         ? (() => {
               let counter = 0;
               const labelStyle = `position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:sans-serif;font-size:clamp(1rem,3cqw,1.5rem);pointer-events:none;color:${outlineColor};`;
               return baseHtml.replace(
                   /(<div class="golden-grid__box[^"]*"[^>]*>)<\/div>/g,
-                  (_match, openTag) => `${openTag}<span style="${labelStyle}">${toRoman(++counter)}.</span></div>`
+                  (_match, openTag) => `${openTag}<span style="${labelStyle}">${getLabel(++counter, labelMode)}.</span></div>`
               );
           })()
         : baseHtml;
@@ -311,10 +302,14 @@ const ExampleApp = () => {
                         <span className="mad-lib-static">{skippedDigits.join(", ")}</span>
                         {" "}will include a single irregular box of the combined relative proprotions to keep the grid golden.</>}
                     {" "}Did you know you can
-                    {" "}<button className="mad-lib-btn" onClick={() => setShowExport(true)}>EXPORT</button> your grid? Don't worry, the roman numerals{" "}
-                    <button className="mad-lib-btn" onClick={() => setUseRomanNumerals(n => !n)}>
-                        {useRomanNumerals ? "COME" : "DON'T COME"}
-                    </button> with it.
+                    {" "}<button className="mad-lib-btn" onClick={() => setShowExport(true)}>EXPORT</button> your grid?{" "}
+                    List{" "}
+                    <button className="mad-lib-btn" onClick={() => {
+                        const idx = LABEL_MODES.indexOf(labelMode);
+                        setLabelMode(LABEL_MODES[(idx + 1) % LABEL_MODES.length]);
+                    }}>
+                        {labelMode}
+                    </button>{" "}in each box from smallest to largest.
                 </p>
             </header>
             
@@ -325,11 +320,19 @@ const ExampleApp = () => {
                     placement={inputControl.placement}
                 >
                     <GoldenBox placeholder>
-                        <span className="box-label" style={{ color: outlineColor }}>I.</span>
+                        {labelMode !== 'NOTHING' && (
+                            <span className="box-label" style={{ color: outlineColor }}>
+                                {getLabel(1, labelMode)}.
+                            </span>
+                        )}
                     </GoldenBox>
                     {FIB_STOPS.slice(1).map((_, i) => (
                         <GoldenBox key={i + 1}>
-                            <span className="box-label" style={{ color: outlineColor }}>{toRoman(i + 1 + (hasPlaceholder ? 1 : 0))}.</span>
+                            {labelMode !== 'NOTHING' && (
+                                <span className="box-label" style={{ color: outlineColor }}>
+                                    {getLabel(i + 1 + (hasPlaceholder ? 1 : 0), labelMode)}.
+                                </span>
+                            )}
                         </GoldenBox>
                     ))}
                 </GoldenGrid>
