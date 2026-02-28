@@ -29,20 +29,19 @@ import { GoldenGrid, GoldenBox } from '@gifcommit/golden-grids'
 // With HSL color progression:
 <GoldenGrid from={1} to={5} color="#7f7ec7" />
 
-// Map your content into grid slots in order:
+// Map your content into grid slots — children map smallest to largest:
 <GoldenGrid from={1} to={3}>
-  <GoldenBox><h1>Largest box</h1></GoldenBox>
+  <GoldenBox><p>Smallest box</p></GoldenBox>
   <GoldenBox><p>Second box</p></GoldenBox>
-  <GoldenBox><p>Third box</p></GoldenBox>
-  <GoldenBox><p>Fourth box</p></GoldenBox>
+  <GoldenBox><h1>Largest box</h1></GoldenBox>
 </GoldenGrid>
 
 // When from > 1, the skipped range becomes the first slot:
 <GoldenGrid from={3} to={5}>
   <GoldenBox><p>Skipped-range area</p></GoldenBox>
-  <GoldenBox><h1>First visible box</h1></GoldenBox>
+  <GoldenBox><p>Smallest visible box</p></GoldenBox>
   <GoldenBox><p>Second visible box</p></GoldenBox>
-  <GoldenBox><p>Third visible box</p></GoldenBox>
+  <GoldenBox><h1>Largest visible box</h1></GoldenBox>
 </GoldenGrid>
 ```
 
@@ -58,7 +57,7 @@ Extra `<GoldenBox>` children beyond the slot count are silently ignored, so you 
 | `outline`   | `string` (CSS border)                    | Optional border applied to all box edges — e.g. `"2px solid #000000"`. Shared edges draw a single line (no doubling).            |
 | `placement` | `"right" \| "bottom" \| "left" \| "top"` | Starting direction of the spiral. Defaults to `"right"`.                                                                         |
 | `clockwise` | `boolean`                                | Spiral direction — `true` for clockwise, `false` for counter-clockwise. Defaults to `true`.                                      |
-| `children`  | `GoldenBox` elements                     | Optional slot content. Each `<GoldenBox>` maps to a slot in order. When `from > 1`, the first `<GoldenBox>` fills the skipped-range area. |
+| `children`  | `GoldenBox` elements                     | Optional slot content. Children map to slots smallest-to-largest. When `from > 1`, the first `<GoldenBox>` fills the skipped-range area. |
 
 ## How it works
 
