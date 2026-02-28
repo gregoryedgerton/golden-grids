@@ -1,4 +1,4 @@
-import { hexToHsl, hslToCss, generateHarmonicPalette } from '../utils/colorUtils';
+import { hexToHsl, hslToCss } from '../utils/colorUtils';
 
 describe('hexToHsl', () => {
   test('black returns [0, 0, 0]', () => {
@@ -60,26 +60,5 @@ describe('hslToCss', () => {
   test('round-trips with hexToHsl for a known color', () => {
     const [h, s, l] = hexToHsl('#ff0000');
     expect(hslToCss(h, s, l)).toContain('hsl(');
-  });
-});
-
-describe('generateHarmonicPalette', () => {
-  test('returns the requested number of colors', () => {
-    expect(generateHarmonicPalette('#ff0000', 5)).toHaveLength(5);
-  });
-
-  test('each entry is a valid hsl() string', () => {
-    generateHarmonicPalette('#7f7ec7', 4).forEach(c => {
-      expect(c).toMatch(/^hsl\(/);
-    });
-  });
-
-  test('first color starts at the base hue', () => {
-    const [h, s, l] = hexToHsl('#ff0000');
-    expect(generateHarmonicPalette('#ff0000', 3)[0]).toBe(hslToCss(h, s, l));
-  });
-
-  test('returns one color for steps = 1', () => {
-    expect(generateHarmonicPalette('#ffffff', 1)).toHaveLength(1);
   });
 });

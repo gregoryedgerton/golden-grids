@@ -1,4 +1,4 @@
-import { generateGridHTML } from '../utils/exportGrid';
+import { generateGridHTML } from '../exportGrid';
 
 describe('generateGridHTML', () => {
   test('returns a comment for an invalid range', () => {

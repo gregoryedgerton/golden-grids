@@ -1,6 +1,10 @@
 import React, { useState, useRef, useCallback } from "react";
 import { createRoot } from "react-dom/client";
-import { GridProvider, useGrid, GoldenGrid, GoldenBox, generateGridHTML, getGridRange, FIB_STOPS } from "@gifcommit/golden-grids";
+import { GoldenGrid, GoldenBox } from "@gifcommit/golden-grids";
+import { GridProvider, useGrid } from "./GridContext";
+import type { InputControlType } from "./GridContext";
+import { generateGridHTML } from "./exportGrid";
+import { FIB_STOPS, getGridRange } from "../src/utils/fibonacci";
 import "./golden-grid.css";
 import { LabelMode, LABEL_MODES, getLabel } from "./labelUtils";
 
@@ -315,7 +319,10 @@ const ExampleApp = () => {
             
             <section className="grid-preview">
                 <GoldenGrid
+                    from={inputControl.from}
+                    to={inputControl.to}
                     color={useColor ? inputControl.color : undefined}
+                    clockwise={inputControl.clockwise}
                     outline={useOutline ? outlineValue : undefined}
                     placement={inputControl.placement}
                 >

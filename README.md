@@ -17,7 +17,7 @@ npm install @gifcommit/golden-grids
 ## Usage
 
 ```tsx
-import { GoldenGrid, GoldenBox, GridProvider } from '@gifcommit/golden-grids'
+import { GoldenGrid, GoldenBox } from '@gifcommit/golden-grids'
 // CSS is auto-injected — no separate import needed
 
 // Transparent layout slots (no color):
@@ -36,11 +36,6 @@ import { GoldenGrid, GoldenBox, GridProvider } from '@gifcommit/golden-grids'
   <GoldenBox><p>Second visible box</p></GoldenBox>
   <GoldenBox><p>Third visible box</p></GoldenBox>
 </GoldenGrid>
-
-// With provider for dynamic/interactive control:
-<GridProvider initialConfig={myConfig}>
-  <GoldenGrid />
-</GridProvider>
 ```
 
 Extra `<GoldenBox>` children beyond the visible slot count are silently ignored, so you can always declare the full set of 78 and let the config control what renders.
@@ -77,28 +72,23 @@ Golden Grids fill 100% of their container width and maintain proportions at any 
 
 The library deliberately does not enforce responsive breakpoints or automatically adjust the grid range as the viewport narrows. Deciding which boxes to show at which breakpoint is a content and product decision, not a layout math decision — the library has no way of knowing which of your boxes matters most on a small screen.
 
-Instead, use `GridProvider` and `setInputControl` to swap configs dynamically. Drive it however fits your stack:
+`GoldenGrid` is a prop-driven component. Own your state, pass `from` and `to`, and drive changes however fits your stack:
 
 ```tsx
-// With a media query listener
-const isNarrow = window.matchMedia('(max-width: 768px)').matches;
+// Static — derive from viewport at render time
+const isMobile = window.matchMedia('(max-width: 768px)').matches;
+<GoldenGrid from={1} to={isMobile ? 3 : 5} color="#7f7ec7" />
 
-<GridProvider initialConfig={isNarrow ? mobileConfig : desktopConfig}>
-  <GoldenGrid />
-</GridProvider>
-
-// Or reactively with a resize observer / matchMedia event
-const { setInputControl } = useGrid();
+// Reactive — update state on breakpoint change
+const [to, setTo] = useState(5);
 useEffect(() => {
   const mq = window.matchMedia('(max-width: 768px)');
-  const handler = (e: MediaQueryListEvent) =>
-    setInputControl(e.matches ? mobileConfig : desktopConfig);
+  const handler = (e: MediaQueryListEvent) => setTo(e.matches ? 3 : 5);
   mq.addEventListener('change', handler);
   return () => mq.removeEventListener('change', handler);
 }, []);
+<GoldenGrid from={1} to={to} color="#7f7ec7" />
 ```
-
-This keeps the library as a pure layout primitive and gives you full control over what "responsive" means for your content.
 
 ## How big can I go?
 

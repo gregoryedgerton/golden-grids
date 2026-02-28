@@ -24,18 +24,3 @@ export function hexToHsl(hex: string): [number, number, number] {
 export function hslToCss(h: number, s: number, l: number): string {
   return `hsl(${h}, ${s}%, ${l}%)`;
 }
-
-export function generateHarmonicPalette(
-  baseHex: string,
-  steps: number
-): string[] {
-  const [baseH, baseS, baseL] = hexToHsl(baseHex);
-  const colors: string[] = [];
-
-  for (let i = 0; i < steps; i++) {
-    const hueShift = (baseH + (i * (360 / steps))) % 360;
-    colors.push(hslToCss(hueShift, baseS, baseL));
-  }
-
-  return colors;
-}

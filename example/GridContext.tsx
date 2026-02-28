@@ -1,7 +1,15 @@
 import * as React from "react";
 import { createContext, useContext, useState, ReactNode } from "react";
-import { InputControlType } from "../types/InputControlType";
-import { FIB_STOPS } from "../utils/fibonacci";
+import type { PlacementValue } from "@gifcommit/golden-grids";
+import { FIB_STOPS } from "../src/utils/fibonacci";
+
+export interface InputControlType {
+  from: number;
+  to: number;
+  color: string;
+  clockwise: boolean;
+  placement: PlacementValue;
+}
 
 interface GridContextProps {
   inputControl: InputControlType;

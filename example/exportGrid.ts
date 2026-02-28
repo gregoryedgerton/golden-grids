@@ -1,6 +1,6 @@
-import { fullFibonacciUpTo, getGridRange } from "./fibonacci";
-import { generateGoldenGridLayout, placementToRotateDeg } from "./gridGenerator";
-import { hexToHsl, hslToCss } from "./colorUtils";
+import { fullFibonacciUpTo, getGridRange } from "../src/utils/fibonacci";
+import { generateGoldenGridLayout, placementToRotateDeg } from "../src/utils/gridGenerator";
+import { hexToHsl, hslToCss } from "../src/utils/colorUtils";
 
 export function generateGridHTML(
   from: number,

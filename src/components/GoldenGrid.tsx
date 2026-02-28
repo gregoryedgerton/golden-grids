@@ -1,5 +1,4 @@
 import React from "react";
-import { useGrid } from "../context/GridContext";
 import { generateGoldenGridLayout, placementToRotateDeg } from "../utils/gridGenerator";
 import { fullFibonacciUpTo, getGridRange } from "../utils/fibonacci";
 import { hexToHsl, hslToCss } from "../utils/colorUtils";
@@ -7,25 +6,25 @@ import { GoldenBox } from "./GoldenBox";
 import type { GoldenBoxProps } from "./GoldenBox";
 import "../styles/grid.css";
 
+export type PlacementValue = "right" | "bottom" | "left" | "top";
+
 export interface GoldenGridProps {
   from?: number;
   to?: number;
   color?: string;
   clockwise?: boolean;
-  placement?: "right" | "bottom" | "left" | "top";
+  placement?: PlacementValue;
   outline?: string; // CSS border shorthand e.g. "2px dashed #ff0000"
   children?: React.ReactNode;
 }
 
 const GoldenGrid: React.FC<GoldenGridProps> = (props): React.ReactElement<any> => {
-  const { inputControl } = useGrid();
-
-  const from      = props.from      ?? inputControl.from;
-  const to        = props.to        ?? inputControl.to;
-  const color     = 'color' in props ? props.color : inputControl.color;
-  const clockwise = props.clockwise ?? inputControl.clockwise;
-  const placement = props.placement ?? inputControl.placement;
-  const outline   = 'outline' in props ? props.outline : undefined;
+  const from      = props.from      ?? 1;
+  const to        = props.to        ?? 4;
+  const color     = props.color;
+  const clockwise = props.clockwise ?? true;
+  const placement = props.placement ?? 'right';
+  const outline   = props.outline;
   const outlined  = !!outline;
 
   const containerBorder: React.CSSProperties = outline
