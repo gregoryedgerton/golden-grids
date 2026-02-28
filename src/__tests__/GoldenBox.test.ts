@@ -12,13 +12,6 @@ describe('GoldenBox', () => {
     expect(props.children).toBe('hello');
   });
 
-  test('placeholder prop is typed as optional boolean', () => {
-    const withPlaceholder: GoldenBoxProps = { placeholder: true };
-    const withoutPlaceholder: GoldenBoxProps = {};
-    expect(withPlaceholder.placeholder).toBe(true);
-    expect(withoutPlaceholder.placeholder).toBeUndefined();
-  });
-
   test('accepts className prop', () => {
     const props: GoldenBoxProps = { className: 'my-class' };
     expect(props.className).toBe('my-class');

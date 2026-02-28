@@ -2,7 +2,6 @@ import React from "react";
 
 export interface GoldenBoxProps {
   children?: React.ReactNode;
-  placeholder?: boolean;
   className?: string;
   style?: React.CSSProperties;
 }

@@ -34,13 +34,11 @@ const GoldenGrid: React.FC<GoldenGridProps> = (props): React.ReactElement<any> =
     ? { borderRight: outline, borderBottom: outline }
     : {};
 
-  // --- child mapping ---
+  // --- child collection ---
   const allBoxChildren = React.Children.toArray(props.children).filter(
     (child): child is React.ReactElement<GoldenBoxProps> =>
       React.isValidElement(child) && child.type === GoldenBox
   );
-  const placeholderChild = allBoxChildren.find(child => child.props.placeholder) ?? null;
-  const boxChildren = allBoxChildren.filter(child => !child.props.placeholder);
 
   // --- layout computation ---
   let start = from;
@@ -68,7 +66,7 @@ const GoldenGrid: React.FC<GoldenGridProps> = (props): React.ReactElement<any> =
     return (
       <div className={gridClass} style={{ aspectRatio: "1 / 1", ...containerBorder }}>
         <div className="golden-grid__box" style={{ left: 0, top: 0, width: "100%", height: "100%", background: bg, ...boxBorder }}>
-          {boxChildren[0] ?? null}
+          {allBoxChildren[0] ?? null}
         </div>
       </div>
     );
@@ -78,8 +76,12 @@ const GoldenGrid: React.FC<GoldenGridProps> = (props): React.ReactElement<any> =
   const requestedSquares = layout.squares.slice(startIdx, endIdx + 1);
   const skippedSquares = layout.squares.slice(0, startIdx);
 
-  // --- placeholder bounds ---
+  // --- positional child mapping ---
   const placeholderExists = skippedSquares.length > 0;
+  const placeholderChild = placeholderExists ? (allBoxChildren[0] ?? null) : null;
+  const boxChildren = placeholderExists ? allBoxChildren.slice(1) : allBoxChildren;
+
+  // --- placeholder bounds ---
   let placeholderStyle: React.CSSProperties | null = null;
   if (placeholderExists) {
     let pMinX = Infinity, pMaxX = -Infinity, pMinY = Infinity, pMaxY = -Infinity;

@@ -9,9 +9,7 @@ function mapChildren(children: React.ReactNode) {
     (child): child is React.ReactElement<GoldenBoxProps> =>
       React.isValidElement(child) && child.type === GoldenBox
   );
-  const placeholderChild = allBoxChildren.find(child => child.props.placeholder) ?? null;
-  const boxChildren = allBoxChildren.filter(child => !child.props.placeholder);
-  return { allBoxChildren, placeholderChild, boxChildren };
+  return { allBoxChildren };
 }
 
 describe('GoldenGrid', () => {
@@ -42,97 +40,59 @@ describe('GoldenGrid', () => {
       expect(allBoxChildren).toHaveLength(1);
     });
 
-    test('placeholder child is identified by placeholder prop', () => {
-      const ph = React.createElement(GoldenBox, { placeholder: true });
-      const reg = React.createElement(GoldenBox, { key: 'r' });
-      const { placeholderChild, boxChildren } = mapChildren([ph, reg]);
-      expect(placeholderChild).not.toBeNull();
-      expect(placeholderChild!.props.placeholder).toBe(true);
-      expect(boxChildren).toHaveLength(1);
-    });
-
-    test('without a placeholder child, placeholderChild is null', () => {
-      const reg1 = React.createElement(GoldenBox, { key: '1' });
-      const reg2 = React.createElement(GoldenBox, { key: '2' });
-      const { placeholderChild, boxChildren } = mapChildren([reg1, reg2]);
-      expect(placeholderChild).toBeNull();
-      expect(boxChildren).toHaveLength(2);
-    });
-
     test('no children produces empty results', () => {
-      const { placeholderChild, boxChildren } = mapChildren(undefined);
-      expect(placeholderChild).toBeNull();
-      expect(boxChildren).toHaveLength(0);
+      const { allBoxChildren } = mapChildren(undefined);
+      expect(allBoxChildren).toHaveLength(0);
     });
 
     test('extra children beyond slot count are silently dropped via index access', () => {
       const boxes = Array.from({ length: 10 }, (_, i) =>
         React.createElement(GoldenBox, { key: i })
       );
-      const { boxChildren } = mapChildren(boxes);
+      const { allBoxChildren } = mapChildren(boxes);
       const slotCount = 3;
-      const assigned = Array.from({ length: slotCount }, (_, i) => boxChildren[i] ?? null);
+      const assigned = Array.from({ length: slotCount }, (_, i) => allBoxChildren[i] ?? null);
       expect(assigned).toHaveLength(3);
       expect(assigned.every(c => c !== null)).toBe(true);
     });
 
     test('fewer children than slots: unassigned slots receive null', () => {
-      const { boxChildren } = mapChildren([React.createElement(GoldenBox, {})]);
+      const { allBoxChildren } = mapChildren([React.createElement(GoldenBox, {})]);
       const slotCount = 3;
-      const assigned = Array.from({ length: slotCount }, (_, i) => boxChildren[i] ?? null);
+      const assigned = Array.from({ length: slotCount }, (_, i) => allBoxChildren[i] ?? null);
       expect(assigned[0]).not.toBeNull();
       expect(assigned[1]).toBeNull();
       expect(assigned[2]).toBeNull();
     });
 
-    test('only the placeholder is stripped from regular boxChildren', () => {
-      const ph = React.createElement(GoldenBox, { placeholder: true });
-      const reg1 = React.createElement(GoldenBox, { key: '1' });
-      const reg2 = React.createElement(GoldenBox, { key: '2' });
-      const { boxChildren } = mapChildren([ph, reg1, reg2]);
+    test('when placeholder exists, first child maps to placeholder slot', () => {
+      const placeholderExists = true;
+      const children = [
+        React.createElement(GoldenBox, { key: '0' }),
+        React.createElement(GoldenBox, { key: '1' }),
+        React.createElement(GoldenBox, { key: '2' }),
+      ];
+      const { allBoxChildren } = mapChildren(children);
+      const placeholderChild = placeholderExists ? (allBoxChildren[0] ?? null) : null;
+      const boxChildren = placeholderExists ? allBoxChildren.slice(1) : allBoxChildren;
+      expect(placeholderChild).toBe(allBoxChildren[0]);
       expect(boxChildren).toHaveLength(2);
-      expect(boxChildren.every(c => !c.props.placeholder)).toBe(true);
+    });
+
+    test('when no placeholder, all children map to visible slots', () => {
+      const placeholderExists = false;
+      const children = [
+        React.createElement(GoldenBox, { key: '0' }),
+        React.createElement(GoldenBox, { key: '1' }),
+      ];
+      const { allBoxChildren } = mapChildren(children);
+      const placeholderChild = placeholderExists ? (allBoxChildren[0] ?? null) : null;
+      const boxChildren = placeholderExists ? allBoxChildren.slice(1) : allBoxChildren;
+      expect(placeholderChild).toBeNull();
+      expect(boxChildren).toHaveLength(2);
     });
   });
 
-  // ─── prop presence detection ──────────────────────────────────────────────
-
-  describe('prop presence detection', () => {
-    test("'color' in props is true when color is explicitly passed as undefined", () => {
-      const props = { color: undefined } as { color?: string };
-      expect('color' in props).toBe(true);
-    });
-
-    test("'color' in props is false when the color key is absent", () => {
-      const props = {} as { color?: string };
-      expect('color' in props).toBe(false);
-    });
-
-    test("'outline' in props is true when outline is explicitly passed as undefined", () => {
-      const props = { outline: undefined } as { outline?: string };
-      expect('outline' in props).toBe(true);
-    });
-
-    test("'outline' in props is false when the outline key is absent", () => {
-      const props = {} as { outline?: string };
-      expect('outline' in props).toBe(false);
-    });
-
-    test("clockwise boolean controls spiral direction", () => {
-      const cw = { clockwise: true };
-      const ccw = { clockwise: false };
-      expect(cw.clockwise).toBe(true);
-      expect(ccw.clockwise).toBe(false);
-    });
-
-    test("placement accepts 'right', 'bottom', 'left', 'top' string values", () => {
-      const placements = ["right", "bottom", "left", "top"] as const;
-      placements.forEach(p => {
-        const props = { placement: p };
-        expect(props.placement).toBe(p);
-      });
-    });
-  });
 
   // ─── outline border construction ──────────────────────────────────────────
 

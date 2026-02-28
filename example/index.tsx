@@ -304,16 +304,16 @@ const ExampleApp = () => {
                     </button></>}.
                     {hasPlaceholder && <>{" "}Grids that skip{" "}
                         <span className="mad-lib-static">{skippedDigits.join(", ")}</span>
-                        {" "}will include a single irregular box of the combined relative proprotions to keep the grid golden.</>}
-                    {" "}Did you know you can
-                    {" "}<button className="mad-lib-btn" onClick={() => setShowExport(true)}>EXPORT</button> your grid?{" "}
-                    List{" "}
+                        {" "}will include a single irregular box of the combined relative proportions to keep the grid golden.</>}
+                    {" "}List{" "}
                     <button className="mad-lib-btn" onClick={() => {
                         const idx = LABEL_MODES.indexOf(labelMode);
                         setLabelMode(LABEL_MODES[(idx + 1) % LABEL_MODES.length]);
                     }}>
                         {labelMode}
-                    </button>{" "}in each box from smallest to largest.
+                    </button>{" "}in each box from smallest to largest.{" "}
+                    Did you know you can{" "}
+                    <button className="mad-lib-btn" onClick={() => setShowExport(true)}>EXPORT</button> your grid?
                 </p>
             </header>
             
@@ -326,18 +326,11 @@ const ExampleApp = () => {
                     outline={useOutline ? outlineValue : undefined}
                     placement={inputControl.placement}
                 >
-                    <GoldenBox placeholder>
-                        {labelMode !== 'NOTHING' && (
-                            <span className="box-label" style={{ color: outlineColor }}>
-                                {getLabel(1, labelMode)}.
-                            </span>
-                        )}
-                    </GoldenBox>
-                    {FIB_STOPS.slice(1).map((_, i) => (
-                        <GoldenBox key={i + 1}>
+                    {Array.from({ length: 79 }, (_, i) => (
+                        <GoldenBox key={i}>
                             {labelMode !== 'NOTHING' && (
                                 <span className="box-label" style={{ color: outlineColor }}>
-                                    {getLabel(i + 1 + (hasPlaceholder ? 1 : 0), labelMode)}.
+                                    {getLabel(i + 1, labelMode)}.
                                 </span>
                             )}
                         </GoldenBox>

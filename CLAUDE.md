@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Purpose
 
-`@gifcommit/golden-grids` is an npm library that gives developers a **golden-ratio grid layout system for building websites**. A consumer installs the package, configures a grid (via props or a JSON config file), and uses the generated proportional boxes as layout areas to place their own content into.
+`@gifcommit/golden-grids` is an npm library that gives developers a **golden-ratio grid layout system for building websites**. A consumer installs the package, configures a grid via props, and uses the generated proportional boxes as layout areas to place their own content into.
 
 The spiral grid is the product — not a visualisation tool. The `<div>` boxes that `GoldenGrid` renders are the slots a consuming site maps its content into.
 
@@ -87,7 +87,7 @@ Vite switches between them via `VITE_BUILD_DEMO=1` (see `vite.config.ts`). A res
 3. `generateGoldenGridLayout()` in `gridGenerator.ts` places squares sequentially — first two explicitly, then each subsequent square flush against the current bounding box, cycling through 4 directions (CW or CCW). Rotation is applied as an integer coordinate transform. Coordinates are normalized to remove negative offsets.
 4. `GoldenGrid` renders declarative JSX — a relative `<div class="golden-grid">` containing absolutely-positioned `<div class="golden-grid__box">` slots at percentage coordinates. If `color` is provided, an HSL progression is applied across slots. If `outline` is provided, borders are applied (right+bottom per box, top+left on the container) so shared edges never double up.
 5. When `from > 1`, skipped leading squares are collapsed into a single placeholder `<div class="golden-grid__box golden-grid__box--placeholder">` to preserve spiral proportions
-6. `GoldenBox` children map into slots in order. A `<GoldenBox placeholder>` targets the placeholder slot. Extra children beyond the visible count are silently ignored.
+6. `GoldenBox` children map into slots positionally. When `from > 1`, the first `<GoldenBox>` fills the skipped-range placeholder; remaining children fill visible slots in order. When `from = 1`, all children map to visible slots directly. Extra children are silently ignored.
 
 ### CSS strategy
 

@@ -20,25 +20,33 @@ npm install @gifcommit/golden-grids
 import { GoldenGrid, GoldenBox } from '@gifcommit/golden-grids'
 // CSS is auto-injected — no separate import needed
 
-// Transparent layout slots (no color):
+// Transparent layout slots:
 <GoldenGrid from={1} to={5} />
+
+// With outline:
+<GoldenGrid from={1} to={5} outline="2px solid #000000" />
 
 // With HSL color progression:
 <GoldenGrid from={1} to={5} color="#7f7ec7" />
 
-// With outline:
-<GoldenGrid from={1} to={5} color="#7f7ec7" outline="2px solid #000000" />
+// Map your content into grid slots in order:
+<GoldenGrid from={1} to={3}>
+  <GoldenBox><h1>Largest box</h1></GoldenBox>
+  <GoldenBox><p>Second box</p></GoldenBox>
+  <GoldenBox><p>Third box</p></GoldenBox>
+  <GoldenBox><p>Fourth box</p></GoldenBox>
+</GoldenGrid>
 
-// Compound component — map your content into grid slots:
-<GoldenGrid from={3} to={5} color="#7f7ec7">
-  <GoldenBox placeholder><p>Fills the skipped-range area</p></GoldenBox>
+// When from > 1, the skipped range becomes the first slot:
+<GoldenGrid from={3} to={5}>
+  <GoldenBox><p>Skipped-range area</p></GoldenBox>
   <GoldenBox><h1>First visible box</h1></GoldenBox>
   <GoldenBox><p>Second visible box</p></GoldenBox>
   <GoldenBox><p>Third visible box</p></GoldenBox>
 </GoldenGrid>
 ```
 
-Extra `<GoldenBox>` children beyond the visible slot count are silently ignored, so you can always declare the full set of 78 and let the config control what renders.
+Extra `<GoldenBox>` children beyond the slot count are silently ignored, so you can always declare the full set and let `from`/`to` control what renders.
 
 ## Configuration
 
@@ -50,7 +58,7 @@ Extra `<GoldenBox>` children beyond the visible slot count are silently ignored,
 | `outline`   | `string` (CSS border)                    | Optional border applied to all box edges — e.g. `"2px solid #000000"`. Shared edges draw a single line (no doubling).            |
 | `placement` | `"right" \| "bottom" \| "left" \| "top"` | Starting direction of the spiral. Defaults to `"right"`.                                                                         |
 | `clockwise` | `boolean`                                | Spiral direction — `true` for clockwise, `false` for counter-clockwise. Defaults to `true`.                                      |
-| `children`  | `GoldenBox` elements                     | Optional slot content. Each `<GoldenBox>` maps to a visible square in order. Use `<GoldenBox placeholder>` for the skipped area. |
+| `children`  | `GoldenBox` elements                     | Optional slot content. Each `<GoldenBox>` maps to a slot in order. When `from > 1`, the first `<GoldenBox>` fills the skipped-range area. |
 
 ## How it works
 
