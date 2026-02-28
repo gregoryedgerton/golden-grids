@@ -1,3 +1,10 @@
+# [1.2.0](https://github.com/gregoryedgerton/golden-grids/compare/v1.1.0...v1.2.0) (2026-02-28)
+
+
+### Features
+
+* **demo:** 4-way label mode cycle for grid boxes ([cb6232a](https://github.com/gregoryedgerton/golden-grids/commit/cb6232ae0f103d485721006d832bb9038dabdb25))
+
 # [1.1.0](https://github.com/gregoryedgerton/golden-grids/compare/v1.0.0...v1.1.0) (2026-02-26)
 
 
