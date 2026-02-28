@@ -1,3 +1,25 @@
+# [3.0.0](https://github.com/gregoryedgerton/golden-grids/compare/v2.0.0...v3.0.0) (2026-02-28)
+
+
+* feat!: positional child mapping — first GoldenBox fills placeholder slot ([d0aa315](https://github.com/gregoryedgerton/golden-grids/commit/d0aa315e87e9af9d529a3ac7b48cd2463c7712f8))
+
+
+### Reverts
+
+* remove JSON config tests — pattern adds no library value ([ea1da18](https://github.com/gregoryedgerton/golden-grids/commit/ea1da184a42e05cafaaa59c5ae277431b381388f))
+
+
+### BREAKING CHANGES
+
+* The placeholder prop on GoldenBox is removed. When from > 1,
+the first GoldenBox child automatically fills the skipped-range area. All
+subsequent children map to visible slots in order. No magic attribute needed.
+
+Also moves the export CTA to the end of the mad-lib paragraph and fixes
+a typo in the placeholder description (proprotions → proportions).
+
+Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>
+
 # [2.0.0](https://github.com/gregoryedgerton/golden-grids/compare/v1.2.0...v2.0.0) (2026-02-28)
 
 
