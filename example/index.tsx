@@ -264,11 +264,16 @@ const ExampleApp = () => {
                     placement={inputControl.placement}
                 >
                     {Array.from({ length: 79 }, (_, i) => {
-                        // When a placeholder exists it occupies the last child slot (index 78).
-                        // Label it "1" (first in priority); visible slots get labels 2..79.
-                        // Without a placeholder the natural 1..79 ordering applies.
+                        // When a placeholder exists it occupies the last child slot (index 78)
+                        // and is labeled 1 (first in sequence). Visible slot children sit at
+                        // positions 0..77; GoldenGrid's priority mapping reverses them so
+                        // position 0 → largest box. Using boxCount - i means position 0 carries
+                        // the highest label (boxCount), which after inversion lands on the largest
+                        // visible box — giving ascending sequence order: placeholder=1, smallest
+                        // visible=2, …, largest visible=boxCount.
+                        // Without a placeholder the natural priority order (1..N) applies.
                         const labelIndex = hasPlaceholder
-                            ? (i < 78 ? i + 2 : 1)
+                            ? (i < 78 ? boxCount - i : 1)
                             : i + 1;
                         return (
                             <GoldenBox key={i}>
