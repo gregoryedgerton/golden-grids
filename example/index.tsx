@@ -363,12 +363,12 @@ const ExampleApp = () => {
                 >
                     {panelEdge === 'left' ? (
                         <>
-                            <span className="control-float__tab-label">GOLDEND GRID GENERATOR</span>
+                            <span className="control-float__tab-label">GOLDEN GRID GENERATOR</span>
                             <span className="control-float__tab-toggle">{panelOpen ? '−' : '+'}</span>
                         </>
                     ) : (
                         <>
-                            <span>GOLDEND GRID GENERATOR</span>
+                            <span>GOLDEN GRID GENERATOR</span>
                             <span className="control-float__tab-toggle">{panelOpen ? '−' : '+'}</span>
                         </>
                     )}
