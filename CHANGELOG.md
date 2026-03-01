@@ -1,3 +1,10 @@
+# [3.2.0](https://github.com/gregoryedgerton/golden-grids/compare/v3.1.0...v3.2.0) (2026-03-01)
+
+
+### Features
+
+* children map largest-to-smallest (priority order) ([b84d882](https://github.com/gregoryedgerton/golden-grids/commit/b84d8822fa7bc03c773c9e296aa632b2e1ad0d88))
+
 # [3.1.0](https://github.com/gregoryedgerton/golden-grids/compare/v3.0.0...v3.1.0) (2026-03-01)
 
 
