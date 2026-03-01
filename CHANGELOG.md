@@ -1,3 +1,11 @@
+# [3.1.0](https://github.com/gregoryedgerton/golden-grids/compare/v3.0.0...v3.1.0) (2026-03-01)
+
+
+### Features
+
+* **demo:** adaptive floating panel with viewport-fit grid preview ([9e7703e](https://github.com/gregoryedgerton/golden-grids/commit/9e7703effe2e97c71637cb8ded043e592292429c))
+* **demo:** panel closed by default, outline on, body bottom padding ([6eeccaa](https://github.com/gregoryedgerton/golden-grids/commit/6eeccaacd0e1144d390eeef2b062905f39890c67))
+
 # [3.0.0](https://github.com/gregoryedgerton/golden-grids/compare/v2.0.0...v3.0.0) (2026-02-28)
 
 
