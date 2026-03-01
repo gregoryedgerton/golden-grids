@@ -78,8 +78,8 @@ const GoldenGrid: React.FC<GoldenGridProps> = (props): React.ReactElement<any> =
 
   // --- positional child mapping ---
   const placeholderExists = skippedSquares.length > 0;
-  const placeholderChild = placeholderExists ? (allBoxChildren[0] ?? null) : null;
-  const boxChildren = placeholderExists ? allBoxChildren.slice(1) : allBoxChildren;
+  const placeholderChild = placeholderExists ? (allBoxChildren[allBoxChildren.length - 1] ?? null) : null;
+  const boxChildren = placeholderExists ? allBoxChildren.slice(0, -1) : allBoxChildren;
 
   // --- placeholder bounds ---
   let placeholderStyle: React.CSSProperties | null = null;

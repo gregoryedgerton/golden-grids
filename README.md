@@ -38,16 +38,16 @@ import { GoldenGrid, GoldenBox } from '@gifcommit/golden-grids'
   <GoldenBox><p>Smallest box</p></GoldenBox>
 </GoldenGrid>
 
-// When from > 1, the skipped range becomes the first slot:
+// When from > 1, the skipped range becomes a placeholder slot — declare it last:
 <GoldenGrid from={3} to={5}>
-  <GoldenBox><p>Skipped-range area</p></GoldenBox>
   <GoldenBox><h1>Largest visible box</h1></GoldenBox>
   <GoldenBox><p>Second visible box</p></GoldenBox>
   <GoldenBox><p>Smallest visible box</p></GoldenBox>
+  <GoldenBox><p>Skipped-range area</p></GoldenBox>
 </GoldenGrid>
 ```
 
-Children map in priority order — first child fills the largest box, last child fills the smallest. Extra `<GoldenBox>` children beyond the slot count are silently ignored, so you can always declare the full set and let `from`/`to` control what renders.
+Children map in priority order — first child fills the largest box, last child fills the smallest. When `from > 1`, the final `<GoldenBox>` fills the skipped-range placeholder. Extra `<GoldenBox>` children beyond the slot count are silently ignored, so you can always declare the full set and let `from`/`to` control what renders.
 
 ## Configuration
 
@@ -59,7 +59,7 @@ Children map in priority order — first child fills the largest box, last child
 | `outline`   | `string` (CSS border)                    | Optional border applied to all box edges — e.g. `"2px solid #000000"`. Shared edges draw a single line (no doubling).                                               |
 | `placement` | `"right" \| "bottom" \| "left" \| "top"` | Starting direction of the spiral. Defaults to `"right"`.                                                                                                            |
 | `clockwise` | `boolean`                                | Spiral direction — `true` for clockwise, `false` for counter-clockwise. Defaults to `true`.                                                                         |
-| `children`  | `GoldenBox` elements                     | Optional slot content. Children map largest-to-smallest — first child fills the largest box. When `from > 1`, the first `<GoldenBox>` fills the skipped-range area. |
+| `children`  | `GoldenBox` elements                     | Optional slot content. Children map largest-to-smallest — first child fills the largest box. When `from > 1`, the last `<GoldenBox>` fills the skipped-range placeholder. |
 
 ## How it works
 

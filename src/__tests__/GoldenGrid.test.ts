@@ -80,7 +80,7 @@ describe('GoldenGrid', () => {
       expect(assigned[0]).toBe(allBoxChildren[slotCount - 1]); // smallest slot = last child
     });
 
-    test('when placeholder exists, first child maps to placeholder slot', () => {
+    test('when placeholder exists, last child maps to placeholder slot', () => {
       const placeholderExists = true;
       const children = [
         React.createElement(GoldenBox, { key: '0' }),
@@ -88,9 +88,9 @@ describe('GoldenGrid', () => {
         React.createElement(GoldenBox, { key: '2' }),
       ];
       const { allBoxChildren } = mapChildren(children);
-      const placeholderChild = placeholderExists ? (allBoxChildren[0] ?? null) : null;
-      const boxChildren = placeholderExists ? allBoxChildren.slice(1) : allBoxChildren;
-      expect(placeholderChild).toBe(allBoxChildren[0]);
+      const placeholderChild = placeholderExists ? (allBoxChildren[allBoxChildren.length - 1] ?? null) : null;
+      const boxChildren = placeholderExists ? allBoxChildren.slice(0, -1) : allBoxChildren;
+      expect(placeholderChild).toBe(allBoxChildren[allBoxChildren.length - 1]);
       expect(boxChildren).toHaveLength(2);
     });
 

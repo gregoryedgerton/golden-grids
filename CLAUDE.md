@@ -27,11 +27,12 @@ import { GoldenGrid, GoldenBox } from '@gifcommit/golden-grids'
 // With outline (CSS border shorthand — no double borders on shared edges):
 <GoldenGrid from={1} to={5} color="#7f7ec7" outline="2px solid #000000" />
 
-// Compound component — children map largest-to-smallest (priority order):
+// Compound component — children map largest-to-smallest (priority order);
+// when from > 1, the last GoldenBox fills the skipped-range placeholder:
 <GoldenGrid from={3} to={5} color="#7f7ec7">
-  <GoldenBox placeholder><p>Fills the skipped-range placeholder area</p></GoldenBox>
   <GoldenBox><h1>Largest visible slot</h1></GoldenBox>
   <GoldenBox><p>Smallest visible slot</p></GoldenBox>
+  <GoldenBox><p>Fills the skipped-range placeholder area</p></GoldenBox>
 </GoldenGrid>
 ```
 
@@ -45,7 +46,7 @@ import { GoldenGrid, GoldenBox } from '@gifcommit/golden-grids'
   outline?: string;           // CSS border shorthand e.g. "2px solid #000000"
   clockwise?: boolean;        // Spiral direction, default true
   placement?: PlacementValue; // Starting orientation, default "right"
-  children?: React.ReactNode; // GoldenBox children map largest-to-smallest — first child fills the largest box
+  children?: React.ReactNode; // GoldenBox children map largest-to-smallest — first child fills the largest box; when from > 1, last child fills the placeholder
 }
 ```
 
@@ -87,7 +88,7 @@ Vite switches between them via `VITE_BUILD_DEMO=1` (see `vite.config.ts`). A res
 3. `generateGoldenGridLayout()` in `gridGenerator.ts` places squares sequentially — first two explicitly, then each subsequent square flush against the current bounding box, cycling through 4 directions (CW or CCW). Rotation is applied as an integer coordinate transform. Coordinates are normalized to remove negative offsets.
 4. `GoldenGrid` renders declarative JSX — a relative `<div class="golden-grid">` containing absolutely-positioned `<div class="golden-grid__box">` slots at percentage coordinates. If `color` is provided, an HSL progression is applied across slots. If `outline` is provided, borders are applied (right+bottom per box, top+left on the container) so shared edges never double up.
 5. When `from > 1`, skipped leading squares are collapsed into a single placeholder `<div class="golden-grid__box golden-grid__box--placeholder">` to preserve spiral proportions
-6. `GoldenBox` children map into slots in priority order — first child fills the largest (most prominent) box, last child fills the smallest. When `from > 1`, the first `<GoldenBox>` fills the skipped-range placeholder; remaining children map largest-to-smallest across visible slots. Extra children beyond the slot count are silently ignored.
+6. `GoldenBox` children map into slots in priority order — first child fills the largest (most prominent) box, descending to smallest. When `from > 1`, the last `<GoldenBox>` fills the skipped-range placeholder; all preceding children map largest-to-smallest across visible slots. Extra children beyond the slot count are silently ignored.
 
 ### CSS strategy
 
