@@ -167,7 +167,7 @@ const Dial: React.FC<DialProps> = ({ value, onChange, label, stops, wrap = false
 const ExampleApp = () => {
     const { inputControl, setInputControl } = useGrid();
     const [showExport, setShowExport] = useState(false);
-    const [panelOpen, setPanelOpen] = useState(true);
+    const [panelOpen, setPanelOpen] = useState(false);
     const [copyLabel, setCopyLabel] = useState("Copy");
     const [useOutline, setUseOutline] = useState(true);
     const [outlineWidth, setOutlineWidth] = useState(2);
