@@ -306,7 +306,7 @@ body {
   flex-direction: column;
   padding: 1rem 0;
   letter-spacing: 0;
-  font-size: 1.1em;
+  font-size: 1em;
 }
 
 .control-float--left.control-float--closed {
@@ -336,6 +336,7 @@ body {
   writing-mode: vertical-rl;
   text-orientation: mixed;
   letter-spacing: 0.1em;
+  white-space: nowrap;
 }
 
 .box-label {
