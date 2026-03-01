@@ -30,16 +30,16 @@ describe('toAlpha', () => {
 });
 
 describe('getLabel', () => {
-    const modes: LabelMode[] = ['ROMAN NUMERALS', 'ALPHABET', 'INTEGERS', 'NOTHING'];
+    const modes: LabelMode[] = ['ROMAN NUMERALS', 'THE ALPHABET', 'INTEGERS', 'NOTHING'];
 
     test('ROMAN NUMERALS returns roman numeral', () => {
         expect(getLabel(1, 'ROMAN NUMERALS')).toBe('I');
         expect(getLabel(27, 'ROMAN NUMERALS')).toBe('XXVII');
     });
 
-    test('ALPHABET returns bijective base-26 letter', () => {
-        expect(getLabel(1, 'ALPHABET')).toBe('A');
-        expect(getLabel(27, 'ALPHABET')).toBe('AA');
+    test('THE ALPHABET returns bijective base-26 letter', () => {
+        expect(getLabel(1, 'THE ALPHABET')).toBe('A');
+        expect(getLabel(27, 'THE ALPHABET')).toBe('AA');
     });
 
     test('INTEGERS returns string integer', () => {

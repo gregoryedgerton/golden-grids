@@ -1,5 +1,5 @@
-export type LabelMode = 'ROMAN NUMERALS' | 'ALPHABET' | 'INTEGERS' | 'NOTHING';
-export const LABEL_MODES: LabelMode[] = ['ROMAN NUMERALS', 'ALPHABET', 'INTEGERS', 'NOTHING'];
+export type LabelMode = 'ROMAN NUMERALS' | 'THE ALPHABET' | 'INTEGERS' | 'NOTHING';
+export const LABEL_MODES: LabelMode[] = ['ROMAN NUMERALS', 'THE ALPHABET', 'INTEGERS', 'NOTHING'];
 
 export function toRoman(n: number): string {
     const vals = [1000, 900, 500, 400, 100, 90, 50, 40, 10, 9, 5, 4, 1];
@@ -26,7 +26,7 @@ export function toAlpha(n: number): string {
 export function getLabel(n: number, mode: LabelMode): string {
     switch (mode) {
         case 'ROMAN NUMERALS': return toRoman(n);
-        case 'ALPHABET':       return toAlpha(n);
+        case 'THE ALPHABET':       return toAlpha(n);
         case 'INTEGERS':       return String(n);
         case 'NOTHING':        return '';
     }

@@ -169,8 +169,8 @@ const ExampleApp = () => {
     const [showExport, setShowExport] = useState(false);
     const [panelOpen, setPanelOpen] = useState(true);
     const [copyLabel, setCopyLabel] = useState("Copy");
-    const [useOutline, setUseOutline] = useState(false);
-    const [outlineWidth, setOutlineWidth] = useState(1);
+    const [useOutline, setUseOutline] = useState(true);
+    const [outlineWidth, setOutlineWidth] = useState(2);
     const [outlineStyle, setOutlineStyle] = useState('solid');
     const [outlineColor, setOutlineColor] = useState('#000000');
     const [useColor, setUseColor] = useState(true);
@@ -252,7 +252,7 @@ const ExampleApp = () => {
     return (
         <div>
             <section
-                className="grid-preview"
+                className={`grid-preview grid-preview--panel-${panelEdge}`}
                 style={{ '--grid-ratio-w': gridRatioW, '--grid-ratio-h': gridRatioH } as React.CSSProperties}
             >
                 <GoldenGrid
@@ -276,20 +276,6 @@ const ExampleApp = () => {
             </section>
 
             <div className={`control-float control-float--${panelEdge}${panelOpen ? '' : ' control-float--closed'}`}>
-                <button
-                    className="control-float__tab"
-                    onClick={() => setPanelOpen(o => !o)}
-                    aria-expanded={panelOpen}
-                >
-                    {panelEdge === 'left' ? (
-                        panelOpen ? '◀' : '▶'
-                    ) : (
-                        <>
-                            <span>Configure</span>
-                            <span>{panelOpen ? '▲' : '▼'}</span>
-                        </>
-                    )}
-                </button>
                 <div className="control-float__body">
                     <p className="mad-lib">
                         Make a Golden Grid from{" "}
@@ -358,17 +344,34 @@ const ExampleApp = () => {
                         {hasPlaceholder && <>{" "}Grids that skip{" "}
                             <span className="mad-lib-static">{skippedDigits.join(", ")}</span>
                             {" "}will include a single irregular box of the combined relative proportions to keep the grid golden.</>}
-                        {" "}List{" "}
+                        {" "}Display{" "}
                         <button className="mad-lib-btn" onClick={() => {
                             const idx = LABEL_MODES.indexOf(labelMode);
                             setLabelMode(LABEL_MODES[(idx + 1) % LABEL_MODES.length]);
                         }}>
                             {labelMode}
-                        </button>{" "}in each box from smallest to largest.{" "}
-                        Did you know you can{" "}
-                        <button className="mad-lib-btn" onClick={() => setShowExport(true)}>EXPORT</button> your grid?
+                        </button>{" "}in each box from smallest to largest, and{" "}
+                        <button className="mad-lib-btn" onClick={() => setShowExport(true)}>EXPORT</button>{" "}this grid.
                     </p>
                 </div>
+                <button
+                    className="control-float__tab"
+                    onClick={() => setPanelOpen(o => !o)}
+                    aria-expanded={panelOpen}
+                    style={useOutline ? (panelEdge === 'left' ? { borderRight: outlineValue } : { borderBottom: outlineValue }) : undefined}
+                >
+                    {panelEdge === 'left' ? (
+                        <>
+                            <span className="control-float__tab-label">GOLDEND GRID GENERATOR</span>
+                            <span>{panelOpen ? '−' : '+'}</span>
+                        </>
+                    ) : (
+                        <>
+                            <span>GOLDEND GRID GENERATOR</span>
+                            <span>{panelOpen ? '−' : '+'}</span>
+                        </>
+                    )}
+                </button>
             </div>
 
             {showExport && (

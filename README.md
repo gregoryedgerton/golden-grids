@@ -2,7 +2,7 @@
 
 How I Learned to Stop Worrying about Rows and Columns and Love the Golden Ratio
 
-[Live Demo](https://gregoryedgerton.github.io/golden-grids/)
+[Golden Grid Generator](https://gregoryedgerton.github.io/golden-grids/) — Explore the sequence, define your inputs and export what you create.
 
 ## What is it?
 
@@ -49,14 +49,14 @@ Extra `<GoldenBox>` children beyond the slot count are silently ignored, so you 
 
 ## Configuration
 
-| Prop        | Type                                     | Description                                                                                                                      |
-| ----------- | ---------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
-| `from`      | `number`                                 | Index position (1–78) in the Fibonacci Sequence. The library sorts your range smallest to largest automatically.                 |
-| `to`        | `number`                                 | Another index position (1–78). Together with `from` this defines your slice of the sequence.                                     |
-| `color`     | `string` (hex)                           | Optional base color for the HSL progression. When omitted, boxes are transparent layout slots.                                   |
-| `outline`   | `string` (CSS border)                    | Optional border applied to all box edges — e.g. `"2px solid #000000"`. Shared edges draw a single line (no doubling).            |
-| `placement` | `"right" \| "bottom" \| "left" \| "top"` | Starting direction of the spiral. Defaults to `"right"`.                                                                         |
-| `clockwise` | `boolean`                                | Spiral direction — `true` for clockwise, `false` for counter-clockwise. Defaults to `true`.                                      |
+| Prop        | Type                                     | Description                                                                                                                              |
+| ----------- | ---------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| `from`      | `number`                                 | Index position (1–78) in the Fibonacci Sequence. The library sorts your range smallest to largest automatically.                         |
+| `to`        | `number`                                 | Another index position (1–78). Together with `from` this defines your slice of the sequence.                                             |
+| `color`     | `string` (hex)                           | Optional base color for the HSL progression. When omitted, boxes are transparent layout slots.                                           |
+| `outline`   | `string` (CSS border)                    | Optional border applied to all box edges — e.g. `"2px solid #000000"`. Shared edges draw a single line (no doubling).                    |
+| `placement` | `"right" \| "bottom" \| "left" \| "top"` | Starting direction of the spiral. Defaults to `"right"`.                                                                                 |
+| `clockwise` | `boolean`                                | Spiral direction — `true` for clockwise, `false` for counter-clockwise. Defaults to `true`.                                              |
 | `children`  | `GoldenBox` elements                     | Optional slot content. Children map to slots smallest-to-largest. When `from > 1`, the first `<GoldenBox>` fills the skipped-range area. |
 
 ## How it works
@@ -83,18 +83,18 @@ The library deliberately does not enforce responsive breakpoints or automaticall
 
 ```tsx
 // Static — derive from viewport at render time
-const isMobile = window.matchMedia('(max-width: 768px)').matches;
-<GoldenGrid from={1} to={isMobile ? 3 : 5} color="#7f7ec7" />
+const isMobile = window.matchMedia("(max-width: 768px)").matches;
+<GoldenGrid from={1} to={isMobile ? 3 : 5} color="#7f7ec7" />;
 
 // Reactive — update state on breakpoint change
 const [to, setTo] = useState(5);
 useEffect(() => {
-  const mq = window.matchMedia('(max-width: 768px)');
+  const mq = window.matchMedia("(max-width: 768px)");
   const handler = (e: MediaQueryListEvent) => setTo(e.matches ? 3 : 5);
-  mq.addEventListener('change', handler);
-  return () => mq.removeEventListener('change', handler);
+  mq.addEventListener("change", handler);
+  return () => mq.removeEventListener("change", handler);
 }, []);
-<GoldenGrid from={1} to={to} color="#7f7ec7" />
+<GoldenGrid from={1} to={to} color="#7f7ec7" />;
 ```
 
 ## How big can I go?
