@@ -146,7 +146,7 @@ const GoldenGrid: React.FC<GoldenGridProps> = (props): React.ReactElement<any> =
             ...boxBorder,
           }}
         >
-          {boxChildren[i] ?? null}
+          {boxChildren[totalRequested - 1 - i] ?? null}
         </div>
       ))}
     </div>

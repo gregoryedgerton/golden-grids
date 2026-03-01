@@ -45,24 +45,39 @@ describe('GoldenGrid', () => {
       expect(allBoxChildren).toHaveLength(0);
     });
 
-    test('extra children beyond slot count are silently dropped via index access', () => {
+    test('extra children beyond slot count are silently dropped (reversed mapping)', () => {
       const boxes = Array.from({ length: 10 }, (_, i) =>
         React.createElement(GoldenBox, { key: i })
       );
       const { allBoxChildren } = mapChildren(boxes);
       const slotCount = 3;
-      const assigned = Array.from({ length: slotCount }, (_, i) => allBoxChildren[i] ?? null);
+      // reversed: slot i gets allBoxChildren[slotCount - 1 - i]
+      const assigned = Array.from({ length: slotCount }, (_, i) => allBoxChildren[slotCount - 1 - i] ?? null);
       expect(assigned).toHaveLength(3);
       expect(assigned.every(c => c !== null)).toBe(true);
     });
 
-    test('fewer children than slots: unassigned slots receive null', () => {
+    test('fewer children than slots: child fills the largest slot, smaller slots receive null', () => {
       const { allBoxChildren } = mapChildren([React.createElement(GoldenBox, {})]);
       const slotCount = 3;
-      const assigned = Array.from({ length: slotCount }, (_, i) => allBoxChildren[i] ?? null);
-      expect(assigned[0]).not.toBeNull();
+      // slots 0..N-1 where 0 = smallest, N-1 = largest; first child → largest slot
+      const assigned = Array.from({ length: slotCount }, (_, i) => allBoxChildren[slotCount - 1 - i] ?? null);
+      expect(assigned[0]).toBeNull();
       expect(assigned[1]).toBeNull();
-      expect(assigned[2]).toBeNull();
+      expect(assigned[2]).not.toBeNull();
+    });
+
+    test('first child maps to the largest slot, last child to the smallest (largest-to-smallest DOM order)', () => {
+      const boxes = [
+        React.createElement(GoldenBox, { key: '0' }), // most important → largest slot
+        React.createElement(GoldenBox, { key: '1' }),
+        React.createElement(GoldenBox, { key: '2' }), // least important → smallest slot
+      ];
+      const { allBoxChildren } = mapChildren(boxes);
+      const slotCount = 3;
+      const assigned = Array.from({ length: slotCount }, (_, i) => allBoxChildren[slotCount - 1 - i] ?? null);
+      expect(assigned[slotCount - 1]).toBe(allBoxChildren[0]); // largest slot = first child
+      expect(assigned[0]).toBe(allBoxChildren[slotCount - 1]); // smallest slot = last child
     });
 
     test('when placeholder exists, first child maps to placeholder slot', () => {

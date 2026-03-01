@@ -1,8 +1,8 @@
 # Golden Grids
 
-How I Learned to Stop Worrying about Rows and Columns and Love the Golden Ratio
+### How I Learned to Stop Worrying about Rows and Columns and Love the Golden Ratio
 
-[Golden Grid Generator](https://gregoryedgerton.github.io/golden-grids/) — Explore the sequence, define your inputs and export what you create.
+Try the [Golden Grid Generator](https://gregoryedgerton.github.io/golden-grids/) — Explore the sequence, define your inputs and export what you create.
 
 ## What is it?
 
@@ -13,6 +13,8 @@ Golden Grids is a responsive layout library driven by the Fibonacci Sequence. In
 ```bash
 npm install @gifcommit/golden-grids
 ```
+
+or visit [![npm](https://img.shields.io/npm/v/@gifcommit/golden-grids)](https://www.npmjs.com/package/@gifcommit/golden-grids) for the latest published package
 
 ## Usage
 
@@ -29,35 +31,35 @@ import { GoldenGrid, GoldenBox } from '@gifcommit/golden-grids'
 // With HSL color progression:
 <GoldenGrid from={1} to={5} color="#7f7ec7" />
 
-// Map your content into grid slots — children map smallest to largest:
+// Map your content into grid slots — children map largest to smallest:
 <GoldenGrid from={1} to={3}>
-  <GoldenBox><p>Smallest box</p></GoldenBox>
-  <GoldenBox><p>Second box</p></GoldenBox>
   <GoldenBox><h1>Largest box</h1></GoldenBox>
+  <GoldenBox><p>Second box</p></GoldenBox>
+  <GoldenBox><p>Smallest box</p></GoldenBox>
 </GoldenGrid>
 
 // When from > 1, the skipped range becomes the first slot:
 <GoldenGrid from={3} to={5}>
   <GoldenBox><p>Skipped-range area</p></GoldenBox>
-  <GoldenBox><p>Smallest visible box</p></GoldenBox>
-  <GoldenBox><p>Second visible box</p></GoldenBox>
   <GoldenBox><h1>Largest visible box</h1></GoldenBox>
+  <GoldenBox><p>Second visible box</p></GoldenBox>
+  <GoldenBox><p>Smallest visible box</p></GoldenBox>
 </GoldenGrid>
 ```
 
-Extra `<GoldenBox>` children beyond the slot count are silently ignored, so you can always declare the full set and let `from`/`to` control what renders.
+Children map in priority order — first child fills the largest box, last child fills the smallest. Extra `<GoldenBox>` children beyond the slot count are silently ignored, so you can always declare the full set and let `from`/`to` control what renders.
 
 ## Configuration
 
-| Prop        | Type                                     | Description                                                                                                                              |
-| ----------- | ---------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
-| `from`      | `number`                                 | Index position (1–78) in the Fibonacci Sequence. The library sorts your range smallest to largest automatically.                         |
-| `to`        | `number`                                 | Another index position (1–78). Together with `from` this defines your slice of the sequence.                                             |
-| `color`     | `string` (hex)                           | Optional base color for the HSL progression. When omitted, boxes are transparent layout slots.                                           |
-| `outline`   | `string` (CSS border)                    | Optional border applied to all box edges — e.g. `"2px solid #000000"`. Shared edges draw a single line (no doubling).                    |
-| `placement` | `"right" \| "bottom" \| "left" \| "top"` | Starting direction of the spiral. Defaults to `"right"`.                                                                                 |
-| `clockwise` | `boolean`                                | Spiral direction — `true` for clockwise, `false` for counter-clockwise. Defaults to `true`.                                              |
-| `children`  | `GoldenBox` elements                     | Optional slot content. Children map to slots smallest-to-largest. When `from > 1`, the first `<GoldenBox>` fills the skipped-range area. |
+| Prop        | Type                                     | Description                                                                                                                                                         |
+| ----------- | ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `from`      | `number`                                 | Index position (1–78) in the Fibonacci Sequence. The library sorts your range smallest to largest automatically.                                                    |
+| `to`        | `number`                                 | Another index position (1–78). Together with `from` this defines your slice of the sequence.                                                                        |
+| `color`     | `string` (hex)                           | Optional base color for the HSL progression. When omitted, boxes are transparent layout slots.                                                                      |
+| `outline`   | `string` (CSS border)                    | Optional border applied to all box edges — e.g. `"2px solid #000000"`. Shared edges draw a single line (no doubling).                                               |
+| `placement` | `"right" \| "bottom" \| "left" \| "top"` | Starting direction of the spiral. Defaults to `"right"`.                                                                                                            |
+| `clockwise` | `boolean`                                | Spiral direction — `true` for clockwise, `false` for counter-clockwise. Defaults to `true`.                                                                         |
+| `children`  | `GoldenBox` elements                     | Optional slot content. Children map largest-to-smallest — first child fills the largest box. When `from > 1`, the first `<GoldenBox>` fills the skipped-range area. |
 
 ## How it works
 

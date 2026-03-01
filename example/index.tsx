@@ -350,7 +350,7 @@ const ExampleApp = () => {
                             setLabelMode(LABEL_MODES[(idx + 1) % LABEL_MODES.length]);
                         }}>
                             {labelMode}
-                        </button>{" "}in each box from smallest to largest, and{" "}
+                        </button>{" "}in each box from largest to smallest, and{" "}
                         <button className="mad-lib-btn" onClick={() => setShowExport(true)}>EXPORT</button>{" "}this grid.
                     </p>
                 </div>
