@@ -1,3 +1,10 @@
+# [3.3.0](https://github.com/gregoryedgerton/golden-grids/compare/v3.2.0...v3.3.0) (2026-03-01)
+
+
+### Features
+
+* placeholder child moves to last position in priority order ([d658a82](https://github.com/gregoryedgerton/golden-grids/commit/d658a82f10ff865c585f71341496c10358b7bd9a))
+
 # [3.2.0](https://github.com/gregoryedgerton/golden-grids/compare/v3.1.0...v3.2.0) (2026-03-01)
 
 
