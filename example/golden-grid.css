@@ -331,6 +331,22 @@ body {
   box-sizing: border-box;
 }
 
+/* Toggle icon — hidden on hover, replaced by action word */
+.control-float__tab:hover .control-float__tab-toggle {
+  display: none;
+}
+
+.control-float__tab::after {
+  content: attr(data-action);
+  display: none;
+  font-size: 0.75em;
+  letter-spacing: 0.15em;
+}
+
+.control-float__tab:hover::after {
+  display: inline;
+}
+
 /* Rotated label for left panel tab */
 .control-float__tab-label {
   writing-mode: vertical-rl;

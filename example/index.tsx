@@ -358,17 +358,18 @@ const ExampleApp = () => {
                     className="control-float__tab"
                     onClick={() => setPanelOpen(o => !o)}
                     aria-expanded={panelOpen}
+                    data-action={panelOpen ? 'CLOSE' : 'OPEN'}
                     style={useOutline ? (panelEdge === 'left' ? { borderRight: outlineValue } : { borderBottom: outlineValue }) : undefined}
                 >
                     {panelEdge === 'left' ? (
                         <>
                             <span className="control-float__tab-label">GOLDEND GRID GENERATOR</span>
-                            <span>{panelOpen ? '−' : '+'}</span>
+                            <span className="control-float__tab-toggle">{panelOpen ? '−' : '+'}</span>
                         </>
                     ) : (
                         <>
                             <span>GOLDEND GRID GENERATOR</span>
-                            <span>{panelOpen ? '−' : '+'}</span>
+                            <span className="control-float__tab-toggle">{panelOpen ? '−' : '+'}</span>
                         </>
                     )}
                 </button>
