@@ -3,12 +3,8 @@ body {
   padding: 0;
 }
 
-.control-panel {
-  font-family: sans-serif;
-  margin: 1.5em;
-}
-
 .mad-lib {
+  font-family: sans-serif;
   font-size: 1.4em;
   line-height: 2.8;
   margin: 0;
@@ -219,7 +215,117 @@ body {
 }
 
 .grid-preview {
-  padding: 1em;
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  box-sizing: border-box;
+}
+
+.grid-preview .golden-grid {
+  width: min(
+    calc(100vw - 4rem),
+    calc((100vh - 4rem) * var(--grid-ratio-w, 1) / var(--grid-ratio-h, 1))
+  );
+}
+
+/* Base panel */
+.control-float {
+  position: fixed;
+  z-index: 100;
+  background: white;
+  display: flex;
+  transition: transform 0.25s ease;
+}
+
+/* Top-anchored: landscape grids — full width, slides from top */
+.control-float--top {
+  flex-direction: column;
+  top: 0;
+  left: 0;
+  right: 0;
+  border-radius: 0;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.15);
+}
+
+.control-float--top .control-float__body {
+  order: 1;
+  max-height: 50vh;
+  overflow-y: auto;
+}
+
+.control-float--top .control-float__tab {
+  order: 2;
+  width: 100%;
+  height: 2.5rem;
+  padding: 0 1.25rem;
+  border-radius: 0;
+}
+
+.control-float--top.control-float--closed {
+  transform: translateY(calc(-100% + 2.5rem));
+}
+
+/* Left-anchored: portrait grids — full height, slides from left */
+.control-float--left {
+  flex-direction: row;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  height: 100vh;
+  border-radius: 0;
+  box-shadow: 4px 0 24px rgba(0, 0, 0, 0.15);
+}
+
+.control-float--left .control-float__body {
+  order: 1;
+  width: min(80vw, 480px);
+  height: 100%;
+  overflow-y: auto;
+}
+
+.control-float--left .control-float__tab {
+  order: 2;
+  width: 2.5rem;
+  height: auto;
+  flex-shrink: 0;
+  flex-direction: column;
+  border-radius: 0;
+  letter-spacing: 0;
+  font-size: 1.1em;
+  padding: 1rem 0;
+}
+
+.control-float--left.control-float--closed {
+  transform: translateX(calc(-100% + 2.5rem));
+}
+
+/* Shared tab styles */
+.control-float__tab {
+  background: #222;
+  color: white;
+  border: none;
+  cursor: pointer;
+  font-family: sans-serif;
+  font-size: 0.8em;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-sizing: border-box;
+}
+
+.control-float__tab:hover {
+  background: #444;
+}
+
+/* Panel body */
+.control-float__body {
+  padding: 1.5em 1.5em 1em;
 }
 
 .box-label {

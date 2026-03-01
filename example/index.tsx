@@ -1,10 +1,11 @@
-import React, { useState, useRef, useCallback } from "react";
+import React, { useState, useRef, useCallback, useMemo } from "react";
 import { createRoot } from "react-dom/client";
 import { GoldenGrid, GoldenBox } from "@gifcommit/golden-grids";
 import { GridProvider, useGrid } from "./GridContext";
 import type { InputControlType } from "./GridContext";
 import { generateGridHTML } from "./exportGrid";
-import { FIB_STOPS, getGridRange } from "../src/utils/fibonacci";
+import { FIB_STOPS, getGridRange, fullFibonacciUpTo } from "../src/utils/fibonacci";
+import { generateGoldenGridLayout, placementToRotateDeg } from "../src/utils/gridGenerator";
 import "./golden-grid.css";
 import { LabelMode, LABEL_MODES, getLabel } from "./labelUtils";
 
@@ -166,6 +167,7 @@ const Dial: React.FC<DialProps> = ({ value, onChange, label, stops, wrap = false
 const ExampleApp = () => {
     const { inputControl, setInputControl } = useGrid();
     const [showExport, setShowExport] = useState(false);
+    const [panelOpen, setPanelOpen] = useState(true);
     const [copyLabel, setCopyLabel] = useState("Copy");
     const [useOutline, setUseOutline] = useState(false);
     const [outlineWidth, setOutlineWidth] = useState(1);
@@ -193,6 +195,18 @@ const ExampleApp = () => {
         skippedDigits = FIB_STOPS.slice(1, lowerIdx);
         boxCount = range.endIdx - range.startIdx + 1 + (hasPlaceholder ? 1 : 0);
     }
+
+    const gridLayout = useMemo(() => {
+        const r = getGridRange(start, end);
+        if (!r || (r.startIdx === 0 && r.endIdx === 0)) return null;
+        const maxVal = Math.max(...r.userSequence);
+        const fullSeq = fullFibonacciUpTo(maxVal);
+        const rot = placementToRotateDeg(inputControl.placement, inputControl.clockwise, r.startIdx);
+        return generateGoldenGridLayout(fullSeq, inputControl.clockwise, rot);
+    }, [start, end, inputControl.placement, inputControl.clockwise]);
+    const gridRatioW = gridLayout ? gridLayout.width : 1;
+    const gridRatioH = gridLayout ? gridLayout.height : 1;
+    const panelEdge = gridRatioW >= gridRatioH ? 'top' : 'left';
 
     const outlineValue = `${outlineWidth}px ${outlineStyle} ${outlineColor}`;
 
@@ -237,87 +251,10 @@ const ExampleApp = () => {
 
     return (
         <div>
-            <header className="control-panel">
-                <p className="mad-lib">
-                    Make a Golden Grid from{" "}
-                    <Dial label="From" value={inputControl.from} stops={FIB_INDEX_STOPS}
-                        onChange={(n) => setInputControl({ ...inputControl, from: n })}
-                        format={(idx) => String(FIB_STOPS[idx])} />
-                    {" "}to{" "}
-                    <Dial label="To" value={inputControl.to} stops={FIB_INDEX_STOPS}
-                        onChange={(n) => setInputControl({ ...inputControl, to: n })}
-                        format={(idx) => String(FIB_STOPS[idx])} />
-                    , comprised of{" "}
-                    <span className="mad-lib-static">{boxCount}</span>
-                    {" "}{boxCount === 1 ? "box" : "boxes"} proportional to the{" "} 
-                    <span className="mad-lib-ordinal">
-                        <input className="mad-lib-input" type="number" aria-label="Lower ordinal"
-                            min={0} max={FIB_INDEX_STOPS.length - 1} value={lowerIdx}
-                            onChange={(e) => {
-                                const v = Math.max(0, Math.min(FIB_INDEX_STOPS.length - 1, parseInt(e.target.value) || 0));
-                                setInputControl({ ...inputControl, [lowerKey]: v });
-                            }} /><sup>{ordinalSuffix(lowerIdx)}</sup>
-                    </span>
-                    {" "}through{" "}
-                    <span className="mad-lib-ordinal">
-                        <input className="mad-lib-input" type="number" aria-label="Upper ordinal"
-                            min={0} max={FIB_INDEX_STOPS.length - 1} value={upperIdx}
-                            onChange={(e) => {
-                                const v = Math.max(0, Math.min(FIB_INDEX_STOPS.length - 1, parseInt(e.target.value) || 0));
-                                setInputControl({ ...inputControl, [upperKey]: v });
-                            }} /><sup>{ordinalSuffix(upperIdx)}</sup>
-                    </span>
-                    {" "}digits of the Fibonacci sequence, rendered with{" "}
-                    <button className="mad-lib-btn" onClick={() => setUseOutline(o => !o)}>
-                        {useOutline ? "AN OUTLINE" : "NO OUTLINE"}
-                    </button>
-                    {useOutline && <>{" "}that's{" "}
-                    <Dial label="Outline width" value={outlineWidth} stops={OUTLINE_WIDTH_STOPS}
-                        onChange={setOutlineWidth}
-                        format={(v) => `${v}px`} />
-                    {" "}thick{" "}
-                    <button className="mad-lib-btn" onClick={() => {
-                        const idx = OUTLINE_STYLES.indexOf(outlineStyle);
-                        setOutlineStyle(OUTLINE_STYLES[(idx + 1) % OUTLINE_STYLES.length]);
-                    }}>{outlineStyle.toUpperCase()}</button>
-                    {" "}and{" "}
-                    <input className="mad-lib-color" type="color" aria-label="Outline color"
-                        value={outlineColor}
-                        onChange={(e) => setOutlineColor(e.target.value)} /></>}
-                    {boxCount === 1 ? ", and a " : ", and "}
-                    <button className="mad-lib-btn" onClick={() => setUseColor(c => !c)}>
-                        {useColor ? "COLORED" : "TRANSPARENT"}
-                    </button>
-                    {" "}{boxCount === 1 ? "box" : "boxes"}{useColor && <>{" "}{boxCount === 1 ? "starting with" : "starting from"}{" "}
-                    <input className="mad-lib-color" type="color" aria-label="Grid color"
-                        value={inputControl.color}
-                        onChange={(e) => setInputControl({ ...inputControl, color: e.target.value })} />
-                    </>}{boxCount > 1 && <>{" "}with the second box placed to the{" "}
-                    <button className="mad-lib-btn" onClick={() => {
-                        const order = inputControl.clockwise ? PLACEMENT_STOPS : [...PLACEMENT_STOPS].reverse();
-                        const idx = order.indexOf(inputControl.placement);
-                        setInputControl({ ...inputControl, placement: order[(idx + 1) % order.length] });
-                    }}>{inputControl.placement.toUpperCase()}</button>
-                      {" "}and spirals{" "}
-                    <button className="mad-lib-btn" onClick={() => setInputControl({ ...inputControl, clockwise: !inputControl.clockwise })}>
-                        {inputControl.clockwise ? "CLOCKWISE" : "COUNTER-CLOCKWISE"}
-                    </button></>}.
-                    {hasPlaceholder && <>{" "}Grids that skip{" "}
-                        <span className="mad-lib-static">{skippedDigits.join(", ")}</span>
-                        {" "}will include a single irregular box of the combined relative proportions to keep the grid golden.</>}
-                    {" "}List{" "}
-                    <button className="mad-lib-btn" onClick={() => {
-                        const idx = LABEL_MODES.indexOf(labelMode);
-                        setLabelMode(LABEL_MODES[(idx + 1) % LABEL_MODES.length]);
-                    }}>
-                        {labelMode}
-                    </button>{" "}in each box from smallest to largest.{" "}
-                    Did you know you can{" "}
-                    <button className="mad-lib-btn" onClick={() => setShowExport(true)}>EXPORT</button> your grid?
-                </p>
-            </header>
-            
-            <section className="grid-preview">
+            <section
+                className="grid-preview"
+                style={{ '--grid-ratio-w': gridRatioW, '--grid-ratio-h': gridRatioH } as React.CSSProperties}
+            >
                 <GoldenGrid
                     from={inputControl.from}
                     to={inputControl.to}
@@ -337,6 +274,102 @@ const ExampleApp = () => {
                     ))}
                 </GoldenGrid>
             </section>
+
+            <div className={`control-float control-float--${panelEdge}${panelOpen ? '' : ' control-float--closed'}`}>
+                <button
+                    className="control-float__tab"
+                    onClick={() => setPanelOpen(o => !o)}
+                    aria-expanded={panelOpen}
+                >
+                    {panelEdge === 'left' ? (
+                        panelOpen ? '◀' : '▶'
+                    ) : (
+                        <>
+                            <span>Configure</span>
+                            <span>{panelOpen ? '▲' : '▼'}</span>
+                        </>
+                    )}
+                </button>
+                <div className="control-float__body">
+                    <p className="mad-lib">
+                        Make a Golden Grid from{" "}
+                        <Dial label="From" value={inputControl.from} stops={FIB_INDEX_STOPS}
+                            onChange={(n) => setInputControl({ ...inputControl, from: n })}
+                            format={(idx) => String(FIB_STOPS[idx])} />
+                        {" "}to{" "}
+                        <Dial label="To" value={inputControl.to} stops={FIB_INDEX_STOPS}
+                            onChange={(n) => setInputControl({ ...inputControl, to: n })}
+                            format={(idx) => String(FIB_STOPS[idx])} />
+                        , comprised of{" "}
+                        <span className="mad-lib-static">{boxCount}</span>
+                        {" "}{boxCount === 1 ? "box" : "boxes"} proportional to the{" "}
+                        <span className="mad-lib-ordinal">
+                            <input className="mad-lib-input" type="number" aria-label="Lower ordinal"
+                                min={0} max={FIB_INDEX_STOPS.length - 1} value={lowerIdx}
+                                onChange={(e) => {
+                                    const v = Math.max(0, Math.min(FIB_INDEX_STOPS.length - 1, parseInt(e.target.value) || 0));
+                                    setInputControl({ ...inputControl, [lowerKey]: v });
+                                }} /><sup>{ordinalSuffix(lowerIdx)}</sup>
+                        </span>
+                        {" "}through{" "}
+                        <span className="mad-lib-ordinal">
+                            <input className="mad-lib-input" type="number" aria-label="Upper ordinal"
+                                min={0} max={FIB_INDEX_STOPS.length - 1} value={upperIdx}
+                                onChange={(e) => {
+                                    const v = Math.max(0, Math.min(FIB_INDEX_STOPS.length - 1, parseInt(e.target.value) || 0));
+                                    setInputControl({ ...inputControl, [upperKey]: v });
+                                }} /><sup>{ordinalSuffix(upperIdx)}</sup>
+                        </span>
+                        {" "}digits of the Fibonacci sequence, rendered with{" "}
+                        <button className="mad-lib-btn" onClick={() => setUseOutline(o => !o)}>
+                            {useOutline ? "AN OUTLINE" : "NO OUTLINE"}
+                        </button>
+                        {useOutline && <>{" "}that's{" "}
+                        <Dial label="Outline width" value={outlineWidth} stops={OUTLINE_WIDTH_STOPS}
+                            onChange={setOutlineWidth}
+                            format={(v) => `${v}px`} />
+                        {" "}thick{" "}
+                        <button className="mad-lib-btn" onClick={() => {
+                            const idx = OUTLINE_STYLES.indexOf(outlineStyle);
+                            setOutlineStyle(OUTLINE_STYLES[(idx + 1) % OUTLINE_STYLES.length]);
+                        }}>{outlineStyle.toUpperCase()}</button>
+                        {" "}and{" "}
+                        <input className="mad-lib-color" type="color" aria-label="Outline color"
+                            value={outlineColor}
+                            onChange={(e) => setOutlineColor(e.target.value)} /></>}
+                        {boxCount === 1 ? ", and a " : ", and "}
+                        <button className="mad-lib-btn" onClick={() => setUseColor(c => !c)}>
+                            {useColor ? "COLORED" : "TRANSPARENT"}
+                        </button>
+                        {" "}{boxCount === 1 ? "box" : "boxes"}{useColor && <>{" "}{boxCount === 1 ? "starting with" : "starting from"}{" "}
+                        <input className="mad-lib-color" type="color" aria-label="Grid color"
+                            value={inputControl.color}
+                            onChange={(e) => setInputControl({ ...inputControl, color: e.target.value })} />
+                        </>}{boxCount > 1 && <>{" "}with the second box placed to the{" "}
+                        <button className="mad-lib-btn" onClick={() => {
+                            const order = inputControl.clockwise ? PLACEMENT_STOPS : [...PLACEMENT_STOPS].reverse();
+                            const idx = order.indexOf(inputControl.placement);
+                            setInputControl({ ...inputControl, placement: order[(idx + 1) % order.length] });
+                        }}>{inputControl.placement.toUpperCase()}</button>
+                          {" "}and spirals{" "}
+                        <button className="mad-lib-btn" onClick={() => setInputControl({ ...inputControl, clockwise: !inputControl.clockwise })}>
+                            {inputControl.clockwise ? "CLOCKWISE" : "COUNTER-CLOCKWISE"}
+                        </button></>}.
+                        {hasPlaceholder && <>{" "}Grids that skip{" "}
+                            <span className="mad-lib-static">{skippedDigits.join(", ")}</span>
+                            {" "}will include a single irregular box of the combined relative proportions to keep the grid golden.</>}
+                        {" "}List{" "}
+                        <button className="mad-lib-btn" onClick={() => {
+                            const idx = LABEL_MODES.indexOf(labelMode);
+                            setLabelMode(LABEL_MODES[(idx + 1) % LABEL_MODES.length]);
+                        }}>
+                            {labelMode}
+                        </button>{" "}in each box from smallest to largest.{" "}
+                        Did you know you can{" "}
+                        <button className="mad-lib-btn" onClick={() => setShowExport(true)}>EXPORT</button> your grid?
+                    </p>
+                </div>
+            </div>
 
             {showExport && (
                 <div className="export-overlay" onClick={(e) => { if (e.target === e.currentTarget) setShowExport(false); }}>
