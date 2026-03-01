@@ -263,15 +263,23 @@ const ExampleApp = () => {
                     outline={useOutline ? outlineValue : undefined}
                     placement={inputControl.placement}
                 >
-                    {Array.from({ length: 79 }, (_, i) => (
-                        <GoldenBox key={i}>
-                            {labelMode !== 'NOTHING' && (
-                                <span className="box-label" style={{ color: outlineColor }}>
-                                    {getLabel(i + 1, labelMode)}.
-                                </span>
-                            )}
-                        </GoldenBox>
-                    ))}
+                    {Array.from({ length: 79 }, (_, i) => {
+                        // When a placeholder exists it occupies the last child slot (index 78).
+                        // Label it "1" (first in priority); visible slots get labels 2..79.
+                        // Without a placeholder the natural 1..79 ordering applies.
+                        const labelIndex = hasPlaceholder
+                            ? (i < 78 ? i + 2 : 1)
+                            : i + 1;
+                        return (
+                            <GoldenBox key={i}>
+                                {labelMode !== 'NOTHING' && (
+                                    <span className="box-label" style={{ color: outlineColor }}>
+                                        {getLabel(labelIndex, labelMode)}.
+                                    </span>
+                                )}
+                            </GoldenBox>
+                        );
+                    })}
                 </GoldenGrid>
             </section>
 
