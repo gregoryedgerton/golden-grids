@@ -68,7 +68,7 @@ npm run setup        # Install Husky git hooks (run once after cloning)
 
 ## Publishing
 
-Package is published to npm as `@gifcommit/golden-grids`. Publishing is triggered by creating a GitHub Release — see `.github/workflows/publish.yml`. Requires `NPM_TOKEN` set as a GitHub Actions secret. Uses semantic-release — a `feat!` commit with `BREAKING CHANGE:` footer triggers a major version bump.
+Package is published to npm as `@gifcommit/golden-grids`. Publishing is triggered by creating a GitHub Release — see `.github/workflows/publish.yml`. Authenticates to npm via Trusted Publishing (OIDC) — no long-lived `NPM_TOKEN` is needed; the workflow's `id-token: write` permission lets the runner mint a short-lived credential that npm verifies against the configured trusted publisher. Uses semantic-release — a `feat!` commit with `BREAKING CHANGE:` footer triggers a major version bump.
 
 ## Architecture
 

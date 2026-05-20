@@ -31,6 +31,9 @@ jobs:
           registry-url: https://registry.npmjs.org
           cache: npm
 
+      - name: Ensure npm CLI supports Trusted Publishing (OIDC)
+        run: npm install -g npm@latest
+
       - run: npm ci
 
       - name: Release (or dry run)
