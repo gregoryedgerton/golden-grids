@@ -32,15 +32,20 @@ function parseOutline(
   }
 
   let style: "solid" | "dotted" | "dashed" = "solid";
+  let noBorder = false;
   const sm = rest.match(new RegExp(`\\s(${BORDER_STYLE_TOKENS})\\s`, "i"));
   if (sm) {
     const token = sm[1].toLowerCase();
-    style = token === "dotted" || token === "dashed" ? token : "solid";
+    if (token === "none" || token === "hidden") {
+      noBorder = true; // CSS none/hidden draws no border — mirror web, don't fall back to solid
+    } else {
+      style = token === "dotted" || token === "dashed" ? token : "solid";
+    }
     rest = rest.replace(sm[0], " ");
   }
 
   const color = rest.trim().replace(/\s+/g, " ");
-  if (width === null || !color) return null;
+  if (noBorder || width === null || !color) return null;
   return { width, style, color };
 }
 

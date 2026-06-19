@@ -105,6 +105,15 @@ describe("GoldenGrid (native)", () => {
     expect(single.props.style.width).toBe("100%");
   });
 
+  test("none/hidden outline styles draw no border (mirrors web)", () => {
+    for (const outline of ["2px none #000000", "2px hidden #000000"]) {
+      const t = render(React.createElement(GoldenGrid, { from: 1, to: 4, outline }));
+      expect(t.props.style.borderTopWidth).toBeUndefined();
+      expect(t.props.style.borderStyle).toBeUndefined();
+      expect(t.children[0].props.style.borderRightWidth).toBeUndefined();
+    }
+  });
+
   test("first child fills the largest slot (largest-to-smallest)", () => {
     const boxes = ["0", "1", "2", "3"].map((txt, i) =>
       React.createElement(GoldenBox, { key: i }, txt)
