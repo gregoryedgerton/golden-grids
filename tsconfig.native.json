@@ -1,0 +1,13 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "types": ["react"],
+    "declaration": true,
+    "emitDeclarationOnly": true,
+    "noEmit": false,
+    "rootDir": "src",
+    "outDir": "dist/native/types"
+  },
+  "include": ["src/native", "src/core", "src/utils"],
+  "exclude": ["src/native/__shims__"]
+}
