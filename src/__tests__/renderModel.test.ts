@@ -29,13 +29,17 @@ describe("computeRenderModel — golden-master fixtures", () => {
   );
 
   // Self-contained contract: each entry stores its input and expected model, so
-  // native (Swift/Kotlin) ports drive the same cases. Assert the current code
-  // reproduces the stored model from the stored input.
-  test.each(FIXTURE_CASES.map((c) => c.name))(
-    "%s reproduces the committed fixture",
-    (name) => {
-      const { input, model } = committed[name];
-      expect(computeRenderModel(input)).toEqual(model);
+  // native (Swift/Kotlin) ports drive the same cases. Assert (a) the stored input
+  // still matches the current case matrix — so cases.ts can't drift from the
+  // fixture without regenerating — and (b) the current code reproduces the stored
+  // model from that input.
+  test.each(FIXTURE_CASES)(
+    "$name reproduces the committed fixture",
+    (c) => {
+      const entry = committed[c.name];
+      expect(entry).toBeDefined();
+      expect(entry.input).toEqual(c.input);
+      expect(computeRenderModel(entry.input)).toEqual(entry.model);
     }
   );
 
