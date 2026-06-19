@@ -10,10 +10,17 @@
       "import": "./dist/golden-grids.es.js",
       "require": "./dist/golden-grids.cjs.js",
       "types": "./dist/index.d.ts"
+    },
+    "./native": {
+      "types": "./dist/native/types/native/index.d.ts",
+      "react-native": "./dist/native/golden-grids-native.es.js",
+      "import": "./dist/native/golden-grids-native.es.js",
+      "require": "./dist/native/golden-grids-native.cjs.js"
     }
   },
   "scripts": {
-    "build": "vite build",
+    "build": "vite build && npm run build:native",
+    "build:native": "VITE_BUILD_NATIVE=1 vite build && tsc -p tsconfig.native.json && rm -rf dist/native/types/native/__shims__",
     "dev": "vite",
     "start": "vite",
     "serve": "vite preview",
@@ -37,11 +44,13 @@
     "@types/jest": "^27.5.2",
     "@types/react": "^19.0.8",
     "@types/react-dom": "^19.0.3",
+    "@types/react-test-renderer": "^18.3.1",
     "@vitejs/plugin-react": "^4.7.0",
     "husky": "^8.0.0",
     "jest": "^27.4.3",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
+    "react-test-renderer": "^18.3.1",
     "rollup": "^4.32.1",
     "rollup-plugin-dts": "^6.1.1",
     "rollup-plugin-peer-deps-external": "^2.2.4",
@@ -56,7 +65,16 @@
   },
   "peerDependencies": {
     "react": "^18.0.0",
-    "react-dom": "^18.0.0"
+    "react-dom": "^18.0.0",
+    "react-native": ">=0.72.0"
+  },
+  "peerDependenciesMeta": {
+    "react-dom": {
+      "optional": true
+    },
+    "react-native": {
+      "optional": true
+    }
   },
   "files": [
     "dist"
@@ -79,6 +97,9 @@
   "jest": {
     "preset": "ts-jest",
     "testEnvironment": "node",
+    "moduleNameMapper": {
+      "^react-native$": "<rootDir>/src/native/__shims__/react-native.ts"
+    },
     "globals": {
       "ts-jest": {
         "tsconfig": "./tsconfig.test.json"

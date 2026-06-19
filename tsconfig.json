@@ -12,7 +12,8 @@
     "moduleResolution": "Node",
     "baseUrl": ".",
     "paths": {
-      "@gifcommit/golden-grids": ["src/index.ts"]
+      "@gifcommit/golden-grids": ["src/index.ts"],
+      "react-native": ["src/native/__shims__/react-native.ts"]
     }
   }
 }
