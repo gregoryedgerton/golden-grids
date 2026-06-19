@@ -1,3 +1,10 @@
+# [3.4.0](https://github.com/gregoryedgerton/golden-grids/compare/v3.3.0...v3.4.0) (2026-06-19)
+
+
+### Features
+
+* React Native renderer via ./native subpath (cross-platform Phase 0+1) ([#5](https://github.com/gregoryedgerton/golden-grids/issues/5)) ([9461058](https://github.com/gregoryedgerton/golden-grids/commit/9461058a34747409ae8ac1c7dc4657591753a52f))
+
 # [3.3.0](https://github.com/gregoryedgerton/golden-grids/compare/v3.2.0...v3.3.0) (2026-03-01)
 
 
