@@ -91,6 +91,20 @@ describe("GoldenGrid (native)", () => {
     expect(dashed.props.style.borderTopColor).toBe("#000000");
   });
 
+  test("functional colours with spaces survive parsing", () => {
+    const t = render(React.createElement(GoldenGrid, { from: 1, to: 4, outline: "2px solid rgb(0, 0, 0)" }));
+    expect(t.props.style.borderTopColor).toBe("rgb(0, 0, 0)");
+    expect(t.props.style.borderTopWidth).toBe(2);
+    expect(t.props.style.borderStyle).toBe("solid");
+  });
+
+  test("container gets an explicit width so it doesn't collapse in non-stretching parents", () => {
+    const grid = render(React.createElement(GoldenGrid, { from: 1, to: 4 }));
+    expect(grid.props.style.width).toBe("100%");
+    const single = render(React.createElement(GoldenGrid, { from: 1, to: 1 }));
+    expect(single.props.style.width).toBe("100%");
+  });
+
   test("first child fills the largest slot (largest-to-smallest)", () => {
     const boxes = ["0", "1", "2", "3"].map((txt, i) =>
       React.createElement(GoldenBox, { key: i }, txt)

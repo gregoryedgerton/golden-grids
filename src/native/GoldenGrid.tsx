@@ -10,36 +10,37 @@ import { GoldenBox } from "./GoldenBox";
 
 export type { PlacementValue, GoldenGridProps };
 
-const BORDER_STYLE_TOKENS = new Set([
-  "solid", "dotted", "dashed", "double", "groove", "ridge", "inset", "outset", "none", "hidden",
-]);
+const BORDER_STYLE_TOKENS = "solid|dotted|dashed|double|groove|ridge|inset|outset|none|hidden";
 
 /** Parse a CSS border shorthand into RN border values. CSS allows the width,
- *  style and colour tokens in any order ("2px solid #000", "solid 2px #000",
- *  "#000 2px solid"), so classify each token rather than assume a fixed order —
- *  matching the web renderer, which hands the string straight to CSS. RN only
- *  supports solid | dotted | dashed, so other styles fall back to solid. Returns
- *  null when a px width and a colour can't both be found. */
+ *  style and colour tokens in any order, and the colour may itself contain
+ *  spaces (e.g. "2px solid rgb(0, 0, 0)"). So pull out the px width and a
+ *  border-style keyword wherever they appear, and treat whatever remains as the
+ *  colour — mirroring the web renderer, which hands the string straight to CSS.
+ *  RN only supports solid | dotted | dashed, so other styles fall back to solid.
+ *  Returns null when a px width and a colour can't both be found. */
 function parseOutline(
   outline: string
 ): { width: number; style: "solid" | "dotted" | "dashed"; color: string } | null {
-  let width: number | null = null;
-  let style: "solid" | "dotted" | "dashed" = "solid";
-  let color: string | null = null;
+  let rest = ` ${outline.trim()} `;
 
-  for (const token of outline.trim().split(/\s+/)) {
-    const w = token.match(/^(\d*\.?\d+)px$/);
-    if (w && width === null) {
-      width = parseFloat(w[1]);
-    } else if (BORDER_STYLE_TOKENS.has(token.toLowerCase())) {
-      const s = token.toLowerCase();
-      style = s === "dotted" || s === "dashed" ? s : "solid";
-    } else if (color === null) {
-      color = token;
-    }
+  let width: number | null = null;
+  const wm = rest.match(/\s(\d*\.?\d+)px\s/);
+  if (wm) {
+    width = parseFloat(wm[1]);
+    rest = rest.replace(wm[0], " ");
   }
 
-  if (width === null || color === null) return null;
+  let style: "solid" | "dotted" | "dashed" = "solid";
+  const sm = rest.match(new RegExp(`\\s(${BORDER_STYLE_TOKENS})\\s`, "i"));
+  if (sm) {
+    const token = sm[1].toLowerCase();
+    style = token === "dotted" || token === "dashed" ? token : "solid";
+    rest = rest.replace(sm[0], " ");
+  }
+
+  const color = rest.trim().replace(/\s+/g, " ");
+  if (width === null || !color) return null;
   return { width, style, color };
 }
 
@@ -80,7 +81,7 @@ const GoldenGrid: React.FC<GoldenGridProps> = (props) => {
   if (model.kind === "single") {
     const slot = model.slots[0];
     return (
-      <View style={{ aspectRatio: 1, ...containerBorder }}>
+      <View style={{ width: "100%", aspectRatio: 1, ...containerBorder }}>
         <View style={{ position: "absolute", left: 0, top: 0, width: "100%", height: "100%", ...bg(slot.color), ...boxBorder }}>
           {slotChildren[0]}
         </View>
@@ -89,7 +90,7 @@ const GoldenGrid: React.FC<GoldenGridProps> = (props) => {
   }
 
   return (
-    <View style={{ position: "relative", aspectRatio: model.aspectRatio.w / model.aspectRatio.h, ...containerBorder }}>
+    <View style={{ position: "relative", width: "100%", aspectRatio: model.aspectRatio.w / model.aspectRatio.h, ...containerBorder }}>
       {model.placeholder && (
         <View
           style={{
