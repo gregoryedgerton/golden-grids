@@ -59,11 +59,23 @@ describe("GoldenGrid (native)", () => {
 
   test("outline parses into split RN border props", () => {
     const t = render(React.createElement(GoldenGrid, { from: 1, to: 4, outline: "2px solid #000000" }));
+    expect(t.props.style.borderStyle).toBe("solid");
     expect(t.props.style.borderTopWidth).toBe(2);
     expect(t.props.style.borderTopColor).toBe("#000000");
     const child = t.children[0];
+    expect(child.props.style.borderStyle).toBe("solid");
     expect(child.props.style.borderRightWidth).toBe(2);
     expect(child.props.style.borderBottomColor).toBe("#000000");
+  });
+
+  test("dashed/dotted outline styles are preserved (mirrors web)", () => {
+    const dashed = render(React.createElement(GoldenGrid, { from: 1, to: 4, outline: "2px dashed #000000" }));
+    expect(dashed.props.style.borderStyle).toBe("dashed");
+    expect(dashed.children[0].props.style.borderStyle).toBe("dashed");
+
+    const dotted = render(React.createElement(GoldenGrid, { from: 1, to: 4, outline: "1px dotted #ff0000" }));
+    expect(dotted.props.style.borderStyle).toBe("dotted");
+    expect(dotted.children[0].props.style.borderStyle).toBe("dotted");
   });
 
   test("first child fills the largest slot (largest-to-smallest)", () => {

@@ -10,12 +10,17 @@ import { GoldenBox } from "./GoldenBox";
 
 export type { PlacementValue, GoldenGridProps };
 
-/** Parse a CSS border shorthand ("2px solid #000") into RN border values.
- *  Best-effort: width + colour; exotic shorthands fall through to no border. */
-function parseOutline(outline: string): { width: number; color: string } | null {
-  const m = outline.trim().match(/^(\d+(?:\.\d+)?)px\s+\S+\s+(.+)$/);
+/** Parse a CSS border shorthand ("2px dashed #000") into RN border values.
+ *  Captures the style token so dashed/dotted outlines mirror the web renderer;
+ *  RN only supports solid | dotted | dashed, so anything else falls back to solid. */
+function parseOutline(
+  outline: string
+): { width: number; style: "solid" | "dotted" | "dashed"; color: string } | null {
+  const m = outline.trim().match(/^(\d+(?:\.\d+)?)px\s+(\S+)\s+(.+)$/);
   if (!m) return null;
-  return { width: parseFloat(m[1]), color: m[2].trim() };
+  const token = m[2];
+  const style = token === "dotted" || token === "dashed" ? token : "solid";
+  return { width: parseFloat(m[1]), style, color: m[3].trim() };
 }
 
 const bg = (color: FillColor): ViewStyle => {
@@ -27,10 +32,10 @@ const GoldenGrid: React.FC<GoldenGridProps> = (props) => {
   const border = props.outline ? parseOutline(props.outline) : null;
   // Split borders like the web renderer so shared edges never double up.
   const containerBorder: ViewStyle = border
-    ? { borderTopWidth: border.width, borderLeftWidth: border.width, borderTopColor: border.color, borderLeftColor: border.color }
+    ? { borderStyle: border.style, borderTopWidth: border.width, borderLeftWidth: border.width, borderTopColor: border.color, borderLeftColor: border.color }
     : {};
   const boxBorder: ViewStyle = border
-    ? { borderRightWidth: border.width, borderBottomWidth: border.width, borderRightColor: border.color, borderBottomColor: border.color }
+    ? { borderStyle: border.style, borderRightWidth: border.width, borderBottomWidth: border.width, borderRightColor: border.color, borderBottomColor: border.color }
     : {};
 
   // --- child collection (the model + assignChildren supply the ordering) ---
