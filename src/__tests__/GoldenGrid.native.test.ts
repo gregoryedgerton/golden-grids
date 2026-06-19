@@ -78,6 +78,19 @@ describe("GoldenGrid (native)", () => {
     expect(dotted.children[0].props.style.borderStyle).toBe("dotted");
   });
 
+  test("outline tokens are order-independent (CSS shorthand)", () => {
+    for (const outline of ["2px solid #000000", "solid 2px #000000", "#000000 2px solid"]) {
+      const t = render(React.createElement(GoldenGrid, { from: 1, to: 4, outline }));
+      expect(t.props.style.borderStyle).toBe("solid");
+      expect(t.props.style.borderTopWidth).toBe(2);
+      expect(t.props.style.borderTopColor).toBe("#000000");
+    }
+    // style token in a non-leading position is still honoured
+    const dashed = render(React.createElement(GoldenGrid, { from: 1, to: 4, outline: "2px #000000 dashed" }));
+    expect(dashed.props.style.borderStyle).toBe("dashed");
+    expect(dashed.props.style.borderTopColor).toBe("#000000");
+  });
+
   test("first child fills the largest slot (largest-to-smallest)", () => {
     const boxes = ["0", "1", "2", "3"].map((txt, i) =>
       React.createElement(GoldenBox, { key: i }, txt)

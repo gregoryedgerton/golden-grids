@@ -10,17 +10,37 @@ import { GoldenBox } from "./GoldenBox";
 
 export type { PlacementValue, GoldenGridProps };
 
-/** Parse a CSS border shorthand ("2px dashed #000") into RN border values.
- *  Captures the style token so dashed/dotted outlines mirror the web renderer;
- *  RN only supports solid | dotted | dashed, so anything else falls back to solid. */
+const BORDER_STYLE_TOKENS = new Set([
+  "solid", "dotted", "dashed", "double", "groove", "ridge", "inset", "outset", "none", "hidden",
+]);
+
+/** Parse a CSS border shorthand into RN border values. CSS allows the width,
+ *  style and colour tokens in any order ("2px solid #000", "solid 2px #000",
+ *  "#000 2px solid"), so classify each token rather than assume a fixed order —
+ *  matching the web renderer, which hands the string straight to CSS. RN only
+ *  supports solid | dotted | dashed, so other styles fall back to solid. Returns
+ *  null when a px width and a colour can't both be found. */
 function parseOutline(
   outline: string
 ): { width: number; style: "solid" | "dotted" | "dashed"; color: string } | null {
-  const m = outline.trim().match(/^(\d+(?:\.\d+)?)px\s+(\S+)\s+(.+)$/);
-  if (!m) return null;
-  const token = m[2];
-  const style = token === "dotted" || token === "dashed" ? token : "solid";
-  return { width: parseFloat(m[1]), style, color: m[3].trim() };
+  let width: number | null = null;
+  let style: "solid" | "dotted" | "dashed" = "solid";
+  let color: string | null = null;
+
+  for (const token of outline.trim().split(/\s+/)) {
+    const w = token.match(/^(\d*\.?\d+)px$/);
+    if (w && width === null) {
+      width = parseFloat(w[1]);
+    } else if (BORDER_STYLE_TOKENS.has(token.toLowerCase())) {
+      const s = token.toLowerCase();
+      style = s === "dotted" || s === "dashed" ? s : "solid";
+    } else if (color === null) {
+      color = token;
+    }
+  }
+
+  if (width === null || color === null) return null;
+  return { width, style, color };
 }
 
 const bg = (color: FillColor): ViewStyle => {
