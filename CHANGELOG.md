@@ -1,3 +1,13 @@
+# [4.0.0](https://github.com/gregoryedgerton/golden-grids/compare/v3.4.0...v4.0.0) (2026-06-19)
+
+
+* feat(ios)!: native iOS (SwiftUI) support — cross-platform Phase 2 ([#6](https://github.com/gregoryedgerton/golden-grids/issues/6)) ([b0c7788](https://github.com/gregoryedgerton/golden-grids/commit/b0c77883291585514791463f9ac5d73243b3b8fe))
+
+
+### BREAKING CHANGES
+
+* golden-grids is now a cross-platform library, released as 4.0.0 to mark first-class native iOS (SwiftUI) support. No source changes are required for existing web or React Native consumers — the npm package's public API and dist output are unchanged; the major is a milestone, not a migration.
+
 # [3.4.0](https://github.com/gregoryedgerton/golden-grids/compare/v3.3.0...v3.4.0) (2026-06-19)
 
 
