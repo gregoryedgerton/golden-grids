@@ -1,768 +1,863 @@
 {
   "empty": {
-    "kind": "empty",
-    "aspectRatio": {
-      "w": 1,
-      "h": 1
+    "input": {
+      "from": 0,
+      "to": 0
     },
-    "slots": [],
-    "placeholder": null
+    "model": {
+      "kind": "empty",
+      "aspectRatio": {
+        "w": 1,
+        "h": 1
+      },
+      "slots": [],
+      "placeholder": null
+    }
   },
   "single": {
-    "kind": "single",
-    "aspectRatio": {
-      "w": 1,
-      "h": 1
+    "input": {
+      "from": 1,
+      "to": 1
     },
-    "slots": [
-      {
-        "rect": {
-          "left": 0,
-          "top": 0,
-          "width": 1,
-          "height": 1
-        },
-        "color": null,
-        "childIndex": 0
-      }
-    ],
-    "placeholder": null
+    "model": {
+      "kind": "single",
+      "aspectRatio": {
+        "w": 1,
+        "h": 1
+      },
+      "slots": [
+        {
+          "rect": {
+            "left": 0,
+            "top": 0,
+            "width": 1,
+            "height": 1
+          },
+          "color": null,
+          "childIndex": 0
+        }
+      ],
+      "placeholder": null
+    }
   },
   "single-color": {
-    "kind": "single",
-    "aspectRatio": {
-      "w": 1,
-      "h": 1
+    "input": {
+      "from": 1,
+      "to": 1,
+      "color": "#7f7ec7"
     },
-    "slots": [
-      {
-        "rect": {
-          "left": 0,
-          "top": 0,
-          "width": 1,
-          "height": 1
-        },
-        "color": {
-          "kind": "hsl",
-          "h": 240.82191780821915,
-          "s": 39.45945945945945,
-          "l": 63.725490196078425
-        },
-        "childIndex": 0
-      }
-    ],
-    "placeholder": null
+    "model": {
+      "kind": "single",
+      "aspectRatio": {
+        "w": 1,
+        "h": 1
+      },
+      "slots": [
+        {
+          "rect": {
+            "left": 0,
+            "top": 0,
+            "width": 1,
+            "height": 1
+          },
+          "color": {
+            "kind": "hsl",
+            "h": 240.82191780821915,
+            "s": 39.45945945945945,
+            "l": 63.725490196078425
+          },
+          "childIndex": 0
+        }
+      ],
+      "placeholder": null
+    }
   },
   "multi-default": {
-    "kind": "grid",
-    "aspectRatio": {
-      "w": 5,
-      "h": 3
+    "input": {
+      "from": 1,
+      "to": 4
     },
-    "slots": [
-      {
-        "rect": {
-          "left": 0.6,
-          "top": 0,
-          "width": 0.2,
-          "height": 0.3333333333333333
-        },
-        "color": null,
-        "childIndex": 3
+    "model": {
+      "kind": "grid",
+      "aspectRatio": {
+        "w": 5,
+        "h": 3
       },
-      {
-        "rect": {
-          "left": 0.8,
-          "top": 0,
-          "width": 0.2,
-          "height": 0.3333333333333333
+      "slots": [
+        {
+          "rect": {
+            "left": 0.6,
+            "top": 0,
+            "width": 0.2,
+            "height": 0.3333333333333333
+          },
+          "color": null,
+          "childIndex": 3
         },
-        "color": null,
-        "childIndex": 2
-      },
-      {
-        "rect": {
-          "left": 0.6,
-          "top": 0.3333333333333333,
-          "width": 0.4,
-          "height": 0.6666666666666666
+        {
+          "rect": {
+            "left": 0.8,
+            "top": 0,
+            "width": 0.2,
+            "height": 0.3333333333333333
+          },
+          "color": null,
+          "childIndex": 2
         },
-        "color": null,
-        "childIndex": 1
-      },
-      {
-        "rect": {
-          "left": 0,
-          "top": 0,
-          "width": 0.6,
-          "height": 1
+        {
+          "rect": {
+            "left": 0.6,
+            "top": 0.3333333333333333,
+            "width": 0.4,
+            "height": 0.6666666666666666
+          },
+          "color": null,
+          "childIndex": 1
         },
-        "color": null,
-        "childIndex": 0
-      }
-    ],
-    "placeholder": null
+        {
+          "rect": {
+            "left": 0,
+            "top": 0,
+            "width": 0.6,
+            "height": 1
+          },
+          "color": null,
+          "childIndex": 0
+        }
+      ],
+      "placeholder": null
+    }
   },
   "multi-color": {
-    "kind": "grid",
-    "aspectRatio": {
-      "w": 13,
-      "h": 8
+    "input": {
+      "from": 1,
+      "to": 6,
+      "color": "#7f7ec7"
     },
-    "slots": [
-      {
-        "rect": {
-          "left": 0.23076923076923078,
-          "top": 0.625,
-          "width": 0.07692307692307693,
-          "height": 0.125
-        },
-        "color": {
-          "kind": "hsl",
-          "h": 240.82191780821915,
-          "s": 39.45945945945945,
-          "l": 72.72549019607843
-        },
-        "childIndex": 5
+    "model": {
+      "kind": "grid",
+      "aspectRatio": {
+        "w": 13,
+        "h": 8
       },
-      {
-        "rect": {
-          "left": 0.3076923076923077,
-          "top": 0.625,
-          "width": 0.07692307692307693,
-          "height": 0.125
+      "slots": [
+        {
+          "rect": {
+            "left": 0.23076923076923078,
+            "top": 0.625,
+            "width": 0.07692307692307693,
+            "height": 0.125
+          },
+          "color": {
+            "kind": "hsl",
+            "h": 240.82191780821915,
+            "s": 39.45945945945945,
+            "l": 72.72549019607843
+          },
+          "childIndex": 5
         },
-        "color": {
-          "kind": "hsl",
-          "h": 282.82191780821915,
-          "s": 39.45945945945945,
-          "l": 69.12549019607843
+        {
+          "rect": {
+            "left": 0.3076923076923077,
+            "top": 0.625,
+            "width": 0.07692307692307693,
+            "height": 0.125
+          },
+          "color": {
+            "kind": "hsl",
+            "h": 282.82191780821915,
+            "s": 39.45945945945945,
+            "l": 69.12549019607843
+          },
+          "childIndex": 4
         },
-        "childIndex": 4
-      },
-      {
-        "rect": {
-          "left": 0.23076923076923078,
-          "top": 0.75,
-          "width": 0.15384615384615385,
-          "height": 0.25
+        {
+          "rect": {
+            "left": 0.23076923076923078,
+            "top": 0.75,
+            "width": 0.15384615384615385,
+            "height": 0.25
+          },
+          "color": {
+            "kind": "hsl",
+            "h": 324.82191780821915,
+            "s": 39.45945945945945,
+            "l": 65.52549019607842
+          },
+          "childIndex": 3
         },
-        "color": {
-          "kind": "hsl",
-          "h": 324.82191780821915,
-          "s": 39.45945945945945,
-          "l": 65.52549019607842
+        {
+          "rect": {
+            "left": 0,
+            "top": 0.625,
+            "width": 0.23076923076923078,
+            "height": 0.375
+          },
+          "color": {
+            "kind": "hsl",
+            "h": 6.821917808219155,
+            "s": 39.45945945945945,
+            "l": 61.92549019607843
+          },
+          "childIndex": 2
         },
-        "childIndex": 3
-      },
-      {
-        "rect": {
-          "left": 0,
-          "top": 0.625,
-          "width": 0.23076923076923078,
-          "height": 0.375
+        {
+          "rect": {
+            "left": 0,
+            "top": 0,
+            "width": 0.38461538461538464,
+            "height": 0.625
+          },
+          "color": {
+            "kind": "hsl",
+            "h": 48.821917808219155,
+            "s": 39.45945945945945,
+            "l": 58.32549019607843
+          },
+          "childIndex": 1
         },
-        "color": {
-          "kind": "hsl",
-          "h": 6.821917808219155,
-          "s": 39.45945945945945,
-          "l": 61.92549019607843
-        },
-        "childIndex": 2
-      },
-      {
-        "rect": {
-          "left": 0,
-          "top": 0,
-          "width": 0.38461538461538464,
-          "height": 0.625
-        },
-        "color": {
-          "kind": "hsl",
-          "h": 48.821917808219155,
-          "s": 39.45945945945945,
-          "l": 58.32549019607843
-        },
-        "childIndex": 1
-      },
-      {
-        "rect": {
-          "left": 0.38461538461538464,
-          "top": 0,
-          "width": 0.6153846153846154,
-          "height": 1
-        },
-        "color": {
-          "kind": "hsl",
-          "h": 90.82191780821915,
-          "s": 39.45945945945945,
-          "l": 54.725490196078425
-        },
-        "childIndex": 0
-      }
-    ],
-    "placeholder": null
+        {
+          "rect": {
+            "left": 0.38461538461538464,
+            "top": 0,
+            "width": 0.6153846153846154,
+            "height": 1
+          },
+          "color": {
+            "kind": "hsl",
+            "h": 90.82191780821915,
+            "s": 39.45945945945945,
+            "l": 54.725490196078425
+          },
+          "childIndex": 0
+        }
+      ],
+      "placeholder": null
+    }
   },
   "multi-color-ccw": {
-    "kind": "grid",
-    "aspectRatio": {
-      "w": 5,
-      "h": 8
+    "input": {
+      "from": 1,
+      "to": 5,
+      "color": "#7f7ec7",
+      "clockwise": false
     },
-    "slots": [
-      {
-        "rect": {
-          "left": 0.6,
-          "top": 0.25,
-          "width": 0.2,
-          "height": 0.125
-        },
-        "color": {
-          "kind": "hsl",
-          "h": 240.82191780821915,
-          "s": 39.45945945945945,
-          "l": 71.22549019607843
-        },
-        "childIndex": 4
+    "model": {
+      "kind": "grid",
+      "aspectRatio": {
+        "w": 5,
+        "h": 8
       },
-      {
-        "rect": {
-          "left": 0.8,
-          "top": 0.25,
-          "width": 0.2,
-          "height": 0.125
+      "slots": [
+        {
+          "rect": {
+            "left": 0.6,
+            "top": 0.25,
+            "width": 0.2,
+            "height": 0.125
+          },
+          "color": {
+            "kind": "hsl",
+            "h": 240.82191780821915,
+            "s": 39.45945945945945,
+            "l": 71.22549019607843
+          },
+          "childIndex": 4
         },
-        "color": {
-          "kind": "hsl",
-          "h": 289.57191780821915,
-          "s": 39.45945945945945,
-          "l": 67.47549019607843
+        {
+          "rect": {
+            "left": 0.8,
+            "top": 0.25,
+            "width": 0.2,
+            "height": 0.125
+          },
+          "color": {
+            "kind": "hsl",
+            "h": 289.57191780821915,
+            "s": 39.45945945945945,
+            "l": 67.47549019607843
+          },
+          "childIndex": 3
         },
-        "childIndex": 3
-      },
-      {
-        "rect": {
-          "left": 0.6,
-          "top": 0,
-          "width": 0.4,
-          "height": 0.25
+        {
+          "rect": {
+            "left": 0.6,
+            "top": 0,
+            "width": 0.4,
+            "height": 0.25
+          },
+          "color": {
+            "kind": "hsl",
+            "h": 338.32191780821915,
+            "s": 39.45945945945945,
+            "l": 63.725490196078425
+          },
+          "childIndex": 2
         },
-        "color": {
-          "kind": "hsl",
-          "h": 338.32191780821915,
-          "s": 39.45945945945945,
-          "l": 63.725490196078425
+        {
+          "rect": {
+            "left": 0,
+            "top": 0,
+            "width": 0.6,
+            "height": 0.375
+          },
+          "color": {
+            "kind": "hsl",
+            "h": 27.071917808219155,
+            "s": 39.45945945945945,
+            "l": 59.975490196078425
+          },
+          "childIndex": 1
         },
-        "childIndex": 2
-      },
-      {
-        "rect": {
-          "left": 0,
-          "top": 0,
-          "width": 0.6,
-          "height": 0.375
-        },
-        "color": {
-          "kind": "hsl",
-          "h": 27.071917808219155,
-          "s": 39.45945945945945,
-          "l": 59.975490196078425
-        },
-        "childIndex": 1
-      },
-      {
-        "rect": {
-          "left": 0,
-          "top": 0.375,
-          "width": 1,
-          "height": 0.625
-        },
-        "color": {
-          "kind": "hsl",
-          "h": 75.82191780821915,
-          "s": 39.45945945945945,
-          "l": 56.225490196078425
-        },
-        "childIndex": 0
-      }
-    ],
-    "placeholder": null
+        {
+          "rect": {
+            "left": 0,
+            "top": 0.375,
+            "width": 1,
+            "height": 0.625
+          },
+          "color": {
+            "kind": "hsl",
+            "h": 75.82191780821915,
+            "s": 39.45945945945945,
+            "l": 56.225490196078425
+          },
+          "childIndex": 0
+        }
+      ],
+      "placeholder": null
+    }
   },
   "placeholder": {
-    "kind": "grid",
-    "aspectRatio": {
-      "w": 8,
-      "h": 5
+    "input": {
+      "from": 3,
+      "to": 5
     },
-    "slots": [
-      {
-        "rect": {
-          "left": 0.75,
-          "top": 0,
-          "width": 0.25,
-          "height": 0.4
-        },
-        "color": null,
-        "childIndex": 2
+    "model": {
+      "kind": "grid",
+      "aspectRatio": {
+        "w": 8,
+        "h": 5
       },
-      {
+      "slots": [
+        {
+          "rect": {
+            "left": 0.75,
+            "top": 0,
+            "width": 0.25,
+            "height": 0.4
+          },
+          "color": null,
+          "childIndex": 2
+        },
+        {
+          "rect": {
+            "left": 0.625,
+            "top": 0.4,
+            "width": 0.375,
+            "height": 0.6
+          },
+          "color": null,
+          "childIndex": 1
+        },
+        {
+          "rect": {
+            "left": 0,
+            "top": 0,
+            "width": 0.625,
+            "height": 1
+          },
+          "color": null,
+          "childIndex": 0
+        }
+      ],
+      "placeholder": {
         "rect": {
           "left": 0.625,
-          "top": 0.4,
-          "width": 0.375,
-          "height": 0.6
-        },
-        "color": null,
-        "childIndex": 1
-      },
-      {
-        "rect": {
-          "left": 0,
           "top": 0,
-          "width": 0.625,
-          "height": 1
+          "width": 0.125,
+          "height": 0.4
         },
-        "color": null,
-        "childIndex": 0
+        "color": null
       }
-    ],
-    "placeholder": {
-      "rect": {
-        "left": 0.625,
-        "top": 0,
-        "width": 0.125,
-        "height": 0.4
-      },
-      "color": null
     }
   },
   "placeholder-color": {
-    "kind": "grid",
-    "aspectRatio": {
-      "w": 21,
-      "h": 13
+    "input": {
+      "from": 3,
+      "to": 7,
+      "color": "#7f7ec7"
     },
-    "slots": [
-      {
+    "model": {
+      "kind": "grid",
+      "aspectRatio": {
+        "w": 21,
+        "h": 13
+      },
+      "slots": [
+        {
+          "rect": {
+            "left": 0.2857142857142857,
+            "top": 0.6153846153846154,
+            "width": 0.09523809523809523,
+            "height": 0.15384615384615385
+          },
+          "color": {
+            "kind": "hsl",
+            "h": 273.32191780821915,
+            "s": 39.45945945945945,
+            "l": 68.72549019607843
+          },
+          "childIndex": 4
+        },
+        {
+          "rect": {
+            "left": 0.23809523809523808,
+            "top": 0.7692307692307693,
+            "width": 0.14285714285714285,
+            "height": 0.23076923076923078
+          },
+          "color": {
+            "kind": "hsl",
+            "h": 305.82191780821915,
+            "s": 39.45945945945945,
+            "l": 66.22549019607843
+          },
+          "childIndex": 3
+        },
+        {
+          "rect": {
+            "left": 0,
+            "top": 0.6153846153846154,
+            "width": 0.23809523809523808,
+            "height": 0.38461538461538464
+          },
+          "color": {
+            "kind": "hsl",
+            "h": 338.32191780821915,
+            "s": 39.45945945945945,
+            "l": 63.725490196078425
+          },
+          "childIndex": 2
+        },
+        {
+          "rect": {
+            "left": 0,
+            "top": 0,
+            "width": 0.38095238095238093,
+            "height": 0.6153846153846154
+          },
+          "color": {
+            "kind": "hsl",
+            "h": 10.821917808219155,
+            "s": 39.45945945945945,
+            "l": 61.225490196078425
+          },
+          "childIndex": 1
+        },
+        {
+          "rect": {
+            "left": 0.38095238095238093,
+            "top": 0,
+            "width": 0.6190476190476191,
+            "height": 1
+          },
+          "color": {
+            "kind": "hsl",
+            "h": 43.321917808219155,
+            "s": 39.45945945945945,
+            "l": 58.725490196078425
+          },
+          "childIndex": 0
+        }
+      ],
+      "placeholder": {
         "rect": {
-          "left": 0.2857142857142857,
+          "left": 0.23809523809523808,
           "top": 0.6153846153846154,
-          "width": 0.09523809523809523,
+          "width": 0.047619047619047616,
           "height": 0.15384615384615385
         },
         "color": {
-          "kind": "hsl",
-          "h": 273.32191780821915,
-          "s": 39.45945945945945,
-          "l": 68.72549019607843
-        },
-        "childIndex": 4
-      },
-      {
-        "rect": {
-          "left": 0.23809523809523808,
-          "top": 0.7692307692307693,
-          "width": 0.14285714285714285,
-          "height": 0.23076923076923078
-        },
-        "color": {
-          "kind": "hsl",
-          "h": 305.82191780821915,
-          "s": 39.45945945945945,
-          "l": 66.22549019607843
-        },
-        "childIndex": 3
-      },
-      {
-        "rect": {
-          "left": 0,
-          "top": 0.6153846153846154,
-          "width": 0.23809523809523808,
-          "height": 0.38461538461538464
-        },
-        "color": {
-          "kind": "hsl",
-          "h": 338.32191780821915,
-          "s": 39.45945945945945,
-          "l": 63.725490196078425
-        },
-        "childIndex": 2
-      },
-      {
-        "rect": {
-          "left": 0,
-          "top": 0,
-          "width": 0.38095238095238093,
-          "height": 0.6153846153846154
-        },
-        "color": {
-          "kind": "hsl",
-          "h": 10.821917808219155,
-          "s": 39.45945945945945,
-          "l": 61.225490196078425
-        },
-        "childIndex": 1
-      },
-      {
-        "rect": {
-          "left": 0.38095238095238093,
-          "top": 0,
-          "width": 0.6190476190476191,
-          "height": 1
-        },
-        "color": {
-          "kind": "hsl",
-          "h": 43.321917808219155,
-          "s": 39.45945945945945,
-          "l": 58.725490196078425
-        },
-        "childIndex": 0
-      }
-    ],
-    "placeholder": {
-      "rect": {
-        "left": 0.23809523809523808,
-        "top": 0.6153846153846154,
-        "width": 0.047619047619047616,
-        "height": 0.15384615384615385
-      },
-      "color": {
-        "kind": "raw",
-        "value": "#7f7ec7"
+          "kind": "raw",
+          "value": "#7f7ec7"
+        }
       }
     }
   },
   "placeholder-single-slot": {
-    "kind": "grid",
-    "aspectRatio": {
-      "w": 3,
-      "h": 2
+    "input": {
+      "from": 3,
+      "to": 3,
+      "color": "#7f7ec7"
     },
-    "slots": [
-      {
+    "model": {
+      "kind": "grid",
+      "aspectRatio": {
+        "w": 3,
+        "h": 2
+      },
+      "slots": [
+        {
+          "rect": {
+            "left": 0.3333333333333333,
+            "top": 0,
+            "width": 0.6666666666666666,
+            "height": 1
+          },
+          "color": {
+            "kind": "hsl",
+            "h": 330.82191780821915,
+            "s": 39.45945945945945,
+            "l": 63.725490196078425
+          },
+          "childIndex": 0
+        }
+      ],
+      "placeholder": {
         "rect": {
-          "left": 0.3333333333333333,
+          "left": 0,
           "top": 0,
-          "width": 0.6666666666666666,
+          "width": 0.3333333333333333,
           "height": 1
         },
         "color": {
-          "kind": "hsl",
-          "h": 330.82191780821915,
-          "s": 39.45945945945945,
-          "l": 63.725490196078425
-        },
-        "childIndex": 0
-      }
-    ],
-    "placeholder": {
-      "rect": {
-        "left": 0,
-        "top": 0,
-        "width": 0.3333333333333333,
-        "height": 1
-      },
-      "color": {
-        "kind": "raw",
-        "value": "#7f7ec7"
+          "kind": "raw",
+          "value": "#7f7ec7"
+        }
       }
     }
   },
   "placement-right": {
-    "kind": "grid",
-    "aspectRatio": {
-      "w": 8,
-      "h": 13
+    "input": {
+      "from": 3,
+      "to": 6,
+      "placement": "right"
     },
-    "slots": [
-      {
-        "rect": {
-          "left": 0.75,
-          "top": 0.6153846153846154,
-          "width": 0.25,
-          "height": 0.15384615384615385
-        },
-        "color": null,
-        "childIndex": 3
+    "model": {
+      "kind": "grid",
+      "aspectRatio": {
+        "w": 8,
+        "h": 13
       },
-      {
+      "slots": [
+        {
+          "rect": {
+            "left": 0.75,
+            "top": 0.6153846153846154,
+            "width": 0.25,
+            "height": 0.15384615384615385
+          },
+          "color": null,
+          "childIndex": 3
+        },
+        {
+          "rect": {
+            "left": 0.625,
+            "top": 0.7692307692307693,
+            "width": 0.375,
+            "height": 0.23076923076923078
+          },
+          "color": null,
+          "childIndex": 2
+        },
+        {
+          "rect": {
+            "left": 0,
+            "top": 0.6153846153846154,
+            "width": 0.625,
+            "height": 0.38461538461538464
+          },
+          "color": null,
+          "childIndex": 1
+        },
+        {
+          "rect": {
+            "left": 0,
+            "top": 0,
+            "width": 1,
+            "height": 0.6153846153846154
+          },
+          "color": null,
+          "childIndex": 0
+        }
+      ],
+      "placeholder": {
         "rect": {
           "left": 0.625,
-          "top": 0.7692307692307693,
-          "width": 0.375,
-          "height": 0.23076923076923078
-        },
-        "color": null,
-        "childIndex": 2
-      },
-      {
-        "rect": {
-          "left": 0,
           "top": 0.6153846153846154,
-          "width": 0.625,
-          "height": 0.38461538461538464
+          "width": 0.125,
+          "height": 0.15384615384615385
         },
-        "color": null,
-        "childIndex": 1
-      },
-      {
-        "rect": {
-          "left": 0,
-          "top": 0,
-          "width": 1,
-          "height": 0.6153846153846154
-        },
-        "color": null,
-        "childIndex": 0
+        "color": null
       }
-    ],
-    "placeholder": {
-      "rect": {
-        "left": 0.625,
-        "top": 0.6153846153846154,
-        "width": 0.125,
-        "height": 0.15384615384615385
-      },
-      "color": null
     }
   },
   "placement-bottom": {
-    "kind": "grid",
-    "aspectRatio": {
-      "w": 13,
-      "h": 8
+    "input": {
+      "from": 3,
+      "to": 6,
+      "placement": "bottom"
     },
-    "slots": [
-      {
+    "model": {
+      "kind": "grid",
+      "aspectRatio": {
+        "w": 13,
+        "h": 8
+      },
+      "slots": [
+        {
+          "rect": {
+            "left": 0.23076923076923078,
+            "top": 0.75,
+            "width": 0.15384615384615385,
+            "height": 0.25
+          },
+          "color": null,
+          "childIndex": 3
+        },
+        {
+          "rect": {
+            "left": 0,
+            "top": 0.625,
+            "width": 0.23076923076923078,
+            "height": 0.375
+          },
+          "color": null,
+          "childIndex": 2
+        },
+        {
+          "rect": {
+            "left": 0,
+            "top": 0,
+            "width": 0.38461538461538464,
+            "height": 0.625
+          },
+          "color": null,
+          "childIndex": 1
+        },
+        {
+          "rect": {
+            "left": 0.38461538461538464,
+            "top": 0,
+            "width": 0.6153846153846154,
+            "height": 1
+          },
+          "color": null,
+          "childIndex": 0
+        }
+      ],
+      "placeholder": {
         "rect": {
           "left": 0.23076923076923078,
-          "top": 0.75,
-          "width": 0.15384615384615385,
-          "height": 0.25
-        },
-        "color": null,
-        "childIndex": 3
-      },
-      {
-        "rect": {
-          "left": 0,
           "top": 0.625,
-          "width": 0.23076923076923078,
-          "height": 0.375
+          "width": 0.15384615384615385,
+          "height": 0.125
         },
-        "color": null,
-        "childIndex": 2
-      },
-      {
-        "rect": {
-          "left": 0,
-          "top": 0,
-          "width": 0.38461538461538464,
-          "height": 0.625
-        },
-        "color": null,
-        "childIndex": 1
-      },
-      {
-        "rect": {
-          "left": 0.38461538461538464,
-          "top": 0,
-          "width": 0.6153846153846154,
-          "height": 1
-        },
-        "color": null,
-        "childIndex": 0
+        "color": null
       }
-    ],
-    "placeholder": {
-      "rect": {
-        "left": 0.23076923076923078,
-        "top": 0.625,
-        "width": 0.15384615384615385,
-        "height": 0.125
-      },
-      "color": null
     }
   },
   "placement-left": {
-    "kind": "grid",
-    "aspectRatio": {
-      "w": 8,
-      "h": 13
+    "input": {
+      "from": 3,
+      "to": 6,
+      "placement": "left"
     },
-    "slots": [
-      {
+    "model": {
+      "kind": "grid",
+      "aspectRatio": {
+        "w": 8,
+        "h": 13
+      },
+      "slots": [
+        {
+          "rect": {
+            "left": 0,
+            "top": 0.23076923076923078,
+            "width": 0.25,
+            "height": 0.15384615384615385
+          },
+          "color": null,
+          "childIndex": 3
+        },
+        {
+          "rect": {
+            "left": 0,
+            "top": 0,
+            "width": 0.375,
+            "height": 0.23076923076923078
+          },
+          "color": null,
+          "childIndex": 2
+        },
+        {
+          "rect": {
+            "left": 0.375,
+            "top": 0,
+            "width": 0.625,
+            "height": 0.38461538461538464
+          },
+          "color": null,
+          "childIndex": 1
+        },
+        {
+          "rect": {
+            "left": 0,
+            "top": 0.38461538461538464,
+            "width": 1,
+            "height": 0.6153846153846154
+          },
+          "color": null,
+          "childIndex": 0
+        }
+      ],
+      "placeholder": {
         "rect": {
-          "left": 0,
+          "left": 0.25,
           "top": 0.23076923076923078,
-          "width": 0.25,
+          "width": 0.125,
           "height": 0.15384615384615385
         },
-        "color": null,
-        "childIndex": 3
-      },
-      {
-        "rect": {
-          "left": 0,
-          "top": 0,
-          "width": 0.375,
-          "height": 0.23076923076923078
-        },
-        "color": null,
-        "childIndex": 2
-      },
-      {
-        "rect": {
-          "left": 0.375,
-          "top": 0,
-          "width": 0.625,
-          "height": 0.38461538461538464
-        },
-        "color": null,
-        "childIndex": 1
-      },
-      {
-        "rect": {
-          "left": 0,
-          "top": 0.38461538461538464,
-          "width": 1,
-          "height": 0.6153846153846154
-        },
-        "color": null,
-        "childIndex": 0
+        "color": null
       }
-    ],
-    "placeholder": {
-      "rect": {
-        "left": 0.25,
-        "top": 0.23076923076923078,
-        "width": 0.125,
-        "height": 0.15384615384615385
-      },
-      "color": null
     }
   },
   "placement-top": {
-    "kind": "grid",
-    "aspectRatio": {
-      "w": 13,
-      "h": 8
+    "input": {
+      "from": 3,
+      "to": 6,
+      "placement": "top"
     },
-    "slots": [
-      {
+    "model": {
+      "kind": "grid",
+      "aspectRatio": {
+        "w": 13,
+        "h": 8
+      },
+      "slots": [
+        {
+          "rect": {
+            "left": 0.6153846153846154,
+            "top": 0,
+            "width": 0.15384615384615385,
+            "height": 0.25
+          },
+          "color": null,
+          "childIndex": 3
+        },
+        {
+          "rect": {
+            "left": 0.7692307692307693,
+            "top": 0,
+            "width": 0.23076923076923078,
+            "height": 0.375
+          },
+          "color": null,
+          "childIndex": 2
+        },
+        {
+          "rect": {
+            "left": 0.6153846153846154,
+            "top": 0.375,
+            "width": 0.38461538461538464,
+            "height": 0.625
+          },
+          "color": null,
+          "childIndex": 1
+        },
+        {
+          "rect": {
+            "left": 0,
+            "top": 0,
+            "width": 0.6153846153846154,
+            "height": 1
+          },
+          "color": null,
+          "childIndex": 0
+        }
+      ],
+      "placeholder": {
         "rect": {
           "left": 0.6153846153846154,
-          "top": 0,
+          "top": 0.25,
           "width": 0.15384615384615385,
-          "height": 0.25
+          "height": 0.125
         },
-        "color": null,
-        "childIndex": 3
-      },
-      {
-        "rect": {
-          "left": 0.7692307692307693,
-          "top": 0,
-          "width": 0.23076923076923078,
-          "height": 0.375
-        },
-        "color": null,
-        "childIndex": 2
-      },
-      {
-        "rect": {
-          "left": 0.6153846153846154,
-          "top": 0.375,
-          "width": 0.38461538461538464,
-          "height": 0.625
-        },
-        "color": null,
-        "childIndex": 1
-      },
-      {
-        "rect": {
-          "left": 0,
-          "top": 0,
-          "width": 0.6153846153846154,
-          "height": 1
-        },
-        "color": null,
-        "childIndex": 0
+        "color": null
       }
-    ],
-    "placeholder": {
-      "rect": {
-        "left": 0.6153846153846154,
-        "top": 0.25,
-        "width": 0.15384615384615385,
-        "height": 0.125
-      },
-      "color": null
     }
   },
   "reversed-bounds": {
-    "kind": "grid",
-    "aspectRatio": {
-      "w": 8,
-      "h": 5
+    "input": {
+      "from": 5,
+      "to": 3,
+      "color": "#7f7ec7"
     },
-    "slots": [
-      {
+    "model": {
+      "kind": "grid",
+      "aspectRatio": {
+        "w": 8,
+        "h": 5
+      },
+      "slots": [
+        {
+          "rect": {
+            "left": 0.75,
+            "top": 0,
+            "width": 0.25,
+            "height": 0.4
+          },
+          "color": {
+            "kind": "hsl",
+            "h": 285.82191780821915,
+            "s": 39.45945945945945,
+            "l": 65.97549019607843
+          },
+          "childIndex": 2
+        },
+        {
+          "rect": {
+            "left": 0.625,
+            "top": 0.4,
+            "width": 0.375,
+            "height": 0.6
+          },
+          "color": {
+            "kind": "hsl",
+            "h": 330.82191780821915,
+            "s": 39.45945945945945,
+            "l": 63.725490196078425
+          },
+          "childIndex": 1
+        },
+        {
+          "rect": {
+            "left": 0,
+            "top": 0,
+            "width": 0.625,
+            "height": 1
+          },
+          "color": {
+            "kind": "hsl",
+            "h": 15.821917808219155,
+            "s": 39.45945945945945,
+            "l": 61.475490196078425
+          },
+          "childIndex": 0
+        }
+      ],
+      "placeholder": {
         "rect": {
-          "left": 0.75,
+          "left": 0.625,
           "top": 0,
-          "width": 0.25,
+          "width": 0.125,
           "height": 0.4
         },
         "color": {
-          "kind": "hsl",
-          "h": 285.82191780821915,
-          "s": 39.45945945945945,
-          "l": 65.97549019607843
-        },
-        "childIndex": 2
-      },
-      {
-        "rect": {
-          "left": 0.625,
-          "top": 0.4,
-          "width": 0.375,
-          "height": 0.6
-        },
-        "color": {
-          "kind": "hsl",
-          "h": 330.82191780821915,
-          "s": 39.45945945945945,
-          "l": 63.725490196078425
-        },
-        "childIndex": 1
-      },
-      {
-        "rect": {
-          "left": 0,
-          "top": 0,
-          "width": 0.625,
-          "height": 1
-        },
-        "color": {
-          "kind": "hsl",
-          "h": 15.821917808219155,
-          "s": 39.45945945945945,
-          "l": 61.475490196078425
-        },
-        "childIndex": 0
-      }
-    ],
-    "placeholder": {
-      "rect": {
-        "left": 0.625,
-        "top": 0,
-        "width": 0.125,
-        "height": 0.4
-      },
-      "color": {
-        "kind": "raw",
-        "value": "#7f7ec7"
+          "kind": "raw",
+          "value": "#7f7ec7"
+        }
       }
     }
   }

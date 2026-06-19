@@ -1,34 +1,41 @@
 import * as fs from "fs";
 import * as path from "path";
 import { computeRenderModel } from "../utils/renderModel";
-import type { RenderModel } from "../utils/renderModel";
+import type { RenderModel, RenderModelInput } from "../utils/renderModel";
 import { FIXTURE_CASES } from "../__fixtures__/cases";
 
 const FIXTURE_PATH = path.join(__dirname, "..", "__fixtures__", "render-model.json");
 
-function buildAll(): Record<string, RenderModel> {
-  const out: Record<string, RenderModel> = {};
-  for (const c of FIXTURE_CASES) out[c.name] = computeRenderModel(c.input);
+interface FixtureEntry {
+  input: RenderModelInput;
+  model: RenderModel;
+}
+
+function buildAll(): Record<string, FixtureEntry> {
+  const out: Record<string, FixtureEntry> = {};
+  for (const c of FIXTURE_CASES) out[c.name] = { input: c.input, model: computeRenderModel(c.input) };
   return out;
 }
 
 describe("computeRenderModel — golden-master fixtures", () => {
-  const generated = buildAll();
-
   // Bootstrap / regenerate: writes the contract file when missing or when
   // UPDATE_FIXTURES=1 (see `npm run gen:fixtures`). Normal runs only read it.
   if (process.env.UPDATE_FIXTURES || !fs.existsSync(FIXTURE_PATH)) {
-    fs.writeFileSync(FIXTURE_PATH, JSON.stringify(generated, null, 2) + "\n");
+    fs.writeFileSync(FIXTURE_PATH, JSON.stringify(buildAll(), null, 2) + "\n");
   }
 
-  const committed: Record<string, RenderModel> = JSON.parse(
+  const committed: Record<string, FixtureEntry> = JSON.parse(
     fs.readFileSync(FIXTURE_PATH, "utf8")
   );
 
+  // Self-contained contract: each entry stores its input and expected model, so
+  // native (Swift/Kotlin) ports drive the same cases. Assert the current code
+  // reproduces the stored model from the stored input.
   test.each(FIXTURE_CASES.map((c) => c.name))(
     "%s reproduces the committed fixture",
     (name) => {
-      expect(generated[name]).toEqual(committed[name]);
+      const { input, model } = committed[name];
+      expect(computeRenderModel(input)).toEqual(model);
     }
   );
 
