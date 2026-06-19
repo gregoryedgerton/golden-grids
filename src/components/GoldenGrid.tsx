@@ -1,30 +1,14 @@
 import React from "react";
 import { computeRenderModel } from "../utils/renderModel";
-import type { FillColor, PlacementValue } from "../utils/renderModel";
-import { hslToCss } from "../utils/colorUtils";
+import type { PlacementValue } from "../utils/renderModel";
+import { pct, fillToCss } from "../core/style";
+import { assignChildren } from "../core/assignChildren";
+import type { GoldenGridProps } from "../core/types";
 import { GoldenBox } from "./GoldenBox";
 import type { GoldenBoxProps } from "./GoldenBox";
 import "../styles/grid.css";
 
-export type { PlacementValue };
-
-export interface GoldenGridProps {
-  from?: number;
-  to?: number;
-  color?: string;
-  clockwise?: boolean;
-  placement?: PlacementValue;
-  outline?: string; // CSS border shorthand e.g. "2px dashed #ff0000"
-  children?: React.ReactNode;
-}
-
-/** Resolve a platform-neutral fill into a CSS value (or undefined to omit). */
-function fillToCss(color: FillColor): string | undefined {
-  if (!color) return undefined;
-  return color.kind === "hsl" ? hslToCss(color.h, color.s, color.l) : color.value;
-}
-
-const pct = (n: number): string => `${n * 100}%`;
+export type { PlacementValue, GoldenGridProps };
 
 const GoldenGrid: React.FC<GoldenGridProps> = (props): React.ReactElement<any> => {
   const outline = props.outline;
@@ -37,7 +21,7 @@ const GoldenGrid: React.FC<GoldenGridProps> = (props): React.ReactElement<any> =
     ? { borderRight: outline, borderBottom: outline }
     : {};
 
-  // --- child collection (React-specific; the model supplies the ordering) ---
+  // --- child collection (React-specific; the model + assignChildren supply the ordering) ---
   const allBoxChildren = React.Children.toArray(props.children).filter(
     (child): child is React.ReactElement<GoldenBoxProps> =>
       React.isValidElement(child) && child.type === GoldenBox
@@ -50,6 +34,7 @@ const GoldenGrid: React.FC<GoldenGridProps> = (props): React.ReactElement<any> =
     clockwise: props.clockwise,
     placement: props.placement,
   });
+  const { slotChildren, placeholderChild } = assignChildren(model, allBoxChildren);
 
   if (model.kind === "empty") {
     return <div className="golden-grid" />;
@@ -63,16 +48,11 @@ const GoldenGrid: React.FC<GoldenGridProps> = (props): React.ReactElement<any> =
     return (
       <div className={gridClass} style={{ aspectRatio: "1 / 1", ...containerBorder }}>
         <div className="golden-grid__box" style={{ left: 0, top: 0, width: "100%", height: "100%", background: fillToCss(slot.color), ...boxBorder }}>
-          {allBoxChildren[slot.childIndex] ?? null}
+          {slotChildren[0]}
         </div>
       </div>
     );
   }
-
-  // --- positional child mapping ---
-  const placeholderExists = !!model.placeholder;
-  const placeholderChild = placeholderExists ? (allBoxChildren[allBoxChildren.length - 1] ?? null) : null;
-  const boxChildren = placeholderExists ? allBoxChildren.slice(0, -1) : allBoxChildren;
 
   return (
     <div className={gridClass} style={{ aspectRatio: `${model.aspectRatio.w} / ${model.aspectRatio.h}`, ...containerBorder }}>
@@ -104,7 +84,7 @@ const GoldenGrid: React.FC<GoldenGridProps> = (props): React.ReactElement<any> =
             ...boxBorder,
           }}
         >
-          {boxChildren[slot.childIndex] ?? null}
+          {slotChildren[i]}
         </div>
       ))}
     </div>
