@@ -19,6 +19,7 @@
     "serve": "vite preview",
     "build:demo": "VITE_BUILD_DEMO=1 vite build",
     "test": "jest",
+    "gen:fixtures": "UPDATE_FIXTURES=1 jest renderModel",
     "prepack": "npm run build",
     "prepublishOnly": "npm test",
     "setup": "husky install"

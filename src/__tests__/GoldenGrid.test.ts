@@ -1,9 +1,11 @@
 import React from 'react';
 import { GoldenBox } from '../components/GoldenBox';
 import type { GoldenBoxProps } from '../components/GoldenBox';
+import { computeRenderModel } from '../utils/renderModel';
 
-// Mirrors the exact child-mapping logic from GoldenGrid.tsx so we can
-// exercise it directly without needing a DOM / jsdom environment.
+// The React-only child filter still lives in GoldenGrid; the slot ordering now
+// comes from computeRenderModel and is asserted against the real model below, so
+// these tests no longer mirror the reversal math by hand.
 function mapChildren(children: React.ReactNode) {
   const allBoxChildren = React.Children.toArray(children).filter(
     (child): child is React.ReactElement<GoldenBoxProps> =>
@@ -45,23 +47,21 @@ describe('GoldenGrid', () => {
       expect(allBoxChildren).toHaveLength(0);
     });
 
-    test('extra children beyond slot count are silently dropped (reversed mapping)', () => {
+    test('extra children beyond slot count are silently dropped (model ordering)', () => {
       const boxes = Array.from({ length: 10 }, (_, i) =>
         React.createElement(GoldenBox, { key: i })
       );
       const { allBoxChildren } = mapChildren(boxes);
-      const slotCount = 3;
-      // reversed: slot i gets allBoxChildren[slotCount - 1 - i]
-      const assigned = Array.from({ length: slotCount }, (_, i) => allBoxChildren[slotCount - 1 - i] ?? null);
+      const { slots } = computeRenderModel({ from: 1, to: 3 }); // 3 visible slots, no placeholder
+      const assigned = slots.map((s) => allBoxChildren[s.childIndex] ?? null);
       expect(assigned).toHaveLength(3);
       expect(assigned.every(c => c !== null)).toBe(true);
     });
 
     test('fewer children than slots: child fills the largest slot, smaller slots receive null', () => {
       const { allBoxChildren } = mapChildren([React.createElement(GoldenBox, {})]);
-      const slotCount = 3;
-      // slots 0..N-1 where 0 = smallest, N-1 = largest; first child → largest slot
-      const assigned = Array.from({ length: slotCount }, (_, i) => allBoxChildren[slotCount - 1 - i] ?? null);
+      const { slots } = computeRenderModel({ from: 1, to: 3 }); // last slot is the largest box
+      const assigned = slots.map((s) => allBoxChildren[s.childIndex] ?? null);
       expect(assigned[0]).toBeNull();
       expect(assigned[1]).toBeNull();
       expect(assigned[2]).not.toBeNull();
@@ -74,14 +74,16 @@ describe('GoldenGrid', () => {
         React.createElement(GoldenBox, { key: '2' }), // least important → smallest slot
       ];
       const { allBoxChildren } = mapChildren(boxes);
-      const slotCount = 3;
-      const assigned = Array.from({ length: slotCount }, (_, i) => allBoxChildren[slotCount - 1 - i] ?? null);
-      expect(assigned[slotCount - 1]).toBe(allBoxChildren[0]); // largest slot = first child
-      expect(assigned[0]).toBe(allBoxChildren[slotCount - 1]); // smallest slot = last child
+      const { slots } = computeRenderModel({ from: 1, to: 3 });
+      const assigned = slots.map((s) => allBoxChildren[s.childIndex] ?? null);
+      expect(assigned[slots.length - 1]).toBe(allBoxChildren[0]); // largest slot = first child
+      expect(assigned[0]).toBe(allBoxChildren[allBoxChildren.length - 1]); // smallest slot = last child
     });
 
     test('when placeholder exists, last child maps to placeholder slot', () => {
-      const placeholderExists = true;
+      // from > 1 ⇒ the model carries a placeholder.
+      const placeholderExists = computeRenderModel({ from: 3, to: 5 }).placeholder !== null;
+      expect(placeholderExists).toBe(true);
       const children = [
         React.createElement(GoldenBox, { key: '0' }),
         React.createElement(GoldenBox, { key: '1' }),
@@ -95,14 +97,16 @@ describe('GoldenGrid', () => {
     });
 
     test('when no placeholder, all children map to visible slots', () => {
-      const placeholderExists = false;
+      // from === 1 ⇒ no placeholder in the model.
+      const placeholderExists = computeRenderModel({ from: 1, to: 4 }).placeholder !== null;
+      expect(placeholderExists).toBe(false);
       const children = [
         React.createElement(GoldenBox, { key: '0' }),
         React.createElement(GoldenBox, { key: '1' }),
       ];
       const { allBoxChildren } = mapChildren(children);
-      const placeholderChild = placeholderExists ? (allBoxChildren[0] ?? null) : null;
-      const boxChildren = placeholderExists ? allBoxChildren.slice(1) : allBoxChildren;
+      const placeholderChild = placeholderExists ? (allBoxChildren[allBoxChildren.length - 1] ?? null) : null;
+      const boxChildren = placeholderExists ? allBoxChildren.slice(0, -1) : allBoxChildren;
       expect(placeholderChild).toBeNull();
       expect(boxChildren).toHaveLength(2);
     });
