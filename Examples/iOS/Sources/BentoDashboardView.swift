@@ -30,7 +30,7 @@ struct BentoDashboardView: View {
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
             .background {
                 ZStack(alignment: .top) {
-                    Color(red: 0.29, green: 0.47, blue: 0.67) // duller steel blue
+                    Palette.daySkyBlue
                     GeometryReader { geo in
                         FocusPlot()
                             .frame(height: max(80, geo.size.height * 0.42))
@@ -41,31 +41,31 @@ struct BentoDashboardView: View {
             }
     }
 
-    // ordinal 1 — sleep, 3×, grayscale gradient + leading separator
+    // ordinal 1 — sleep, 3×, editorial-purple → panel-gray gradient + leading separator
     private var sleepTile: some View {
         stat(icon: "moon.stars", value: "6.2", unit: "hrs", label: "Sleep",
              valueSize: base * 3, labelFont: .title3, onDark: true)
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
             .background(LinearGradient(
-                colors: [Color(white: 0.16), Color(white: 0.52)],
-                startPoint: .topLeading, endPoint: .bottomTrailing)) // grayscale
+                colors: [Palette.headlinePurple, Palette.panelGray],
+                startPoint: .topLeading, endPoint: .bottomTrailing)) // purple → gray
             .overlay(alignment: .leading) {
                 Rectangle().fill(.white.opacity(0.35)).frame(width: 1)
             }
     }
 
-    // ordinal 2 — an eyes / nose / ear selector, set to ear
+    // ordinal 2 — an eyes / nose / ear selector, set to eyes
     private var stepsTile: some View {
-        EmojiSliderTile(items: ["👀", "👃", "👂"], start: 2)
+        EmojiSliderTile(items: ["👀", "👃", "👂"], start: 0)
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-            .background(.regularMaterial)
+            .background(Palette.panelGray)
     }
 
     // ordinal 3 — a mood selector: a face + a 3-stop slider, top separator from steps
     private var tasksTile: some View {
         EmojiSliderTile(items: ["🙁", "😐", "🙂"], start: 2)
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-            .background(.regularMaterial)
+            .background(Palette.panelGray)
             .overlay(alignment: .top) {
                 Rectangle().fill(Color.primary.opacity(0.12)).frame(height: 1)
             }

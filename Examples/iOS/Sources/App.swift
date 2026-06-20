@@ -2,11 +2,20 @@ import SwiftUI
 
 @main
 struct GoldenGridsExampleApp: App {
+    @UIApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
+
     var body: some Scene {
         WindowGroup {
             RootView()
         }
     }
+}
+
+/// Disables UIKit state restoration so the app always opens on the first tab
+/// (and so a screenshot launch arg reliably selects a tab).
+final class AppDelegate: NSObject, UIApplicationDelegate {
+    func application(_ application: UIApplication,
+                     shouldRestoreSecureApplicationState coder: NSCoder) -> Bool { false }
 }
 
 struct RootView: View {

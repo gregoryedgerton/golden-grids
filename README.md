@@ -49,6 +49,51 @@ import { GoldenGrid, GoldenBox } from '@gifcommit/golden-grids'
 
 Children map in priority order — first child fills the largest box, last child fills the smallest. When `from > 1`, the final `<GoldenBox>` fills the skipped-range placeholder. Extra `<GoldenBox>` children beyond the slot count are silently ignored, so you can always declare the full set and let `from`/`to` control what renders.
 
+## Cross-platform
+
+The grid is computed from one shared, framework-agnostic model, so the same component renders three ways:
+
+- **Web (React)** — `@gifcommit/golden-grids` (everything above)
+- **React Native** — `@gifcommit/golden-grids/native`
+- **Native iOS (SwiftUI)** — a Swift package, `import GoldenGrids`
+
+### React Native
+
+Same API, rendered with native `<View>`s — just import from the `/native` entry:
+
+```tsx
+import { GoldenGrid, GoldenBox } from '@gifcommit/golden-grids/native'
+
+<GoldenGrid from={1} to={5} color="#7f7ec7" />
+```
+
+### iOS (SwiftUI)
+
+Add the Swift package (Xcode → _File ▸ Add Package Dependencies…_, or in `Package.swift`):
+
+```swift
+.package(url: "https://github.com/gregoryedgerton/golden-grids", from: "4.0.0")
+```
+
+Then drop your views into the slots — the closure is keyed by child ordinal (`0` = the largest slot):
+
+```swift
+import GoldenGrids
+
+GoldenGrid(from: 1, to: 5, color: "#7f7ec7") { ordinal in
+    Image(photos[ordinal]).resizable().scaledToFill()
+}
+```
+
+A runnable example app lives in [`Examples/iOS`](Examples/iOS) — four screens built entirely with `GoldenGrid`: a swipeable featured carousel, a sky gallery, a stats dashboard, and a line-less editorial layout.
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/gregoryedgerton/golden-grids/main/docs/ios/featured.png" width="200" alt="Featured — a swipeable card carousel" />
+  <img src="https://raw.githubusercontent.com/gregoryedgerton/golden-grids/main/docs/ios/galleries.png" width="200" alt="Galleries — sky gradients with sun and moon" />
+  <img src="https://raw.githubusercontent.com/gregoryedgerton/golden-grids/main/docs/ios/dashboards.png" width="200" alt="Dashboards — a bento of stats" />
+  <img src="https://raw.githubusercontent.com/gregoryedgerton/golden-grids/main/docs/ios/editorial.png" width="200" alt="Editorial — a line-less copy grid" />
+</p>
+
 ## Configuration
 
 | Prop        | Type                                     | Description                                                                                                                                                         |
