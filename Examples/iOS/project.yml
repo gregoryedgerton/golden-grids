@@ -1,0 +1,28 @@
+name: GoldenGridsExamples
+options:
+  bundleIdPrefix: com.gifcommit.goldengrids
+  deploymentTarget:
+    iOS: "16.0"
+  createIntermediateGroups: true
+packages:
+  GoldenGrids:
+    path: ../..
+targets:
+  GoldenGridsExamples:
+    type: application
+    platform: iOS
+    sources:
+      - Sources
+    dependencies:
+      - package: GoldenGrids
+        product: GoldenGrids
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.gifcommit.goldengrids.examples
+        GENERATE_INFOPLIST_FILE: "YES"
+        MARKETING_VERSION: "1.0"
+        CURRENT_PROJECT_VERSION: "1"
+        TARGETED_DEVICE_FAMILY: "1,2"
+        SWIFT_VERSION: "5.0"
+        INFOPLIST_KEY_UILaunchScreen_Generation: "YES"
+        INFOPLIST_KEY_UIApplicationSceneManifest_Generation: "YES"

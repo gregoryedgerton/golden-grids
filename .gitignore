@@ -24,10 +24,12 @@ coverage/
 
 # Swift / SwiftPM (iOS port)
 .build/
+.build-xc/
 .swiftpm/
 Package.resolved
 *.xcodeproj
 *.xcworkspace
+Examples/iOS/shots/
 
 # Environment variables
 .env
