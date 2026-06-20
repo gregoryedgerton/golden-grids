@@ -35,7 +35,7 @@ struct EditorialView: View {
     private var headlineBox: some View {
         Text("GOLDEN\nRATIO\nLAYOUTS")
             .font(.system(size: 32, weight: .semibold))
-            .foregroundStyle(.indigo)
+            .foregroundStyle(Palette.headlinePurple)
             .minimumScaleFactor(0.5)
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
     }
