@@ -1,5 +1,27 @@
+pluginManagement {
+    repositories {
+        google {
+            content {
+                includeGroupByRegex("com\\.android.*")
+                includeGroupByRegex("com\\.google.*")
+                includeGroupByRegex("androidx.*")
+            }
+        }
+        mavenCentral()
+        gradlePluginPortal()
+    }
+}
+
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositories {
+        google()
+        mavenCentral()
+    }
+}
+
 rootProject.name = "golden-grids-android"
 
-// Phase 2b: the pure render-model core is verifiable on its own (no Android SDK).
-// The Compose :renderer and :example modules are added once the SDK is wired up.
-include(":core")
+// :core is a pure-Kotlin module (no Android SDK); :renderer and :example are
+// the Jetpack Compose renderer and a runnable showcase app.
+include(":core", ":renderer", ":example")
