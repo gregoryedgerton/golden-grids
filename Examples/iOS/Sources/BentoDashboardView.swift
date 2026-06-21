@@ -23,16 +23,17 @@ struct BentoDashboardView: View {
         }
     }
 
-    // ordinal 0 — hero, 5×, dull blue with an abstract data plot behind the stat
+    // ordinal 0 — hero, 5×, day-sky blue with an abstract data plot behind the stat.
+    // Text + plot use a deep navy ink so they stay legible on the light fill.
     private var focusTile: some View {
         stat(icon: "target", value: "82", unit: "%", label: "Focus Flow",
-             valueSize: base * 5, labelFont: .title2, onDark: true)
+             valueSize: base * 5, labelFont: .title2, onDark: true, ink: Palette.focusInk)
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
             .background {
                 ZStack(alignment: .top) {
                     Palette.daySkyBlue
                     GeometryReader { geo in
-                        FocusPlot()
+                        FocusPlot(tint: Palette.focusInk)
                             .frame(height: max(80, geo.size.height * 0.42))
                             .padding(.horizontal, 18)
                             .padding(.top, 52)
@@ -71,13 +72,18 @@ struct BentoDashboardView: View {
             }
     }
 
+    // `ink` overrides the foreground (icon/value/label) for tiles whose fill needs
+    // a custom text colour — e.g. dark ink on the light day-sky-blue Focus tile.
     private func stat(icon: String, value: String, unit: String, label: String,
                       valueSize: CGFloat, labelFont: Font, onDark: Bool,
-                      tint: Color = .primary) -> some View {
-        VStack(alignment: .leading, spacing: 4) {
+                      ink: Color? = nil, tint: Color = .primary) -> some View {
+        let primaryFg = ink ?? (onDark ? Color.white : Color.primary)
+        let iconFg = ink ?? (onDark ? Color.white : tint)
+        let labelFg = ink?.opacity(0.8) ?? (onDark ? Color.white.opacity(0.9) : Color.secondary)
+        return VStack(alignment: .leading, spacing: 4) {
             Image(systemName: icon)
                 .font(valueSize >= base * 3 ? .title : .title3)
-                .foregroundStyle(onDark ? Color.white : tint)
+                .foregroundStyle(iconFg)
             Spacer(minLength: 0)
             HStack(alignment: .firstTextBaseline, spacing: 2) {
                 Text(value).font(.system(size: valueSize, weight: .bold, design: .rounded))
@@ -88,9 +94,9 @@ struct BentoDashboardView: View {
             .minimumScaleFactor(0.4)
             .lineLimit(1)
             Text(label).font(labelFont)
-                .foregroundStyle(onDark ? Color.white.opacity(0.9) : Color.secondary)
+                .foregroundStyle(labelFg)
         }
-        .foregroundStyle(onDark ? Color.white : Color.primary)
+        .foregroundStyle(primaryFg)
         .padding(onDark ? 18 : 14)
     }
 }
@@ -121,6 +127,7 @@ private struct EmojiSliderTile: View {
 /// Abstract data plot — a faint scatter + trend line, as if the Focus tile is
 /// reading some correlated signal. Decorative; the points aren't real data.
 private struct FocusPlot: View {
+    var tint: Color = .white
     private let ys: [CGFloat] = [0.78, 0.62, 0.68, 0.46, 0.52, 0.34, 0.40, 0.22]
 
     var body: some View {
@@ -130,11 +137,11 @@ private struct FocusPlot: View {
             }
             var line = Path()
             line.addLines(pts)
-            ctx.stroke(line, with: .color(.white.opacity(0.28)), lineWidth: 1.5)
+            ctx.stroke(line, with: .color(tint.opacity(0.40)), lineWidth: 1.5)
             for p in pts {
                 let r: CGFloat = 3.5
                 ctx.fill(Path(ellipseIn: CGRect(x: p.x - r, y: p.y - r, width: r * 2, height: r * 2)),
-                         with: .color(.white.opacity(0.5)))
+                         with: .color(tint.opacity(0.65)))
             }
         }
     }

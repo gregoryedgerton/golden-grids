@@ -8,4 +8,6 @@ enum Palette {
     static let headlinePurple = Color.indigo
     /// The main blue of the daytime sky gradient, and the Focus Flow tile.
     static let daySkyBlue = Color(red: 0.36, green: 0.71, blue: 0.98)
+    /// Deep navy ink — readable text/plot on the light daySkyBlue Focus tile.
+    static let focusInk = Color(red: 0.06, green: 0.14, blue: 0.36)
 }
