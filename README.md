@@ -88,10 +88,10 @@ GoldenGrid(from: 1, to: 5, color: "#7f7ec7") { ordinal in
 A runnable example app lives in [`Examples/iOS`](Examples/iOS) — four screens built entirely with `GoldenGrid`: a swipeable featured carousel, a sky gallery, a stats dashboard, and a line-less editorial layout.
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/gregoryedgerton/golden-grids/main/docs/ios/featured.png" width="200" alt="Featured — a swipeable card carousel" />
-  <img src="https://raw.githubusercontent.com/gregoryedgerton/golden-grids/main/docs/ios/galleries.png" width="200" alt="Galleries — sky gradients with sun and moon" />
-  <img src="https://raw.githubusercontent.com/gregoryedgerton/golden-grids/main/docs/ios/dashboards.png" width="200" alt="Dashboards — a bento of stats" />
-  <img src="https://raw.githubusercontent.com/gregoryedgerton/golden-grids/main/docs/ios/editorial.png" width="200" alt="Editorial — a line-less copy grid" />
+  <img src="https://raw.githubusercontent.com/gregoryedgerton/golden-grids/main/docs/ios/featured.gif" width="200" alt="Featured — a swipeable card carousel" />
+  <img src="https://raw.githubusercontent.com/gregoryedgerton/golden-grids/main/docs/ios/galleries.gif" width="200" alt="Galleries — sky gradients with sun and moon" />
+  <img src="https://raw.githubusercontent.com/gregoryedgerton/golden-grids/main/docs/ios/dashboards.gif" width="200" alt="Dashboards — a bento of stats" />
+  <img src="https://raw.githubusercontent.com/gregoryedgerton/golden-grids/main/docs/ios/editorial.gif" width="200" alt="Editorial — a line-less copy grid" />
 </p>
 
 ## Configuration
