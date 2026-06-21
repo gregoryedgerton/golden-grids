@@ -21,15 +21,25 @@ struct GalleryView: View {
         Sky(stops: [c(0.36, 0.71, 0.98), c(0.66, 0.86, 0.99), c(0.88, 0.95, 1.00)], body: .sun, high: true),
     ]
 
+    @State private var appeared = false
+
     var body: some View {
         NavigationStack {
             GoldenGrid(from: 1, to: 4, placement: .bottom) { ordinal in
                 let sky = skies[ordinal % skies.count]
                 LinearGradient(colors: sky.stops, startPoint: .top, endPoint: .bottom)
                     .overlay { celestialBody(sky) }
+                    .scaleEffect(appeared ? 1 : 0.9)
+                    .opacity(appeared ? 1 : 0)
+                    .animation(.spring(response: 0.5, dampingFraction: 0.82).delay(Double(ordinal) * 0.09), value: appeared)
             }
             .padding(12)
             .navigationTitle("Galleries")
+            .onAppear {
+                guard !appeared else { return }
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) { appeared = true }
+            }
+            .onDisappear { appeared = false } // replay the intro on return
         }
     }
 
