@@ -51,11 +51,12 @@ Children map in priority order — first child fills the largest box, last child
 
 ## Cross-platform
 
-The grid is computed from one shared, framework-agnostic model, so the same component renders three ways:
+The grid is computed from one shared, framework-agnostic model, so the same component renders four ways:
 
 - **Web (React)** — `@gifcommit/golden-grids` (everything above)
 - **React Native** — `@gifcommit/golden-grids/native`
 - **Native iOS (SwiftUI)** — a Swift package, `import GoldenGrids`
+- **Native Android (Jetpack Compose)** — a Kotlin module, `import com.gifcommit.goldengrids.GoldenGrid`
 
 ### React Native
 
@@ -92,6 +93,25 @@ A runnable example app lives in [`Examples/iOS`](Examples/iOS) — four screens 
   <img src="https://raw.githubusercontent.com/gregoryedgerton/golden-grids/main/docs/ios/galleries.gif" width="200" alt="Galleries — sky gradients with sun and moon" />
   <img src="https://raw.githubusercontent.com/gregoryedgerton/golden-grids/main/docs/ios/dashboards.gif" width="200" alt="Dashboards — a bento of stats" />
   <img src="https://raw.githubusercontent.com/gregoryedgerton/golden-grids/main/docs/ios/editorial.gif" width="200" alt="Editorial — a line-less copy grid" />
+</p>
+
+### Android (Jetpack Compose)
+
+The same proportional model, rendered with Compose. The `GoldenGrid` composable takes the same props and fills each slot via a `slotContent` lambda keyed by child ordinal (`0` = the largest slot):
+
+```kotlin
+import com.gifcommit.goldengrids.GoldenGrid
+
+GoldenGrid(from = 1, to = 5, color = "#7f7ec7", modifier = Modifier.fillMaxWidth()) { ordinal ->
+    Image(painterResource(photos[ordinal]), contentDescription = null, contentScale = ContentScale.Crop)
+}
+```
+
+A runnable example app lives in [`android/example`](android/example); the renderer is verified against the same `render-model.json` golden master as every other platform. See [`android/README.md`](android/README.md) to build and run it.
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/gregoryedgerton/golden-grids/main/docs/android/showcase-colors.png" width="220" alt="Android — HSL colour progression across the spiral" />
+  <img src="https://raw.githubusercontent.com/gregoryedgerton/golden-grids/main/docs/android/showcase-slots.png" width="220" alt="Android — content mapped into slots, largest first" />
 </p>
 
 ## Configuration
