@@ -5,16 +5,18 @@ import GoldenGrids
 /// and a platforms list sit up top; the body fills the largest box. Below, a
 /// second single-tile grid carries more copy that fades out under a gradient.
 struct EditorialView: View {
+    @State private var appeared = false
+
     var body: some View {
         NavigationStack {
             ScrollView(showsIndicators: false) {
                 VStack(spacing: 24) {
                     GoldenGrid(from: 1, to: 3, placement: .right) { ordinal in
-                        switch ordinal {
-                        case 0: bodyBox       // largest, bottom
-                        case 1: platformsBox  // top
-                        default: headlineBox  // top
-                        }
+                        slot(ordinal)
+                            .opacity(appeared ? 1 : 0)
+                            .offset(y: appeared ? 0 : 18)
+                            // headline (ordinal 2) leads, then platforms, then body
+                            .animation(.easeOut(duration: 0.5).delay(Double(2 - ordinal) * 0.08), value: appeared)
                     }
 
                     GoldenGrid(from: 1, to: 1) { _ in moreCopyBox }
@@ -25,10 +27,27 @@ struct EditorialView: View {
                                 endPoint: .bottom
                             )
                         }
+                        .opacity(appeared ? 1 : 0)
+                        .offset(y: appeared ? 0 : 18)
+                        .animation(.easeOut(duration: 0.5).delay(0.28), value: appeared)
                 }
                 .padding(20)
             }
             .navigationTitle("Editorial")
+            .onAppear {
+                guard !appeared else { return }
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) { appeared = true }
+            }
+            .onDisappear { appeared = false } // replay the intro on return
+        }
+    }
+
+    @ViewBuilder
+    private func slot(_ ordinal: Int) -> some View {
+        switch ordinal {
+        case 0: bodyBox       // largest, bottom
+        case 1: platformsBox  // top
+        default: headlineBox  // top
         }
     }
 

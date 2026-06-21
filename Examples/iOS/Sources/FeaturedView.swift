@@ -31,6 +31,7 @@ struct FeaturedView: View {
 
     @State private var index = 0
     @State private var dragOffset: CGFloat = 0
+    @State private var appeared = false
 
     var body: some View {
         NavigationStack {
@@ -44,8 +45,10 @@ struct FeaturedView: View {
                     ForEach(Array(features.enumerated()), id: \.element.id) { i, feature in
                         card(feature)
                             .frame(width: cardW)
-                            .scaleEffect(i == index ? 1 : 0.93)
-                            .opacity(i == index ? 1 : 0.5)
+                            .scaleEffect(appeared ? (i == index ? 1 : 0.93) : 0.82)
+                            .opacity(appeared ? (i == index ? 1 : 0.5) : 0)
+                            .offset(y: appeared ? 0 : 28)
+                            .animation(.spring(response: 0.5, dampingFraction: 0.82).delay(Double(i) * 0.07), value: appeared)
                     }
                 }
                 .frame(width: geo.size.width, height: geo.size.height, alignment: .leading)
@@ -69,6 +72,11 @@ struct FeaturedView: View {
             }
             .navigationTitle("Featured")
             .overlay(alignment: .bottom) { pageDots }
+            .onAppear {
+                guard !appeared else { return }
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) { appeared = true }
+            }
+            .onDisappear { appeared = false } // replay the intro on return
         }
     }
 
@@ -81,7 +89,9 @@ struct FeaturedView: View {
             }
         }
         .padding(.bottom, 10)
+        .opacity(appeared ? 1 : 0)
         .animation(.easeOut(duration: 0.2), value: index)
+        .animation(.easeOut(duration: 0.4).delay(0.3), value: appeared)
     }
 
     private func card(_ feature: Feature) -> some View {
