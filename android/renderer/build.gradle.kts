@@ -23,7 +23,12 @@ kotlin {
 
 dependencies {
     api(project(":core"))
-    implementation(platform("androidx.compose:compose-bom:2024.12.01"))
+    // GoldenGrid's public signature exposes Compose types — Modifier (ui) and
+    // @Composable (runtime) — so those plus the BOM are `api`, putting them on a
+    // consumer's compile classpath transitively. foundation is internal-only
+    // (Box / BoxWithConstraints / background), so it stays `implementation`.
+    api(platform("androidx.compose:compose-bom:2024.12.01"))
+    api("androidx.compose.ui:ui")
+    api("androidx.compose.runtime:runtime")
     implementation("androidx.compose.foundation:foundation")
-    implementation("androidx.compose.ui:ui")
 }
