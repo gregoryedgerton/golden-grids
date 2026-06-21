@@ -29,8 +29,8 @@ struct BentoDashboardView: View {
         }
     }
 
-    // ordinal 0 — hero, 5×, day-sky blue. The figure counts up and the plot
-    // points settle into place; deep navy ink keeps it legible on the light fill.
+    // ordinal 0 — hero, 5×, day-sky blue. Only the figure counts up; the plot is
+    // a static flat line so the looping intro never flashes. Navy ink stays legible.
     private var focusTile: some View {
         stat(icon: "target", value: 82, decimals: 0, unit: "%", label: "Focus Flow",
              valueSize: base * 5, labelFont: .title2, onDark: true, ink: Palette.focusInk,
@@ -50,27 +50,27 @@ struct BentoDashboardView: View {
             }
     }
 
-    // ordinal 1 — sleep, 3×, gradient fades from day to a dark night + separator
+    // ordinal 1 — sleep, 3×, gradient shifts from dusk to deep night (both dark,
+    // so the looping intro never flashes) + leading separator
     private var sleepTile: some View {
         stat(icon: "moon.stars", value: 6.2, decimals: 1, unit: "hrs", label: "Sleep",
              valueSize: base * 3, labelFont: .title3, onDark: true, reveal: appeared)
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
             .background(LinearGradient(
-                colors: appeared ? Self.sleepNight : Self.sleepDay,
+                colors: appeared ? Self.sleepNight : Self.sleepDusk,
                 startPoint: .topLeading, endPoint: .bottomTrailing))
-            .animation(.easeInOut(duration: 1.3).delay(0.1), value: appeared)
+            .animation(.easeInOut(duration: 5.0).delay(0.1), value: appeared)
             .overlay(alignment: .leading) {
                 Rectangle().fill(.white.opacity(0.35)).frame(width: 1)
             }
     }
 
-    // Sleep tile fades along this day → night transition. The night end is darker
-    // than the old purple→gray fill, so the tile reads as "asleep".
-    private static let sleepDay: [Color] = [
-        Color(red: 0.46, green: 0.62, blue: 0.92), Color(red: 0.88, green: 0.92, blue: 0.99),
+    // Sleep tile fades from a dusk hue to deep night — both dark, so no flash.
+    private static let sleepDusk: [Color] = [
+        Color(red: 0.32, green: 0.17, blue: 0.44), Color(red: 0.46, green: 0.26, blue: 0.42),
     ]
     private static let sleepNight: [Color] = [
-        Color(red: 0.06, green: 0.05, blue: 0.22), Color(red: 0.22, green: 0.18, blue: 0.40),
+        Color(red: 0.06, green: 0.05, blue: 0.22), Color(red: 0.18, green: 0.15, blue: 0.38),
     ]
 
     // ordinal 2 — an eyes / nose / ear selector, set to eyes
@@ -140,11 +140,18 @@ private struct Counter: View, Animatable {
 /// between the items.
 private struct EmojiSliderTile: View {
     let items: [String]
+    let start: Int
     @State private var index: Double
 
     init(items: [String], start: Int) {
         self.items = items
-        _index = State(initialValue: Double(start))
+        self.start = start
+        _index = State(initialValue: Self.farEnd(items: items, start: start))
+    }
+
+    // Begin at the opposite end so the thumb has somewhere to slide to.
+    private static func farEnd(items: [String], start: Int) -> Double {
+        start == 0 ? Double(items.count - 1) : 0
     }
 
     var body: some View {
@@ -156,11 +163,19 @@ private struct EmojiSliderTile: View {
                 .tint(.blue)
         }
         .padding(12)
+        .onAppear {
+            // Auto-slide to the resting stop, cycling the emoji on the way.
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
+                withAnimation(.easeInOut(duration: 0.9)) { index = Double(start) }
+            }
+        }
+        .onDisappear { index = Self.farEnd(items: items, start: start) } // replay on return
     }
 }
 
-/// Abstract data plot — the points settle from a flat baseline into place as
-/// `progress` animates 0→1, fading in as they arrive. Decorative, not real data.
+/// A trend line that loads FLAT (already visible, full opacity) and whose points
+/// then settle into place as `progress` animates 0→1. Opacity is constant, so the
+/// line never flashes in from nothing. Decorative, not real data.
 private struct FocusPlot: View, Animatable {
     var tint: Color
     var progress: Double
@@ -175,18 +190,18 @@ private struct FocusPlot: View, Animatable {
     var body: some View {
         Canvas { ctx, size in
             let p = max(0, min(1, progress))
-            let baseline: CGFloat = 0.55
+            let baseline: CGFloat = 0.5
             let pts = ys.enumerated().map { i, y in
                 let yy = baseline + (y - baseline) * CGFloat(p)
                 return CGPoint(x: size.width * CGFloat(i) / CGFloat(ys.count - 1), y: size.height * yy)
             }
             var line = Path()
             line.addLines(pts)
-            ctx.stroke(line, with: .color(tint.opacity(0.40 * p)), lineWidth: 1.5)
+            ctx.stroke(line, with: .color(tint.opacity(0.30)), lineWidth: 1.5)
             for pt in pts {
-                let r: CGFloat = 3.5
+                let r: CGFloat = 3
                 ctx.fill(Path(ellipseIn: CGRect(x: pt.x - r, y: pt.y - r, width: r * 2, height: r * 2)),
-                         with: .color(tint.opacity(0.65 * p)))
+                         with: .color(tint.opacity(0.5)))
             }
         }
     }
