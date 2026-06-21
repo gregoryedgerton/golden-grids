@@ -36,6 +36,13 @@ fun GoldenGrid(
         )
     }
 
+    // Empty range (e.g. from = 0, to = 0) renders nothing and reserves no space —
+    // no aspect-ratio height — matching the web (<div/>) and React Native (<View/>) renderers.
+    if (model.kind == "empty") {
+        Box(modifier)
+        return
+    }
+
     BoxWithConstraints(
         modifier.aspectRatio((model.aspectRatio.w / model.aspectRatio.h).toFloat())
     ) {
