@@ -43,6 +43,35 @@ class RenderModelFixtureTest {
         println("✓ Kotlin render model matches all $checked render-model.json entries")
     }
 
+    /**
+     * Fibonacci values exceed Int.MAX_VALUE at F(47); the README documents the
+     * from/to range up to 78. With 32-bit coordinates these would overflow to
+     * negative garbage — assert the full documented range stays valid (all rects
+     * normalised in [0,1], positive finite aspect ratio).
+     */
+    @Test
+    fun largeRangeDoesNotOverflow() {
+        for (to in intArrayOf(46, 47, 60, 78)) {
+            val model = computeRenderModel(RenderModelInput(to = to, color = "#7f7ec7"))
+            assertTrue(model.kind == "grid", "to=$to should be a grid")
+            val ar = model.aspectRatio
+            assertTrue(
+                ar.w > 0.0 && ar.h > 0.0 && ar.w.isFinite() && ar.h.isFinite(),
+                "to=$to aspect ratio must be positive and finite, got $ar",
+            )
+            assertTrue(model.slots.isNotEmpty(), "to=$to must have slots")
+            for (s in model.slots) {
+                val r = s.rect
+                assertTrue(
+                    r.left >= 0.0 && r.top >= 0.0 &&
+                        r.width > 0.0 && r.height > 0.0 &&
+                        r.left + r.width <= 1.0 + 1e-9 && r.top + r.height <= 1.0 + 1e-9,
+                    "to=$to produced an out-of-range (overflowed) rect: $r",
+                )
+            }
+        }
+    }
+
     private fun locateFixture(): File {
         val rel = "src/__fixtures__/render-model.json"
         val candidates = listOf("../$rel", "../../$rel", rel)

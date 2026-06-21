@@ -51,14 +51,17 @@ data class RenderModelInput(
 
 // ---- spiral layout (port of gridGenerator.ts) ----
 
-data class Square(var x: Int, var y: Int, val size: Int)
+// Coordinates are Long: Fibonacci values exceed Int.MAX_VALUE at F(47), and the
+// documented from/to range reaches 78 — matching the web (f64) and Swift (Int64)
+// ports, which both carry the full range exactly.
+data class Square(var x: Long, var y: Long, val size: Long)
 
 data class GridLayout(
     val squares: List<Square>,
-    val width: Int,
-    val height: Int,
-    val minX: Int,
-    val minY: Int,
+    val width: Long,
+    val height: Long,
+    val minX: Long,
+    val minY: Long,
 )
 
 internal fun placementToRotateDeg(placement: PlacementValue, clockwise: Boolean, startIdx: Int): Int {
@@ -74,12 +77,12 @@ internal fun placementToRotateDeg(placement: PlacementValue, clockwise: Boolean,
     return (desiredDeg - naturalDeg + 360) % 360
 }
 
-fun generateGoldenGridLayout(fibSequence: List<Int>, clockwise: Boolean = true, rotate: Int = 0): GridLayout {
+fun generateGoldenGridLayout(fibSequence: List<Long>, clockwise: Boolean = true, rotate: Int = 0): GridLayout {
     require(fibSequence.size >= 2) { "Need at least two numbers in the sequence." }
     require(rotate in listOf(0, 90, 180, 270)) { "Invalid rotation value: $rotate." }
 
     val squares = mutableListOf<Square>()
-    var minX = Int.MAX_VALUE; var maxX = Int.MIN_VALUE; var minY = Int.MAX_VALUE; var maxY = Int.MIN_VALUE
+    var minX = Long.MAX_VALUE; var maxX = Long.MIN_VALUE; var minY = Long.MAX_VALUE; var maxY = Long.MIN_VALUE
 
     fun expandBounds(sq: Square) {
         if (sq.x < minX) minX = sq.x
@@ -88,12 +91,12 @@ fun generateGoldenGridLayout(fibSequence: List<Int>, clockwise: Boolean = true, 
         if (sq.y + sq.size - 1 > maxY) maxY = sq.y + sq.size - 1
     }
     fun recalcBounds() {
-        minX = Int.MAX_VALUE; maxX = Int.MIN_VALUE; minY = Int.MAX_VALUE; maxY = Int.MIN_VALUE
+        minX = Long.MAX_VALUE; maxX = Long.MIN_VALUE; minY = Long.MAX_VALUE; maxY = Long.MIN_VALUE
         for (s in squares) expandBounds(s)
     }
 
-    squares.add(Square(0, 0, fibSequence[0]))
-    squares.add(Square(fibSequence[0], 0, fibSequence[1]))
+    squares.add(Square(0L, 0L, fibSequence[0]))
+    squares.add(Square(fibSequence[0], 0L, fibSequence[1]))
     expandBounds(squares[0]); expandBounds(squares[1])
 
     // CW: bottom → left → top → right ; CCW: top → left → bottom → right
@@ -104,7 +107,7 @@ fun generateGoldenGridLayout(fibSequence: List<Int>, clockwise: Boolean = true, 
     for (i in 2 until fibSequence.size) {
         val size = fibSequence[i]
         val (dx, dy) = directions[dirIndex]
-        val xPos: Int; val yPos: Int
+        val xPos: Long; val yPos: Long
         when {
             dx == 0 && dy == 1 -> { xPos = minX; yPos = maxY + 1 }              // bottom
             dx == -1 && dy == 0 -> { xPos = minX - size; yPos = maxY - size + 1 } // left
@@ -134,13 +137,13 @@ fun generateGoldenGridLayout(fibSequence: List<Int>, clockwise: Boolean = true, 
 
 // ---- fibonacci (port of fibonacci.ts subset) ----
 
-internal fun fullFibonacciUpTo(n: Int): List<Int> {
-    val arr = mutableListOf(1, 1)
+internal fun fullFibonacciUpTo(n: Long): List<Long> {
+    val arr = mutableListOf(1L, 1L)
     while (arr.last() < n) arr.add(arr[arr.size - 1] + arr[arr.size - 2])
     return arr.filter { it <= n }
 }
 
-internal data class GridRange(val userSequence: List<Int>, val startIdx: Int, val endIdx: Int)
+internal data class GridRange(val userSequence: List<Long>, val startIdx: Int, val endIdx: Int)
 
 internal fun getGridRange(fromIdx: Int, toIdx: Int): GridRange? {
     var startPos = minOf(fromIdx, toIdx)
@@ -149,7 +152,7 @@ internal fun getGridRange(fromIdx: Int, toIdx: Int): GridRange? {
     if (startPos == 0) startPos = 1
     val startIdx = startPos - 1
     val endIdx = endPos - 1
-    val fib = mutableListOf(1, 1)
+    val fib = mutableListOf(1L, 1L)
     while (fib.size <= endIdx) fib.add(fib[fib.size - 1] + fib[fib.size - 2])
     return GridRange(fib.subList(startIdx, endIdx + 1).toList(), startIdx, endIdx)
 }
@@ -223,7 +226,7 @@ fun computeRenderModel(input: RenderModelInput): RenderModel {
     val placeholderExists = skippedSquares.isNotEmpty()
     var placeholder: RenderPlaceholder? = null
     if (placeholderExists) {
-        var pMinX = Int.MAX_VALUE; var pMaxX = Int.MIN_VALUE; var pMinY = Int.MAX_VALUE; var pMaxY = Int.MIN_VALUE
+        var pMinX = Long.MAX_VALUE; var pMaxX = Long.MIN_VALUE; var pMinY = Long.MAX_VALUE; var pMaxY = Long.MIN_VALUE
         for (sq in skippedSquares) {
             if (sq.x < pMinX) pMinX = sq.x
             if (sq.x + sq.size - 1 > pMaxX) pMaxX = sq.x + sq.size - 1
