@@ -2,17 +2,15 @@ import SwiftUI
 import GoldenGrids
 
 /// Bento dashboard — statistics in the proportional slots, rotated to portrait
-/// with `placement: .top`. On appear the screen animates itself in: the grid
-/// grows from two cells to four (revealing the slider panels), the figures count
-/// up, the Focus plot points settle into place, and the Sleep tile fades from a
-/// daytime sky to a dark night.
+/// with `placement: .top`. On appear the figures count up, the Focus plot points
+/// settle into place, and the Sleep tile fades from a daytime sky to a dark night.
 struct BentoDashboardView: View {
     private let base: CGFloat = 24 // 1× value size
     @State private var appeared = false
 
     var body: some View {
         NavigationStack {
-            GoldenGrid(from: 1, to: appeared ? 4 : 2, placement: .top) { ordinal in
+            GoldenGrid(from: 1, to: 4, placement: .top) { ordinal in
                 switch ordinal {
                 case 0: focusTile
                 case 1: sleepTile
@@ -21,7 +19,6 @@ struct BentoDashboardView: View {
                 }
             }
             .padding(12)
-            .animation(.spring(response: 0.75, dampingFraction: 0.82), value: appeared)
             .navigationTitle("Dashboards")
             .onAppear {
                 // Let the launch / tab transition settle so the intro plays on-screen.
