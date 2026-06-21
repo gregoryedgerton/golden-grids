@@ -41,7 +41,10 @@ placeholder is filled by `placeholderContent`.
 - **Android SDK** with platform 35 and build-tools 35 (set `sdk.dir` in
   `local.properties`, or `ANDROID_HOME`)
 
-The pure `:core` module needs only a JDK — no Android SDK.
+The pure `:core` module needs only a JDK — no Android SDK. `:renderer` and
+`:example` are added to the build automatically when an SDK is configured
+(`ANDROID_HOME` or `local.properties` `sdk.dir`), so `./gradlew :core:test` runs
+on a JDK-only machine without evaluating the Android build scripts.
 
 ## Build & test
 
