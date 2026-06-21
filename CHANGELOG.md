@@ -1,3 +1,10 @@
+# [4.1.0](https://github.com/gregoryedgerton/golden-grids/compare/v4.0.0...v4.1.0) (2026-06-21)
+
+
+### Features
+
+* **android:** Jetpack Compose port — Kotlin core + renderer + example ([#16](https://github.com/gregoryedgerton/golden-grids/issues/16)) ([77271b0](https://github.com/gregoryedgerton/golden-grids/commit/77271b01e1510eb84284f26fd97751f8ccf96456))
+
 # [4.0.0](https://github.com/gregoryedgerton/golden-grids/compare/v3.4.0...v4.0.0) (2026-06-19)
 
 
