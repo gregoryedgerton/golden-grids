@@ -66,6 +66,14 @@ The package ships an interactive playground — the **Golden Grid Generator** �
   <img src="https://raw.githubusercontent.com/gregoryedgerton/golden-grids/main/docs/web/demo.png" width="600" alt="The Golden Grid Generator — a golden-ratio spiral built in the browser" />
 </p>
 
+A handful more, all built in the generator — two, three and four cells; dotted, no and solid outlines; alphabetic, numeric or no labels; across portrait and landscape:
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/gregoryedgerton/golden-grids/main/docs/web/sample-2cell.png" height="230" alt="Two cells — dotted outline, alphabetic labels, portrait" />
+  <img src="https://raw.githubusercontent.com/gregoryedgerton/golden-grids/main/docs/web/sample-3cell.png" height="230" alt="Three cells — no outline, numeric labels, landscape" />
+  <img src="https://raw.githubusercontent.com/gregoryedgerton/golden-grids/main/docs/web/sample-4cell.png" height="230" alt="Four cells — solid outline, no labels, portrait" />
+</p>
+
 ### React Native
 
 Same API, rendered with native `<View>`s — just import from the `/native` entry:
