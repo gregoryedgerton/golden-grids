@@ -107,11 +107,13 @@ GoldenGrid(from = 1, to = 5, color = "#7f7ec7", modifier = Modifier.fillMaxWidth
 }
 ```
 
-A runnable example app lives in [`android/example`](android/example); the renderer is verified against the same `render-model.json` golden master as every other platform. See [`android/README.md`](android/README.md) to build and run it.
+A runnable example app lives in [`android/example`](android/example) — the same four screens as the iOS example, rebuilt in Compose: a swipeable featured carousel, a sky gallery, a stats dashboard, and a text-first editorial layout. The renderer is verified against the same `render-model.json` golden master as every other platform. See [`android/README.md`](android/README.md) to build and run it.
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/gregoryedgerton/golden-grids/main/docs/android/showcase-colors.png" width="220" alt="Android — HSL colour progression across the spiral" />
-  <img src="https://raw.githubusercontent.com/gregoryedgerton/golden-grids/main/docs/android/showcase-slots.png" width="220" alt="Android — content mapped into slots, largest first" />
+  <img src="https://raw.githubusercontent.com/gregoryedgerton/golden-grids/main/docs/android/featured.gif" width="200" alt="Featured — a swipeable card carousel" />
+  <img src="https://raw.githubusercontent.com/gregoryedgerton/golden-grids/main/docs/android/galleries.gif" width="200" alt="Galleries — sky gradients with sun and moon" />
+  <img src="https://raw.githubusercontent.com/gregoryedgerton/golden-grids/main/docs/android/dashboards.gif" width="200" alt="Dashboards — a bento of stats" />
+  <img src="https://raw.githubusercontent.com/gregoryedgerton/golden-grids/main/docs/android/editorial.gif" width="200" alt="Editorial — a text-first copy grid" />
 </p>
 
 ## Configuration

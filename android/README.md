@@ -63,7 +63,16 @@ adb shell am start -n com.gifcommit.goldengrids.example/.MainActivity
 
 Built and verified with Gradle 8.11.1, AGP 8.7.3, Kotlin 2.1.0, Compose BOM 2024.12.01.
 
+## Example screens
+
+`:example` mirrors `Examples/iOS` — four screens, icons-only bottom navigation, each
+built entirely with `GoldenGrid`: a swipeable **Featured** carousel, a sky **Gallery**,
+a stats **Dashboard** (count-up figures, a settling plot, a dusk→night gradient, gliding
+selectors), and a text-first **Editorial** article. Each screen builds itself in on appear.
+
 <p align="center">
-  <img src="../docs/android/showcase-colors.png" width="220" alt="Colour progression across the spiral" />
-  <img src="../docs/android/showcase-slots.png" width="220" alt="Content mapped into slots, largest first" />
+  <img src="../docs/android/featured.gif" width="200" alt="Featured — a swipeable card carousel" />
+  <img src="../docs/android/galleries.gif" width="200" alt="Galleries — sky gradients with sun and moon" />
+  <img src="../docs/android/dashboards.gif" width="200" alt="Dashboards — a bento of stats" />
+  <img src="../docs/android/editorial.gif" width="200" alt="Editorial — a text-first copy grid" />
 </p>
