@@ -3,65 +3,72 @@ package com.gifcommit.goldengrids.example
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Article
+import androidx.compose.material.icons.filled.GridView
+import androidx.compose.material.icons.filled.PhotoLibrary
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import com.gifcommit.goldengrids.GoldenGrid
 
+/**
+ * Mirrors Examples/iOS — four screens, icons-only bottom navigation, each built
+ * entirely with the GoldenGrid composable: a swipeable Featured carousel, a sky
+ * Gallery, a stats Dashboard, and a text-first Editorial article.
+ */
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContent {
-            MaterialTheme {
-                Surface(Modifier.fillMaxSize()) { Showcase() }
-            }
-        }
+        setContent { MaterialTheme { Surface { AppShell() } } }
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun Showcase() {
-    Column(
-        Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(24.dp),
-        verticalArrangement = Arrangement.spacedBy(24.dp),
-    ) {
-        Text("Golden Grids", fontSize = 32.sp, fontWeight = FontWeight.Bold)
-        Text(
-            "Jetpack Compose, rendered over the same proportional model as web, React Native and SwiftUI.",
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
+private fun AppShell() {
+    val titles = listOf("Featured", "Galleries", "Dashboards", "Editorial")
+    val icons = listOf(Icons.Filled.Star, Icons.Filled.PhotoLibrary, Icons.Filled.GridView, Icons.Filled.Article)
+    var selected by rememberSaveable { mutableIntStateOf(0) }
 
-        Text("Colour progression — from 1 to 5", fontWeight = FontWeight.SemiBold)
-        GoldenGrid(from = 1, to = 5, color = "#7f7ec7", modifier = Modifier.fillMaxWidth())
-
-        Text("Content slots — largest first", fontWeight = FontWeight.SemiBold)
-        GoldenGrid(from = 1, to = 4, modifier = Modifier.fillMaxWidth()) { childIndex ->
-            Box(
-                Modifier.fillMaxSize().background(tiles[childIndex % tiles.size]),
-                contentAlignment = Alignment.Center,
-            ) {
-                Text("${childIndex + 1}", color = Color.White, fontSize = 20.sp, fontWeight = FontWeight.Bold)
+    Scaffold(
+        topBar = { TopAppBar(title = { Text(titles[selected]) }) },
+        bottomBar = {
+            NavigationBar {
+                titles.indices.forEach { i ->
+                    NavigationBarItem(
+                        selected = selected == i,
+                        onClick = { selected = i },
+                        icon = { Icon(icons[i], contentDescription = titles[i]) },
+                    )
+                }
+            }
+        },
+    ) { padding ->
+        // Render only the selected screen, so switching tabs disposes and recreates
+        // it — that replays each screen's build-in intro, matching the iOS onDisappear.
+        Box(Modifier.fillMaxSize().padding(padding)) {
+            when (selected) {
+                0 -> FeaturedScreen()
+                1 -> GalleryScreen()
+                2 -> DashboardScreen()
+                else -> EditorialScreen()
             }
         }
     }
 }
-
-private val tiles = listOf(
-    Color(0xFF4C3FB0), Color(0xFF1E7F8C), Color(0xFFC2553F), Color(0xFF5E8B3A),
-)
