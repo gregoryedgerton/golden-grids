@@ -58,6 +58,14 @@ The grid is computed from one shared, framework-agnostic model, so the same comp
 - **Native iOS (SwiftUI)** — a Swift package, `import GoldenGrids`
 - **Native Android (Jetpack Compose)** — a Kotlin module, `import com.gifcommit.goldengrids.GoldenGrid`
 
+### Web (React)
+
+The package ships an interactive playground — the **Golden Grid Generator** — where you tune the grid through a mad-lib of dials and toggles (range, colour, outline, spiral direction, labels) and export the result. [Try it live.](https://gregoryedgerton.github.io/golden-grids/)
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/gregoryedgerton/golden-grids/main/docs/web/demo.png" width="600" alt="The Golden Grid Generator — a golden-ratio spiral built in the browser" />
+</p>
+
 ### React Native
 
 Same API, rendered with native `<View>`s — just import from the `/native` entry:
