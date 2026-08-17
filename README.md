@@ -35,10 +35,13 @@ stage.style.transformOrigin = '0 0';
 stage.style.transform = toCssTransform(frame, innerWidth, innerHeight);
 
 // Optional anchor: where the focused square's centre lands, defaulting to
-// the viewport centre. Pass a point to pin the dial against an edge — e.g.
-// half the focus size pins its edge flush (which edge to hug, and when, is
-// your layout's decision):
-const focusHalf = Math.min(innerWidth, innerHeight) / 2;
+// the viewport centre. Pass a point to pin the dial against an edge — half
+// the RENDERED focus size pins its edge flush. The rendered size is
+// fillRatio × min(viewport sides), so compute from the same fillRatio you
+// gave spiralCamera (default 0.62). Which edge to hug, and when, is your
+// layout's decision:
+const fillRatio = 0.62; // must match the spiralCamera call
+const focusHalf = (fillRatio * Math.min(innerWidth, innerHeight)) / 2;
 stage.style.transform = toCssTransform(frame, innerWidth, innerHeight, {
   x: focusHalf, // flush left
   y: innerHeight / 2,
