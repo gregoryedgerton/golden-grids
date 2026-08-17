@@ -91,7 +91,13 @@ export function spiralCamera(
 
   const target = fillRatio * Math.min(viewportWidth, viewportHeight);
   const scale = target / focusSize;
-  const rotationDeg = (clockwise ? -90 : 90) * depth;
+  // +90 per step for a clockwise layout: stepping from square n to n-1
+  // already turns the neighbourhood -90 degrees, so the stage rotates the
+  // OTHER way to cancel it — which is what keeps every whole-depth frame
+  // oriented identically (the next-deeper square always enters from the same
+  // side). The naive -90 doubles the turn instead and flips the visible
+  // neighbourhood ~180 degrees between frames.
+  const rotationDeg = (clockwise ? 90 : -90) * depth;
 
   return { scale, rotationDeg, centerX, centerY };
 }

@@ -42,8 +42,30 @@ describe('spiralCamera', () => {
   });
 
   it('rotates 90 degrees per step, direction following handedness', () => {
-    expect(spiralCamera(layout, 2, 800, 600).rotationDeg).toBe(-180);
-    expect(spiralCamera(layout, 2, 800, 600, { clockwise: false }).rotationDeg).toBe(180);
+    expect(spiralCamera(layout, 2, 800, 600).rotationDeg).toBe(180);
+    expect(spiralCamera(layout, 2, 800, 600, { clockwise: false }).rotationDeg).toBe(-180);
+  });
+
+  it('keeps every whole-depth frame identically oriented (self-similarity)', () => {
+    // The invariant behind the rotation sign: at every whole depth, the
+    // next-deeper square must appear at the SAME screen angle from centre.
+    // With the sign inverted this alternates by ~180 degrees frame to frame.
+    const screenAngle = (depth: number): number => {
+      const frame = spiralCamera(layout, depth, 1000, 1000);
+      const sq = layout.squares[14 - depth - 1];
+      const rad = (frame.rotationDeg * Math.PI) / 180;
+      const cx = sq.x + sq.size / 2 - frame.centerX;
+      const cy = sq.y + sq.size / 2 - frame.centerY;
+      const sx = cx * frame.scale;
+      const sy = cy * frame.scale;
+      const rx = sx * Math.cos(rad) - sy * Math.sin(rad);
+      const ry = sx * Math.sin(rad) + sy * Math.cos(rad);
+      return Math.atan2(ry, rx);
+    };
+    const reference = screenAngle(0);
+    for (let depth = 1; depth < 5; depth++) {
+      expect(screenAngle(depth)).toBeCloseTo(reference, 1);
+    }
   });
 
   it('honours a custom fill ratio', () => {
