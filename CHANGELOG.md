@@ -1,3 +1,10 @@
+# [4.3.0](https://github.com/gregoryedgerton/golden-grids/compare/v4.2.1...v4.3.0) (2026-08-17)
+
+
+### Features
+
+* anchor option on toCssTransform — pin the dial anywhere ([#23](https://github.com/gregoryedgerton/golden-grids/issues/23)) ([be8a977](https://github.com/gregoryedgerton/golden-grids/commit/be8a977267654926c0e18262850f17df4d9e4274))
+
 ## [4.2.1](https://github.com/gregoryedgerton/golden-grids/compare/v4.2.0...v4.2.1) (2026-08-17)
 
 
