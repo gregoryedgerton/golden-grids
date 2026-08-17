@@ -67,13 +67,17 @@ export function spiralCamera(
 ): SpiralCameraFrame {
   const { fillRatio = 0.62, clockwise = true } = options;
   const count = layout.squares.length;
-  const focus = focusIndexAt(depth, count);
-  const lower = Math.max(0, Math.floor(focus));
-  const upper = Math.min(count - 1, Math.ceil(focus));
 
-  if (lower > count - 1 || upper < 0) {
+  // Validate before any clamping: a depth of -0.5 would otherwise reuse the
+  // largest square's centre while still applying a 45-degree rotation — an
+  // inconsistent frame rather than the promised error.
+  if (depth < 0 || depth > count - 1) {
     throw new Error(`Depth ${depth} is outside the layout's ${count} squares.`);
   }
+
+  const focus = focusIndexAt(depth, count);
+  const lower = Math.floor(focus);
+  const upper = Math.ceil(focus);
 
   const t = focus - lower;
   const from = layout.squares[lower];
@@ -94,6 +98,10 @@ export function spiralCamera(
  * The frame as a CSS transform for an absolutely-positioned stage whose
  * children sit at layout coordinates used as pixels. Order matters: centre
  * the viewport, turn and zoom about it, then bring the focus point under it.
+ *
+ * The stage MUST have `transform-origin: 0 0` — the matrix assumes it. The
+ * CSS default is the element's own centre, which silently shifts the focus
+ * off viewport-centre once the stage has a box of its own.
  */
 export function toCssTransform(
   frame: SpiralCameraFrame,
@@ -135,12 +143,16 @@ export function spiralWindow(
 ): SpiralWindow {
   const { holdSteps = 1, fadeSteps = 2.5 } = options;
   const delta = Math.abs(focusIndexAt(depth, squareCount) - index);
-  const opacity =
+  const raw =
     delta <= holdSteps
       ? 1
       : Math.max(0, (fadeSteps - delta) / (fadeSteps - holdSteps));
+  // hidden derives from the ROUNDED value the consumer will actually render:
+  // a raw opacity of 0.0004 rounds to 0, and content rendered at 0 must also
+  // leave the paint and the tab order.
+  const opacity = Number(raw.toFixed(3));
   return {
-    opacity: Number(opacity.toFixed(3)),
+    opacity,
     hidden: opacity <= 0,
     focused: delta < 0.5,
   };

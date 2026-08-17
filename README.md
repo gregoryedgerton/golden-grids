@@ -30,6 +30,8 @@ import {
 
 const layout = generateGoldenGridLayout([1, 1, 2, 3, 5, 8, 13], true, 0);
 const frame = spiralCamera(layout, depth, innerWidth, innerHeight);
+// The stage must have transform-origin: 0 0 — the matrix assumes it.
+stage.style.transformOrigin = '0 0';
 stage.style.transform = toCssTransform(frame, innerWidth, innerHeight);
 
 // How present is square k at this depth? One ramp gives you "a few tiles at

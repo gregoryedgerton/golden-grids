@@ -56,8 +56,10 @@ describe('spiralCamera', () => {
     expect(frame.scale).toBeCloseTo(0.62 * 600, 5);
   });
 
-  it('rejects a depth outside the layout', () => {
+  it('rejects any depth outside [0, count - 1], including fractional overshoot', () => {
     expect(() => spiralCamera(layout, 99, 800, 600)).toThrow('outside the layout');
+    expect(() => spiralCamera(layout, -0.5, 800, 600)).toThrow('outside the layout');
+    expect(() => spiralCamera(layout, 14.5, 800, 600)).toThrow('outside the layout');
   });
 
   it('works on un-normalized layouts — only centres and sizes matter', () => {
@@ -94,6 +96,14 @@ describe('spiralWindow', () => {
     const gone = spiralWindow(11, 0, 15);
     expect(gone.opacity).toBe(0);
     expect(gone.hidden).toBe(true);
+  });
+
+  it('hides content whose rendered opacity rounds to zero', () => {
+    // Raw opacity just inside the boundary (≈0.0003) rounds to 0.000 — the
+    // consumer renders 0, so hidden must agree with what is rendered.
+    const nearZero = spiralWindow(9, 2.4995, 15);
+    expect(nearZero.opacity).toBe(0);
+    expect(nearZero.hidden).toBe(true);
   });
 
   it('agrees with itself at the fade boundary', () => {
