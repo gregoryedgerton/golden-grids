@@ -132,6 +132,14 @@ describe('spiralWindow', () => {
     expect(() => spiralWindow(9, 0, 15, { holdSteps: -1, fadeSteps: 0 })).toThrow(
       'Legibility window'
     );
+    // NaN bypasses ordering comparisons; Infinity yields opacity NaN outside
+    // the hold. Both come from parsed config and must fail loudly.
+    expect(() => spiralWindow(9, 0, 15, { holdSteps: NaN, fadeSteps: 2 })).toThrow(
+      'Legibility window'
+    );
+    expect(() =>
+      spiralWindow(9, 0, 15, { holdSteps: 1, fadeSteps: Infinity })
+    ).toThrow('Legibility window');
   });
 
   it('honours custom hold and fade distances', () => {

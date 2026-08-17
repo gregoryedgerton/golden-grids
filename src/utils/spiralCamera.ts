@@ -145,7 +145,12 @@ export function spiralWindow(
   // A malformed window renders nonsense rather than failing visibly: an
   // inverted one reverses the ramp (opacity above 1, growing with distance),
   // and a negative hold hides the focus itself. Refuse both.
-  if (holdSteps < 0 || fadeSteps <= holdSteps) {
+  if (
+    !Number.isFinite(holdSteps) ||
+    !Number.isFinite(fadeSteps) ||
+    holdSteps < 0 ||
+    fadeSteps <= holdSteps
+  ) {
     throw new Error(
       `Legibility window needs 0 <= holdSteps (${holdSteps}) < fadeSteps (${fadeSteps}).`
     );
