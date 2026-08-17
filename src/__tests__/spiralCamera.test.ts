@@ -123,10 +123,14 @@ describe('spiralWindow', () => {
     // fadeSteps <= holdSteps flips the ramp's denominator: opacity 2 at four
     // steps out, growing with distance, and nothing ever hidden.
     expect(() => spiralWindow(9, 0, 15, { holdSteps: 3, fadeSteps: 2 })).toThrow(
-      'must be greater than'
+      'Legibility window'
     );
     expect(() => spiralWindow(9, 0, 15, { holdSteps: 1, fadeSteps: 1 })).toThrow(
-      'must be greater than'
+      'Legibility window'
+    );
+    // Negative-but-ordered distances hide the focus itself.
+    expect(() => spiralWindow(9, 0, 15, { holdSteps: -1, fadeSteps: 0 })).toThrow(
+      'Legibility window'
     );
   });
 

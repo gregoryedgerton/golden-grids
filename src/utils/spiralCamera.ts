@@ -142,11 +142,12 @@ export function spiralWindow(
   options: SpiralWindowOptions = {}
 ): SpiralWindow {
   const { holdSteps = 1, fadeSteps = 2.5 } = options;
-  // An inverted window reverses the ramp — opacity above 1 that GROWS with
-  // distance, and nothing ever hides. Refuse it rather than render nonsense.
-  if (fadeSteps <= holdSteps) {
+  // A malformed window renders nonsense rather than failing visibly: an
+  // inverted one reverses the ramp (opacity above 1, growing with distance),
+  // and a negative hold hides the focus itself. Refuse both.
+  if (holdSteps < 0 || fadeSteps <= holdSteps) {
     throw new Error(
-      `fadeSteps (${fadeSteps}) must be greater than holdSteps (${holdSteps}).`
+      `Legibility window needs 0 <= holdSteps (${holdSteps}) < fadeSteps (${fadeSteps}).`
     );
   }
   const delta = Math.abs(focusIndexAt(depth, squareCount) - index);
