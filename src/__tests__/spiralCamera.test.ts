@@ -26,7 +26,7 @@ describe('spiralCamera', () => {
   it('scales the focused square to the fill ratio of the smaller side', () => {
     const frame = spiralCamera(layout, 0, 1200, 800);
     expect(frame.scale).toBeCloseTo((0.62 * 800) / 610, 5);
-    expect(frame.rotationDeg).toBe(-0);
+    expect(frame.rotationDeg).toBe(0);
   });
 
   it('centres the focused square in layout coordinates', () => {
