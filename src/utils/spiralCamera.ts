@@ -68,6 +68,12 @@ export function spiralCamera(
   const { fillRatio = 0.62, clockwise = true } = options;
   const count = layout.squares.length;
 
+  // A non-finite or non-positive ratio produces an invalid scale(); browsers
+  // discard the declaration and silently keep the previous frame on screen.
+  if (!Number.isFinite(fillRatio) || fillRatio <= 0) {
+    throw new Error(`fillRatio (${fillRatio}) must be a positive finite number.`);
+  }
+
   // Validate before any clamping: a depth of -0.5 would otherwise reuse the
   // largest square's centre while still applying a 45-degree rotation — an
   // inconsistent frame rather than the promised error. NaN (a scroll ratio

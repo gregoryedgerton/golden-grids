@@ -68,6 +68,14 @@ describe('spiralCamera', () => {
     }
   });
 
+  it('rejects a non-finite or non-positive fill ratio', () => {
+    // An invalid scale() is discarded by the browser, silently freezing the
+    // previous frame — fail loudly instead.
+    expect(() => spiralCamera(layout, 0, 800, 600, { fillRatio: NaN })).toThrow('fillRatio');
+    expect(() => spiralCamera(layout, 0, 800, 600, { fillRatio: Infinity })).toThrow('fillRatio');
+    expect(() => spiralCamera(layout, 0, 800, 600, { fillRatio: 0 })).toThrow('fillRatio');
+  });
+
   it('honours a custom fill ratio', () => {
     const frame = spiralCamera(layout, 0, 1000, 1000, { fillRatio: 1 });
     expect(frame.scale).toBeCloseTo(1000 / 610, 5);
