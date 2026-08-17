@@ -1,3 +1,10 @@
+# [4.2.0](https://github.com/gregoryedgerton/golden-grids/compare/v4.1.0...v4.2.0) (2026-08-17)
+
+
+### Features
+
+* spiral camera — dial through a layout by depth ([#21](https://github.com/gregoryedgerton/golden-grids/issues/21)) ([9037db3](https://github.com/gregoryedgerton/golden-grids/commit/9037db34e0f4f86f6adf32fa46c44ff24e8a00c3))
+
 # [4.1.0](https://github.com/gregoryedgerton/golden-grids/compare/v4.0.0...v4.1.0) (2026-06-21)
 
 
