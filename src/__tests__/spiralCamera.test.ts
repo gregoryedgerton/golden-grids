@@ -145,6 +145,7 @@ describe('spiralWindow', () => {
     // fail loudly, not return opacity NaN with hidden false.
     expect(() => spiralWindow(9, NaN, 15)).toThrow('finite depth');
     expect(() => spiralWindow(NaN, 0, 15)).toThrow('finite depth');
+    expect(() => spiralWindow(9, 0, NaN)).toThrow('finite depth');
   });
 
   it('honours custom hold and fade distances', () => {

@@ -160,8 +160,14 @@ export function spiralWindow(
   // A NaN depth or index propagates to opacity NaN with hidden false —
   // stale-painted, still-focusable content. Same failure loudness as the
   // distances above.
-  if (!Number.isFinite(depth) || !Number.isFinite(index)) {
-    throw new Error(`Legibility window needs finite depth (${depth}) and index (${index}).`);
+  if (
+    !Number.isFinite(depth) ||
+    !Number.isFinite(index) ||
+    !Number.isFinite(squareCount)
+  ) {
+    throw new Error(
+      `Legibility window needs finite depth (${depth}), index (${index}) and squareCount (${squareCount}).`
+    );
   }
   const delta = Math.abs(focusIndexAt(depth, squareCount) - index);
   const raw =
