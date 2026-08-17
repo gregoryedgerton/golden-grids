@@ -113,7 +113,7 @@ describe('spiralCamera', () => {
 });
 
 describe('toCssTransform', () => {
-  it('composes centre, rotation, scale, and focus in that order', () => {
+  it('composes anchor, rotation, scale, and focus in that order', () => {
     const layout = generateGoldenGridLayout(fib(5), true, 0);
     const frame = spiralCamera(layout, 1, 1200, 800);
     const css = toCssTransform(frame, 1200, 800);
@@ -121,6 +121,28 @@ describe('toCssTransform', () => {
       `translate(600px, 400px) rotate(${frame.rotationDeg}deg) ` +
         `scale(${frame.scale}) translate(${-frame.centerX}px, ${-frame.centerY}px)`
     );
+  });
+
+  it('defaults the anchor to the viewport centre', () => {
+    const layout = generateGoldenGridLayout(fib(5), true, 0);
+    const frame = spiralCamera(layout, 0, 1000, 600);
+    expect(toCssTransform(frame, 1000, 600)).toContain('translate(500px, 300px)');
+  });
+
+  it('pins the focus to a custom anchor — an edge-flush dial', () => {
+    // The focused square is min(vw,vh) at fillRatio 1; anchoring its centre
+    // at half that size puts its left edge at x = 0.
+    const layout = generateGoldenGridLayout(fib(5), true, 0);
+    const frame = spiralCamera(layout, 0, 1200, 800);
+    const css = toCssTransform(frame, 1200, 800, { x: 400, y: 400 });
+    expect(css).toContain('translate(400px, 400px)');
+  });
+
+  it('rejects a non-finite anchor', () => {
+    const layout = generateGoldenGridLayout(fib(5), true, 0);
+    const frame = spiralCamera(layout, 0, 1200, 800);
+    expect(() => toCssTransform(frame, 1200, 800, { x: NaN, y: 0 })).toThrow('finite');
+    expect(() => toCssTransform(frame, 1200, 800, { x: 0, y: Infinity })).toThrow('finite');
   });
 });
 

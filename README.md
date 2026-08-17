@@ -34,6 +34,16 @@ const frame = spiralCamera(layout, depth, innerWidth, innerHeight);
 stage.style.transformOrigin = '0 0';
 stage.style.transform = toCssTransform(frame, innerWidth, innerHeight);
 
+// Optional anchor: where the focused square's centre lands, defaulting to
+// the viewport centre. Pass a point to pin the dial against an edge — e.g.
+// half the focus size pins its edge flush (which edge to hug, and when, is
+// your layout's decision):
+const focusHalf = Math.min(innerWidth, innerHeight) / 2;
+stage.style.transform = toCssTransform(frame, innerWidth, innerHeight, {
+  x: focusHalf, // flush left
+  y: innerHeight / 2,
+});
+
 // How present is square k at this depth? One ramp gives you "a few tiles at
 // a time" and the crossfade; hidden fires exactly when opacity reaches zero,
 // so invisible content never stays focusable.

@@ -125,20 +125,36 @@ export function spiralCamera(
 
 /**
  * The frame as a CSS transform for an absolutely-positioned stage whose
- * children sit at layout coordinates used as pixels. Order matters: centre
- * the viewport, turn and zoom about it, then bring the focus point under it.
+ * children sit at layout coordinates used as pixels. Order matters: anchor
+ * the viewport, turn and zoom about that point, then bring the focus point
+ * under it.
+ *
+ * `anchor` is where the focused square's CENTRE lands in viewport pixels —
+ * the dial's pivot. It defaults to the viewport centre; a consumer that
+ * wants the focus flush against an edge passes the point directly (e.g.
+ * `{ x: focusSize / 2, y: viewportHeight / 2 }` pins the focused square's
+ * left edge to x = 0). Which edge to hug is the consumer's layout decision —
+ * proven on gregoryedgerton.com/timeline, where the dial hugs the nav column
+ * on desktop and the header line on mobile.
  *
  * The stage MUST have `transform-origin: 0 0` — the matrix assumes it. The
  * CSS default is the element's own centre, which silently shifts the focus
- * off viewport-centre once the stage has a box of its own.
+ * off its anchor once the stage has a box of its own.
  */
 export function toCssTransform(
   frame: SpiralCameraFrame,
   viewportWidth: number,
-  viewportHeight: number
+  viewportHeight: number,
+  anchor: { x: number; y: number } = {
+    x: viewportWidth / 2,
+    y: viewportHeight / 2,
+  }
 ): string {
+  if (!Number.isFinite(anchor.x) || !Number.isFinite(anchor.y)) {
+    throw new Error(`Anchor (${anchor.x}, ${anchor.y}) must be finite.`);
+  }
   return (
-    `translate(${viewportWidth / 2}px, ${viewportHeight / 2}px) ` +
+    `translate(${anchor.x}px, ${anchor.y}px) ` +
     `rotate(${frame.rotationDeg}deg) scale(${frame.scale}) ` +
     `translate(${-frame.centerX}px, ${-frame.centerY}px)`
   );
