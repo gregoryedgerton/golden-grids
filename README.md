@@ -8,6 +8,43 @@ Try the [Golden Grid Generator](https://gregoryedgerton.github.io/golden-grids/)
 
 Golden Grids is a responsive layout library driven by the Fibonacci Sequence. Instead of traditional rows and columns you get proportionally aligned boxes that follow the golden ratio. What you do with those boxes is your business, but at least you won't be boring.
 
+## Spiral camera
+
+`spiralCamera` turns a layout into a dialable view: give it a depth and it
+returns the transform that fills the viewport with one square — the focus —
+composed exactly as the spiral places its neighbours. Depth 0 focuses the last
+(largest) square; each whole step moves one square deeper, toward the eye.
+Scale interpolates geometrically and rotation advances 90° per step, so a
+scroll-bound depth feels like one continuous dial. Framework-free: bind it to
+scroll, a slider, or a clock — the camera only answers "where is the viewport
+at depth d".
+
+```ts
+import {
+  generateGoldenGridLayout,
+  spiralCamera,
+  toCssTransform,
+  spiralWindow,
+  spiralEye,
+} from '@gifcommit/golden-grids';
+
+const layout = generateGoldenGridLayout([1, 1, 2, 3, 5, 8, 13], true, 0);
+const frame = spiralCamera(layout, depth, innerWidth, innerHeight);
+stage.style.transform = toCssTransform(frame, innerWidth, innerHeight);
+
+// How present is square k at this depth? One ramp gives you "a few tiles at
+// a time" and the crossfade; hidden fires exactly when opacity reaches zero,
+// so invisible content never stays focusable.
+const { opacity, hidden, focused } = spiralWindow(k, depth, layout.squares.length);
+
+// The spiral's convergence point, e.g. as a transform origin or annotation
+// anchor (centre of the smallest square; exact in the φ-limit).
+const eye = spiralEye(layout);
+```
+
+Proven in production on [gregoryedgerton.com/timeline](https://www.gregoryedgerton.com/timeline/)
+before being upstreamed.
+
 ## Installation
 
 ```bash

@@ -50,7 +50,7 @@ import { GoldenGrid, GoldenBox } from '@gifcommit/golden-grids'
 }
 ```
 
-Exported from the library: `GoldenGrid`, `GoldenGridProps`, `GoldenBox`, `GoldenBoxProps`, `generateGoldenGridLayout` (raw coordinates for non-React use cases), and types `Square`, `GridLayout`, `PlacementValue`.
+Exported from the library: `GoldenGrid`, `GoldenGridProps`, `GoldenBox`, `GoldenBoxProps`, `generateGoldenGridLayout` (raw coordinates for non-React use cases), the spiral camera (`spiralCamera`, `toCssTransform`, `spiralWindow`, `spiralEye`, `focusIndexAt` — framework-free depth-dial math in `src/utils/spiralCamera.ts`), and types `Square`, `GridLayout`, `PlacementValue`, `SpiralCameraOptions`, `SpiralCameraFrame`, `SpiralWindowOptions`, `SpiralWindow`.
 
 `GridProvider`, `useGrid`, `InputControlType`, `generateGridHTML`, `FIB_STOPS`, and `getGridRange` are **not exported** — they are demo-only internals.
 
