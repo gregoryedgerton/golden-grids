@@ -1,3 +1,10 @@
+## [4.2.1](https://github.com/gregoryedgerton/golden-grids/compare/v4.2.0...v4.2.1) (2026-08-17)
+
+
+### Bug Fixes
+
+* externalize react/jsx-runtime in the web bundle ([#22](https://github.com/gregoryedgerton/golden-grids/issues/22)) ([70a3876](https://github.com/gregoryedgerton/golden-grids/commit/70a3876f5e528a06128b4e7e82f1d7798804908d))
+
 # [4.2.0](https://github.com/gregoryedgerton/golden-grids/compare/v4.1.0...v4.2.0) (2026-08-17)
 
 

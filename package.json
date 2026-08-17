@@ -1,6 +1,6 @@
 {
   "name": "@gifcommit/golden-grids",
-  "version": "4.2.0",
+  "version": "4.2.1",
   "description": "A React library for generating golden ratio grid layouts.",
   "main": "dist/golden-grids.cjs.js",
   "module": "dist/golden-grids.es.js",
