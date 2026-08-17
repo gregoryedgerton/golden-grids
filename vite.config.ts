@@ -69,7 +69,13 @@ export default defineConfig(({ command }) => {
         formats: ["es", "cjs"],
       },
       rollupOptions: {
-        external: ["react", "react-dom"],
+        // react/jsx-runtime (and its dev variant) MUST be external alongside
+        // react itself: bundling it bakes in the building React's internals —
+        // the 4.2.0 bundle inlined React 18's dev jsx-runtime, which touches
+        // __SECRET_INTERNALS at module init and crashes under React 19 before
+        // a consumer can reach even the framework-free exports. The native
+        // build already externalized it; the web build now matches.
+        external: ["react", "react-dom", "react/jsx-runtime", "react/jsx-dev-runtime"],
         output: {
           globals: {
             react: "React",
