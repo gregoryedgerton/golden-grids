@@ -68,6 +68,14 @@ describe('spiralCamera', () => {
     }
   });
 
+  it('rejects an unmeasured or degenerate viewport', () => {
+    // A zero-sized container mid-layout is a real state; the consumer should
+    // skip the frame rather than render an invalid one.
+    expect(() => spiralCamera(layout, 0, 0, 600)).toThrow('positive finite dimensions');
+    expect(() => spiralCamera(layout, 0, 800, NaN)).toThrow('positive finite dimensions');
+    expect(() => spiralCamera(layout, 0, -800, 600)).toThrow('positive finite dimensions');
+  });
+
   it('rejects a non-finite or non-positive fill ratio', () => {
     // An invalid scale() is discarded by the browser, silently freezing the
     // previous frame — fail loudly instead.
@@ -173,9 +181,13 @@ describe('spiralWindow', () => {
     ).toThrow('Legibility window');
     // A NaN depth (scroll ratio against a zero-sized container) or index must
     // fail loudly, not return opacity NaN with hidden false.
-    expect(() => spiralWindow(9, NaN, 15)).toThrow('finite depth');
-    expect(() => spiralWindow(NaN, 0, 15)).toThrow('finite depth');
-    expect(() => spiralWindow(9, 0, NaN)).toThrow('finite depth');
+    expect(() => spiralWindow(9, NaN, 15)).toThrow('inside');
+    expect(() => spiralWindow(NaN, 0, 15)).toThrow('inside');
+    expect(() => spiralWindow(9, 0, NaN)).toThrow('squareCount');
+    // Structurally out-of-range coordinates are refused too — depth 15 in a
+    // 15-square layout is outside [0, 14], as is a negative index.
+    expect(() => spiralWindow(0, 15, 15)).toThrow('inside');
+    expect(() => spiralWindow(-1, 0, 15)).toThrow('inside');
   });
 
   it('honours custom hold and fade distances', () => {

@@ -74,6 +74,21 @@ export function spiralCamera(
     throw new Error(`fillRatio (${fillRatio}) must be a positive finite number.`);
   }
 
+  // Same failure shape for an unmeasured viewport: NaN or zero dimensions
+  // reach scale() as an invalid or degenerate value. A zero-sized container
+  // is a real state during layout — the consumer should skip the frame, not
+  // render one.
+  if (
+    !Number.isFinite(viewportWidth) ||
+    !Number.isFinite(viewportHeight) ||
+    viewportWidth <= 0 ||
+    viewportHeight <= 0
+  ) {
+    throw new Error(
+      `Viewport (${viewportWidth}x${viewportHeight}) must have positive finite dimensions.`
+    );
+  }
+
   // Validate before any clamping: a depth of -0.5 would otherwise reuse the
   // largest square's centre while still applying a 45-degree rotation — an
   // inconsistent frame rather than the promised error. NaN (a scroll ratio
@@ -175,10 +190,15 @@ export function spiralWindow(
   if (
     !Number.isFinite(depth) ||
     !Number.isFinite(index) ||
-    !Number.isFinite(squareCount)
+    !Number.isFinite(squareCount) ||
+    depth < 0 ||
+    depth > squareCount - 1 ||
+    index < 0 ||
+    index > squareCount - 1
   ) {
     throw new Error(
-      `Legibility window needs finite depth (${depth}), index (${index}) and squareCount (${squareCount}).`
+      `Legibility window needs depth (${depth}) and index (${index}) inside ` +
+        `[0, ${squareCount - 1}] for a finite squareCount (${squareCount}).`
     );
   }
   const delta = Math.abs(focusIndexAt(depth, squareCount) - index);
