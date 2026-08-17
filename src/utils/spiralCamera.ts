@@ -70,8 +70,10 @@ export function spiralCamera(
 
   // Validate before any clamping: a depth of -0.5 would otherwise reuse the
   // largest square's centre while still applying a 45-degree rotation — an
-  // inconsistent frame rather than the promised error.
-  if (depth < 0 || depth > count - 1) {
+  // inconsistent frame rather than the promised error. NaN (a scroll ratio
+  // computed against a zero-sized container) fails every comparison, so it is
+  // checked for explicitly.
+  if (!Number.isFinite(depth) || depth < 0 || depth > count - 1) {
     throw new Error(`Depth ${depth} is outside the layout's ${count} squares.`);
   }
 
@@ -154,6 +156,12 @@ export function spiralWindow(
     throw new Error(
       `Legibility window needs 0 <= holdSteps (${holdSteps}) < fadeSteps (${fadeSteps}).`
     );
+  }
+  // A NaN depth or index propagates to opacity NaN with hidden false —
+  // stale-painted, still-focusable content. Same failure loudness as the
+  // distances above.
+  if (!Number.isFinite(depth) || !Number.isFinite(index)) {
+    throw new Error(`Legibility window needs finite depth (${depth}) and index (${index}).`);
   }
   const delta = Math.abs(focusIndexAt(depth, squareCount) - index);
   const raw =

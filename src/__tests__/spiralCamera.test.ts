@@ -60,6 +60,7 @@ describe('spiralCamera', () => {
     expect(() => spiralCamera(layout, 99, 800, 600)).toThrow('outside the layout');
     expect(() => spiralCamera(layout, -0.5, 800, 600)).toThrow('outside the layout');
     expect(() => spiralCamera(layout, 14.5, 800, 600)).toThrow('outside the layout');
+    expect(() => spiralCamera(layout, NaN, 800, 600)).toThrow('outside the layout');
   });
 
   it('works on un-normalized layouts — only centres and sizes matter', () => {
@@ -140,6 +141,10 @@ describe('spiralWindow', () => {
     expect(() =>
       spiralWindow(9, 0, 15, { holdSteps: 1, fadeSteps: Infinity })
     ).toThrow('Legibility window');
+    // A NaN depth (scroll ratio against a zero-sized container) or index must
+    // fail loudly, not return opacity NaN with hidden false.
+    expect(() => spiralWindow(9, NaN, 15)).toThrow('finite depth');
+    expect(() => spiralWindow(NaN, 0, 15)).toThrow('finite depth');
   });
 
   it('honours custom hold and fade distances', () => {
