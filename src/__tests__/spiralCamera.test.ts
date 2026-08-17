@@ -119,6 +119,17 @@ describe('spiralWindow', () => {
     expect(spiralWindow(14, 5, 15).hidden).toBe(true);
   });
 
+  it('rejects an inverted window', () => {
+    // fadeSteps <= holdSteps flips the ramp's denominator: opacity 2 at four
+    // steps out, growing with distance, and nothing ever hidden.
+    expect(() => spiralWindow(9, 0, 15, { holdSteps: 3, fadeSteps: 2 })).toThrow(
+      'must be greater than'
+    );
+    expect(() => spiralWindow(9, 0, 15, { holdSteps: 1, fadeSteps: 1 })).toThrow(
+      'must be greater than'
+    );
+  });
+
   it('honours custom hold and fade distances', () => {
     const wide = spiralWindow(11, 0, 15, { holdSteps: 3, fadeSteps: 5 });
     expect(wide.opacity).toBe(1);

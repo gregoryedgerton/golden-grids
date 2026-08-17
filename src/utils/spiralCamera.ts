@@ -142,6 +142,13 @@ export function spiralWindow(
   options: SpiralWindowOptions = {}
 ): SpiralWindow {
   const { holdSteps = 1, fadeSteps = 2.5 } = options;
+  // An inverted window reverses the ramp — opacity above 1 that GROWS with
+  // distance, and nothing ever hides. Refuse it rather than render nonsense.
+  if (fadeSteps <= holdSteps) {
+    throw new Error(
+      `fadeSteps (${fadeSteps}) must be greater than holdSteps (${holdSteps}).`
+    );
+  }
   const delta = Math.abs(focusIndexAt(depth, squareCount) - index);
   const raw =
     delta <= holdSteps
