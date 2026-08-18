@@ -14,15 +14,15 @@ import GoldenGrids
 /// web port walls even earlier, at 78 (Number.MAX_SAFE_INTEGER). Going to a
 /// true 100 needs a float-coordinate layout in the library.
 ///
-/// The filters are the grego facet lesson as a demo: the spiral is
-/// count-driven, so a filtered set is the SAME machine over fewer squares —
+/// The sets are the grego facet lesson as a demo: the spiral is
+/// count-driven, so a smaller set is the SAME machine over fewer squares —
 /// layout and trail re-SOLVED per count, never reused across counts.
 struct SpiralView: View {
     private static let fullCount = 91
 
     /// Which numbers ride the dial. The number is the tile's CONTENT — its
-    /// geometry comes from its position in the filtered layout.
-    enum NumberFilter: String, CaseIterable, Identifiable {
+    /// geometry comes from its position in the set's layout.
+    enum NumberSet: String, CaseIterable, Identifiable {
         case all = "ALL"
         case duo = "DUO"
         case trio = "TRIO"
@@ -39,7 +39,7 @@ struct SpiralView: View {
         }
     }
 
-    /// One dial per filter: its numbers, and a spiral laid out for exactly
+    /// One dial per set: its numbers, and a spiral laid out for exactly
     /// that count — fib run and trail rotation both re-solved, because the
     /// trail direction cycles with the square count.
     struct Dial {
@@ -48,13 +48,13 @@ struct SpiralView: View {
         var count: Int { numbers.count }
     }
 
-    private static let dials: [NumberFilter: Dial] = {
-        var out: [NumberFilter: Dial] = [:]
-        for filter in NumberFilter.allCases {
-            let numbers = filter.numbers
+    private static let dials: [NumberSet: Dial] = {
+        var out: [NumberSet: Dial] = [:]
+        for numberSet in NumberSet.allCases {
+            let numbers = numberSet.numbers
             var fib = [1, 1]
             while fib.count < numbers.count { fib.append(fib[fib.count - 1] + fib[fib.count - 2]) }
-            out[filter] = Dial(
+            out[numberSet] = Dial(
                 numbers: numbers,
                 layout: generateGoldenGridLayout(
                     fib,
@@ -66,11 +66,11 @@ struct SpiralView: View {
         return out
     }()
 
-    @State private var filter: NumberFilter = SpiralView.initialFilter()
-    // Clamped against the INITIAL filter's dial, not the full set — GG_DEPTH
+    @State private var set: NumberSet = SpiralView.initialSet()
+    // Clamped against the INITIAL set's dial, not the full one — GG_DEPTH
     // combined with a short GG_FILTER must not start out of range.
     @State private var depth: Double = SpiralView.initialDepth(
-        for: SpiralView.dials[SpiralView.initialFilter()]!.count
+        for: SpiralView.dials[SpiralView.initialSet()]!.count
     )
     @State private var dragStartDepth: Double?
     /// Last two drag samples, for a live-flick velocity (depth/second) —
@@ -80,7 +80,7 @@ struct SpiralView: View {
     @State private var flickVelocity: Double = 0
     @State private var coastTask: Task<Void, Never>?
 
-    private var dial: Dial { Self.dials[filter]! }
+    private var dial: Dial { Self.dials[set]! }
     private var maxDepth: Double { Double(dial.count - 1) }
 
     /// Screenshot hooks, like GG_TAB in App.swift: GG_DEPTH starts the dial
@@ -92,11 +92,11 @@ struct SpiralView: View {
         return min(max(value, 0), Double(count - 1))
     }
 
-    /// GG_FILTER selects a segment at launch (all/duo/trio/quad) — the same
+    /// GG_FILTER selects a set at launch (all/duo/trio/quad) — the same
     /// deterministic-recording family as GG_TAB/GG_DEPTH/GG_AUTOSPIN.
-    private static func initialFilter() -> NumberFilter {
+    private static func initialSet() -> NumberSet {
         guard let raw = ProcessInfo.processInfo.environment["GG_FILTER"] else { return .all }
-        return NumberFilter(rawValue: raw.uppercased()) ?? .all
+        return NumberSet(rawValue: raw.uppercased()) ?? .all
     }
 
     private static func autospinRate() -> Double? {
@@ -147,22 +147,22 @@ struct SpiralView: View {
                 )
 
                 VStack(spacing: 8) {
-                    // Quick filters in the slider's old seat: the same
-                    // numbers re-dialed through a smaller spiral. Switching
-                    // grabs the dial (kills any coast) and re-clamps depth
-                    // into the new, shorter track.
-                    Picker("Filter", selection: $filter) {
-                        ForEach(NumberFilter.allCases) { option in
+                    // Quick sets in the slider's old seat, each a spiral of
+                    // its own size. Switching grabs the dial (kills any
+                    // coast) and re-clamps depth into the new, shorter
+                    // track.
+                    Picker("Set", selection: $set) {
+                        ForEach(NumberSet.allCases) { option in
                             Text(option.rawValue).tag(option)
                         }
                     }
                     .pickerStyle(.segmented)
                     // The two-parameter onChange still deploys below iOS 17.
-                    .onChange(of: filter) { _ in
+                    .onChange(of: set) { _ in
                         coastTask?.cancel()
                         depth = min(depth, maxDepth)
                     }
-                    // Clamp BEFORE indexing: on a filter switch SwiftUI
+                    // Clamp BEFORE indexing: on a set switch SwiftUI
                     // renders this body with the new dial before onChange
                     // has re-clamped the state, and an unclamped depth would
                     // index outside the shorter dial.
@@ -279,7 +279,7 @@ struct SpiralView: View {
 
     private func tile(number: Int, focused: Bool, frame: SpiralCameraFrame) -> some View {
         // Hue keyed to the NUMBER, not the position: 46 keeps its colour in
-        // every filter it appears in.
+        // every set it appears in.
         let hue = Double(number).truncatingRemainder(dividingBy: 15) / 15
         let t = Self.texturePx
         // Orientation-lock the label: counter-rotate the content against the
