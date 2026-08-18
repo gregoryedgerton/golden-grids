@@ -83,14 +83,16 @@ export const SpiralStage: React.FC<Props> = ({
           // The flat renderer's shared-edge rule, in layout space: every
           // square draws right+bottom, and only squares on the layout's own
           // top/left boundary draw top/left — so a shared edge carries ONE
-          // line and the dial previews the exported outline thickness.
+          // line and the dial previews the exported outline thickness. The
+          // boundary is layout.minX/minY, NOT zero: rotated layouts keep
+          // negative coordinates (the renderers subtract the minima).
           const scaled = outline ? scaleOutline(outline, netScale) : undefined;
           const borders = scaled
             ? {
                 borderRight: scaled,
                 borderBottom: scaled,
-                borderTop: square.y === 0 ? scaled : undefined,
-                borderLeft: square.x === 0 ? scaled : undefined,
+                borderTop: square.y === layout.minY ? scaled : undefined,
+                borderLeft: square.x === layout.minX ? scaled : undefined,
               }
             : undefined;
           const transform =
