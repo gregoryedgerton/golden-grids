@@ -28,7 +28,7 @@ struct SpiralView: View {
 
     var body: some View {
         NavigationStack {
-            VStack(spacing: 16) {
+            VStack(spacing: 24) {
                 GeometryReader { geo in
                     stage(in: geo.size)
                 }
@@ -46,7 +46,7 @@ struct SpiralView: View {
                         .onEnded { _ in dragStartDepth = nil }
                 )
 
-                VStack(spacing: 6) {
+                VStack(spacing: 8) {
                     Slider(value: $depth, in: 0...Double(Self.count - 1))
                     Text("depth \(depth, specifier: "%.2f") — square \(Self.count - Int(depth.rounded()))")
                         .font(.caption.monospacedDigit())
@@ -54,7 +54,8 @@ struct SpiralView: View {
                 }
                 .padding(.horizontal)
             }
-            .padding(12)
+            .padding(.horizontal, 4)
+            .padding(.bottom, 12)
             .navigationTitle("Spiral")
         }
     }
@@ -80,7 +81,9 @@ struct SpiralView: View {
             depth: depth,
             viewportWidth: Double(size.width),
             viewportHeight: Double(size.height),
-            options: SpiralCameraOptions(fillRatio: 0.62, clockwise: true)
+            // A larger fill than the 1/φ default: the dial is the whole
+            // point of this screen, so the focus owns most of the stage.
+            options: SpiralCameraOptions(fillRatio: 0.85, clockwise: true)
         )
         // Per-tile composed transforms, NOT one matrix over a shared stage:
         // a stage transform rasterizes the 1-unit deep squares and upscales
@@ -92,7 +95,7 @@ struct SpiralView: View {
                 let square = Self.layout.squares[index]
                 let window = spiralWindow(index, depth: depth, squareCount: Self.count)
                 if !window.hidden {
-                    tile(index: index, focused: window.focused)
+                    tile(index: index, focused: window.focused, frame: frame)
                         .opacity(window.opacity)
                         .transformEffect(
                             toAffineTileTransform(
@@ -109,9 +112,14 @@ struct SpiralView: View {
         .animation(.linear(duration: 0.05), value: depth)
     }
 
-    private func tile(index: Int, focused: Bool) -> some View {
+    private func tile(index: Int, focused: Bool, frame: SpiralCameraFrame) -> some View {
         let hue = Double(index) / Double(Self.count)
         let t = Self.texturePx
+        // Orientation-lock the label: counter-rotate the content against the
+        // dial (about its own centre, the SwiftUI default) so it orbits with
+        // the tile but never spins. A configuration detail — pass
+        // counterRotate: false to let content ride the spiral instead.
+        let content = contentTransform(frame)
         return RoundedRectangle(cornerRadius: t * 0.02)
             .fill(Color(hue: hue, saturation: 0.45, brightness: focused ? 0.95 : 0.75))
             .overlay(
@@ -122,7 +130,10 @@ struct SpiralView: View {
                 Text("\(index + 1)")
                     .font(.system(size: t * 0.3, weight: .bold, design: .rounded))
                     .foregroundStyle(.black.opacity(0.45))
+                    .rotationEffect(.degrees(content.rotationDeg))
+                    .scaleEffect(content.scale)
             )
             .frame(width: t, height: t)
+            .clipped()
     }
 }

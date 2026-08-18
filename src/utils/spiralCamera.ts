@@ -262,6 +262,66 @@ export function toNativeTileTransform(
   ];
 }
 
+/**
+ * The transform that keeps a tile's CONTENT readable while the dial turns:
+ * counter-rotate by exactly the stage rotation about the content's own
+ * centre, so content orbits with its tile but never spins — the
+ * orientation-lock illusion the production dial uses for its artwork.
+ *
+ * `cover` (default true) adds the |cosθ| + |sinθ| swell: mid-turn the
+ * counter-rotated square no longer axis-aligns with its clip box and corners
+ * would show through; the factor is exactly 1 at whole depths (no permanent
+ * crop) and √2 at worst. Turn it off for content that should never scale —
+ * padded text, say — and accept the corners instead.
+ *
+ * `counterRotate` (default true) is the whole feature's switch: false returns
+ * the identity, so a consumer wiring configuration can keep one call site
+ * and let content rotate with the spiral when that is the look they want.
+ *
+ * Apply about the content's CENTRE (transform-origin 50% 50% on the web —
+ * NOT the tile's 0 0 — and the default pivot on RN/Compose), inside a tile
+ * that clips overflow.
+ */
+export interface ContentTransform {
+  rotationDeg: number;
+  scale: number;
+}
+
+export interface ContentTransformOptions {
+  counterRotate?: boolean;
+  cover?: boolean;
+}
+
+export function contentTransform(
+  frame: SpiralCameraFrame,
+  options: ContentTransformOptions = {}
+): ContentTransform {
+  const { counterRotate = true, cover = true } = options;
+  if (!counterRotate) return { rotationDeg: 0, scale: 1 };
+  const radians = (frame.rotationDeg * Math.PI) / 180;
+  const scale = cover ? Math.abs(Math.cos(radians)) + Math.abs(Math.sin(radians)) : 1;
+  return { rotationDeg: -frame.rotationDeg, scale };
+}
+
+/** The content transform as a CSS string (transform-origin 50% 50%). */
+export function toCssContentTransform(
+  frame: SpiralCameraFrame,
+  options: ContentTransformOptions = {}
+): string {
+  const content = contentTransform(frame, options);
+  return `rotate(${content.rotationDeg}deg) scale(${content.scale})`;
+}
+
+/** The content transform as an RN `transform` array (RN pivots at centre
+ * natively, so no translation correction is needed here). */
+export function toNativeContentTransform(
+  frame: SpiralCameraFrame,
+  options: ContentTransformOptions = {}
+): NativeTransform[] {
+  const content = contentTransform(frame, options);
+  return [{ rotate: `${content.rotationDeg}deg` }, { scale: content.scale }];
+}
+
 /** The side of the focused square the spiral's interior trails toward. */
 export type SpiralTrail = 'right' | 'bottom' | 'left' | 'top';
 

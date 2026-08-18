@@ -198,4 +198,33 @@ class SpiralCameraFixtureTest {
             assertClose(expected.getValue("scale").jsonPrimitive.double, tile.scale, "[$frameName#$squareIndex] scale")
         }
     }
+
+    @Test
+    fun contentsMatchGoldenMaster() {
+        val root = Json.parseToJsonElement(locateFixture().readText()).jsonObject
+        val frames = root.getValue("frames").jsonArray.associateBy {
+            it.jsonObject.getValue("name").jsonPrimitive.content
+        }
+        val contents = root.getValue("contents").jsonArray
+        assertTrue(contents.isNotEmpty(), "no content fixtures loaded")
+
+        for (element in contents) {
+            val entry = element.jsonObject
+            val frameCase = frames.getValue(entry.getValue("frameName").jsonPrimitive.content).jsonObject
+            val f = frameCase.getValue("frame").jsonObject
+            val expected = entry.getValue("content").jsonObject
+            val content = contentTransform(
+                SpiralCameraFrame(
+                    scale = f.getValue("scale").jsonPrimitive.double,
+                    rotationDeg = f.getValue("rotationDeg").jsonPrimitive.double,
+                    centerX = f.getValue("centerX").jsonPrimitive.double,
+                    centerY = f.getValue("centerY").jsonPrimitive.double,
+                ),
+                counterRotate = entry.getValue("counterRotate").jsonPrimitive.boolean,
+                cover = entry.getValue("cover").jsonPrimitive.boolean,
+            )
+            assertClose(expected.getValue("rotationDeg").jsonPrimitive.double, content.rotationDeg, "content rot")
+            assertClose(expected.getValue("scale").jsonPrimitive.double, content.scale, "content scale")
+        }
+    }
 }

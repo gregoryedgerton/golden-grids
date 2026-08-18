@@ -16,6 +16,9 @@ export {
   tileTransform,
   toCssTileTransform,
   toNativeTileTransform,
+  contentTransform,
+  toCssContentTransform,
+  toNativeContentTransform,
 } from "./utils/spiralCamera";
 export type {
   SpiralCameraOptions,
@@ -25,4 +28,6 @@ export type {
   SpiralTrail,
   NativeTransform,
   TileTransform,
+  ContentTransform,
+  ContentTransformOptions,
 } from "./utils/spiralCamera";

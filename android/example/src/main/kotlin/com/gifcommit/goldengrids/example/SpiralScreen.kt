@@ -32,6 +32,7 @@ import com.gifcommit.goldengrids.SpiralCameraOptions
 import com.gifcommit.goldengrids.SpiralTrail
 import com.gifcommit.goldengrids.generateGoldenGridLayout
 import com.gifcommit.goldengrids.spiralCamera
+import com.gifcommit.goldengrids.contentTransform
 import com.gifcommit.goldengrids.spiralWindow
 import com.gifcommit.goldengrids.tileTransform
 import com.gifcommit.goldengrids.trailToRotateDeg
@@ -145,10 +146,19 @@ private fun Stage(depth: Double, size: IntSize) {
                             .background(color, RoundedCornerShape((TEXTURE_PX * 0.02).toFloat().toDp())),
                         contentAlignment = Alignment.Center,
                     ) {
+                        // Orientation-lock the label (Compose pivots at the
+                        // centre by default). A configuration detail — pass
+                        // counterRotate = false to let content ride the dial.
+                        val content = contentTransform(frame)
                         Text(
                             text = "${index + 1}",
                             color = Color.Black.copy(alpha = 0.45f),
                             fontSize = with(density) { (TEXTURE_PX * 0.3).toFloat().toSp() },
+                            modifier = Modifier.graphicsLayer {
+                                rotationZ = content.rotationDeg.toFloat()
+                                scaleX = content.scale.toFloat()
+                                scaleY = content.scale.toFloat()
+                            },
                         )
                     }
                 }

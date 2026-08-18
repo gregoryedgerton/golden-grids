@@ -1,10 +1,12 @@
 import { generateGoldenGridLayout } from '../utils/gridGenerator';
 import {
+  contentTransform,
   focusIndexAt,
   spiralCamera,
   spiralEye,
   spiralWindow,
   tileTransform,
+  toCssContentTransform,
   toCssTileTransform,
   toCssTransform,
   toNativeTileTransform,
@@ -521,5 +523,48 @@ describe('tileTransform', () => {
     expect(() =>
       tileTransform(frame, square, 800, 600, { texturePx: 0 })
     ).toThrow(/texturePx/);
+  });
+});
+
+describe('contentTransform', () => {
+  const layout = generateGoldenGridLayout(fib(15), true, 0);
+
+  it('cancels the stage rotation exactly, with a cover of one at rest', () => {
+    for (const depth of [0, 1, 7, 14]) {
+      const frame = spiralCamera(layout, depth, 800, 600);
+      const content = contentTransform(frame);
+      expect(content.rotationDeg).toBe(-frame.rotationDeg);
+      // Whole depths are where the dial rests: no permanent crop.
+      expect(content.scale).toBeCloseTo(1, 9);
+    }
+  });
+
+  it('swells mid-turn so the clip box stays covered, peaking at root two', () => {
+    const frame = spiralCamera(layout, 0.5, 800, 600); // 45° residual
+    const content = contentTransform(frame);
+    expect(content.scale).toBeCloseTo(Math.SQRT2, 9);
+    expect(contentTransform(frame, { cover: false }).scale).toBe(1);
+  });
+
+  it('is a configuration detail: counterRotate false is the identity', () => {
+    // One call site, one switch — content rides the spiral when that is the
+    // look the consumer wants.
+    const frame = spiralCamera(layout, 3.25, 800, 600);
+    expect(contentTransform(frame, { counterRotate: false })).toEqual({
+      rotationDeg: 0,
+      scale: 1,
+    });
+    expect(contentTransform(frame, { counterRotate: false, cover: true })).toEqual({
+      rotationDeg: 0,
+      scale: 1,
+    });
+  });
+
+  it('emits the css form of the same decomposition', () => {
+    const frame = spiralCamera(layout, 2.5, 800, 600);
+    const content = contentTransform(frame);
+    expect(toCssContentTransform(frame)).toBe(
+      `rotate(${content.rotationDeg}deg) scale(${content.scale})`
+    );
   });
 });

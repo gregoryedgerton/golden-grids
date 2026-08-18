@@ -2,6 +2,7 @@ import * as fs from "fs";
 import * as path from "path";
 import { generateGoldenGridLayout } from "../utils/gridGenerator";
 import {
+  contentTransform,
   spiralCamera,
   spiralEye,
   spiralWindow,
@@ -186,12 +187,20 @@ interface TileCase {
   tile: { translateX: number; translateY: number; rotationDeg: number; scale: number };
 }
 
+interface ContentCase {
+  frameName: string;
+  counterRotate: boolean;
+  cover: boolean;
+  content: { rotationDeg: number; scale: number };
+}
+
 interface Fixture {
   frames: FrameCase[];
   windows: WindowCase[];
   trails: TrailCase[];
   eyes: EyeCase[];
   tiles: TileCase[];
+  contents: ContentCase[];
 }
 
 function tileCases(): TileCase[] {
@@ -228,6 +237,26 @@ function tileCases(): TileCase[] {
   return cases;
 }
 
+function contentCases(): ContentCase[] {
+  const cases: ContentCase[] = [];
+  for (const input of [FRAME_INPUTS[0], FRAME_INPUTS[1], FRAME_INPUTS[3], FRAME_INPUTS[30]]) {
+    if (!input) continue;
+    const current = frameCase(input);
+    for (const counterRotate of [true, false]) {
+      for (const cover of [true, false]) {
+        const content = contentTransform({ ...current.frame }, { counterRotate, cover });
+        cases.push({
+          frameName: current.name,
+          counterRotate,
+          cover,
+          content: { rotationDeg: z(content.rotationDeg), scale: z(content.scale) },
+        });
+      }
+    }
+  }
+  return cases;
+}
+
 function buildAll(): Fixture {
   return {
     frames: FRAME_INPUTS.map(frameCase),
@@ -241,6 +270,7 @@ function buildAll(): Fixture {
     trails: TRAIL_CASES,
     eyes: EYE_CASES,
     tiles: tileCases(),
+    contents: contentCases(),
   };
 }
 
@@ -295,6 +325,11 @@ describe("spiral camera — golden-master fixtures", () => {
     expect(committed.tiles.length).toBeGreaterThan(0);
     const current = tileCases();
     expect(current).toEqual(committed.tiles);
+  });
+
+  test("contents reproduce the committed fixture", () => {
+    expect(committed.contents.length).toBeGreaterThan(0);
+    expect(contentCases()).toEqual(committed.contents);
   });
 
   test("eyes reproduce the committed fixture", () => {

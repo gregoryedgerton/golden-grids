@@ -170,6 +170,29 @@ fun tileTransform(
     )
 }
 
+/**
+ * The transform that keeps a tile's CONTENT readable while the dial turns —
+ * counter-rotation about the content's own centre (Compose's default pivot),
+ * with the |cos|+|sin| cover swell. Mirrors `contentTransform`, including
+ * its two switches: `counterRotate = false` is the identity, `cover = false`
+ * skips the swell.
+ */
+data class ContentTransform(
+    val rotationDeg: Double,
+    val scale: Double,
+)
+
+fun contentTransform(
+    frame: SpiralCameraFrame,
+    counterRotate: Boolean = true,
+    cover: Boolean = true,
+): ContentTransform {
+    if (!counterRotate) return ContentTransform(rotationDeg = 0.0, scale = 1.0)
+    val radians = Math.toRadians(frame.rotationDeg)
+    val scale = if (cover) abs(cos(radians)) + abs(sin(radians)) else 1.0
+    return ContentTransform(rotationDeg = -frame.rotationDeg, scale = scale)
+}
+
 // ---- trail solve ----
 
 /** The side of the focused square the spiral's interior trails toward. */

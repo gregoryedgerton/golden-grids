@@ -179,6 +179,28 @@ public func toAffineTileTransform(
 }
 #endif
 
+/// The transform that keeps a tile's CONTENT readable while the dial turns —
+/// counter-rotation about the content's own centre, with the |cos|+|sin|
+/// cover swell. Mirrors `contentTransform`, including its two switches:
+/// `counterRotate: false` is the identity (the whole feature is a
+/// configuration detail), and `cover: false` skips the swell for content
+/// that must never scale.
+public struct ContentTransform: Equatable, Sendable {
+    public var rotationDeg: Double
+    public var scale: Double
+}
+
+public func contentTransform(
+    _ frame: SpiralCameraFrame,
+    counterRotate: Bool = true,
+    cover: Bool = true
+) -> ContentTransform {
+    if !counterRotate { return ContentTransform(rotationDeg: 0, scale: 1) }
+    let radians = frame.rotationDeg * .pi / 180
+    let scale = cover ? abs(cos(radians)) + abs(sin(radians)) : 1
+    return ContentTransform(rotationDeg: -frame.rotationDeg, scale: scale)
+}
+
 // MARK: - Trail solve
 
 /// The side of the focused square the spiral's interior trails toward.

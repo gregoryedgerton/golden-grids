@@ -73,12 +73,23 @@ final class SpiralCameraFixtureTests: XCTestCase {
         let texturePx: Double
         let tile: TileEntry
     }
+    struct ContentEntry: Decodable {
+        let rotationDeg: Double
+        let scale: Double
+    }
+    struct ContentCase: Decodable {
+        let frameName: String
+        let counterRotate: Bool
+        let cover: Bool
+        let content: ContentEntry
+    }
     struct Fixture: Decodable {
         let frames: [FrameCase]
         let windows: [WindowCase]
         let trails: [TrailCase]
         let eyes: [EyeCase]
         let tiles: [TileCase]
+        let contents: [ContentCase]
     }
 
     private let tol = 1e-9
@@ -227,6 +238,27 @@ final class SpiralCameraFixtureTests: XCTestCase {
             XCTAssertEqual(tile.translateY, entry.tile.translateY, accuracy: tol, "[\(entry.frameName)#\(entry.squareIndex)] ty")
             XCTAssertEqual(tile.rotationDeg, entry.tile.rotationDeg, accuracy: tol, "[\(entry.frameName)#\(entry.squareIndex)] rot")
             XCTAssertEqual(tile.scale, entry.tile.scale, accuracy: tol, "[\(entry.frameName)#\(entry.squareIndex)] scale")
+        }
+    }
+
+    func testContentsReproduceEveryFixture() throws {
+        let fixture = try loadFixture()
+        XCTAssertFalse(fixture.contents.isEmpty, "no content fixtures loaded")
+        let framesByName = Dictionary(uniqueKeysWithValues: fixture.frames.map { ($0.name, $0) })
+
+        for entry in fixture.contents {
+            guard let frameCase = framesByName[entry.frameName] else {
+                XCTFail("content references unknown frame \(entry.frameName)"); continue
+            }
+            let frame = SpiralCameraFrame(
+                scale: frameCase.frame.scale,
+                rotationDeg: frameCase.frame.rotationDeg,
+                centerX: frameCase.frame.centerX,
+                centerY: frameCase.frame.centerY
+            )
+            let content = contentTransform(frame, counterRotate: entry.counterRotate, cover: entry.cover)
+            XCTAssertEqual(content.rotationDeg, entry.content.rotationDeg, accuracy: tol, "[\(entry.frameName)] content rot")
+            XCTAssertEqual(content.scale, entry.content.scale, accuracy: tol, "[\(entry.frameName)] content scale")
         }
     }
 }

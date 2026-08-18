@@ -66,6 +66,7 @@ import {
   spiralCamera,
   spiralEye,
   spiralWindow,
+  toCssContentTransform,
   toCssTileTransform,
 } from '@gifcommit/golden-grids';
 
@@ -97,6 +98,16 @@ for (const [k, square] of layout.squares.entries()) {
 }
 // (React Native: toNativeTileTransform; Swift: toAffineTileTransform;
 //  Kotlin: tileTransform + graphicsLayer with TransformOrigin(0f, 0f).)
+
+// Keep the CONTENT readable while the dial turns: counter-rotate it against
+// the stage about its own centre (transform-origin 50% 50% — not the tile's
+// 0 0), so it orbits with its tile but never spins. The |cosθ|+|sinθ| cover
+// swell keeps the clip box full mid-turn (exactly 1 at rest, √2 at worst).
+// A configuration detail: { counterRotate: false } is the identity for
+// consumers who want content to ride the spiral; { cover: false } for
+// content that must never scale.
+art.style.transformOrigin = '50% 50%';
+art.style.transform = toCssContentTransform(frame);
 
 // Optional anchor: where the focused square's centre lands, defaulting to
 // the viewport centre. Pass a point to pin the dial against an edge — half
