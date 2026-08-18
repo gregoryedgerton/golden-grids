@@ -78,7 +78,11 @@ struct SpiralView: View {
     }()
 
     @State private var filter: NumberFilter = SpiralView.initialFilter()
-    @State private var depth: Double = SpiralView.initialDepth()
+    // Clamped against the INITIAL filter's dial, not the full set — GG_DEPTH
+    // combined with a short GG_FILTER must not start out of range.
+    @State private var depth: Double = SpiralView.initialDepth(
+        for: SpiralView.dials[SpiralView.initialFilter()]!.count
+    )
     @State private var dragStartDepth: Double?
     /// Last two drag samples, for a live-flick velocity (depth/second) —
     /// only the final <100 ms of the gesture should decide the coast, or a
@@ -93,10 +97,10 @@ struct SpiralView: View {
     /// Screenshot hooks, like GG_TAB in App.swift: GG_DEPTH starts the dial
     /// at a depth, GG_AUTOSPIN dials from there at N squares/second — both
     /// demo-only, for recording the README artwork deterministically.
-    private static func initialDepth() -> Double {
+    private static func initialDepth(for count: Int) -> Double {
         guard let raw = ProcessInfo.processInfo.environment["GG_DEPTH"],
               let value = Double(raw) else { return 0 }
-        return min(max(value, 0), Double(fullCount - 1))
+        return min(max(value, 0), Double(count - 1))
     }
 
     /// GG_FILTER selects a segment at launch (all/odd/even/prime) — the same
@@ -169,7 +173,11 @@ struct SpiralView: View {
                         coastTask?.cancel()
                         depth = min(depth, maxDepth)
                     }
-                    Text("depth \(depth, specifier: "%.2f") — square \(dial.numbers[dial.count - 1 - Int(depth.rounded())])")
+                    // Clamp BEFORE indexing: on a filter switch SwiftUI
+                    // renders this body with the new dial before onChange
+                    // has re-clamped the state, and an unclamped depth would
+                    // index outside the shorter dial.
+                    Text("depth \(min(depth, maxDepth), specifier: "%.2f") — square \(dial.numbers[dial.count - 1 - Int(min(depth, maxDepth).rounded())])")
                         .font(.caption.monospacedDigit())
                         .foregroundStyle(.secondary)
                 }
