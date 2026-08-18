@@ -108,8 +108,9 @@ for (const [k, square] of layout.squares.entries()) {
 // decision:
 const fillRatio = 0.62; // must match the spiralCamera call
 const focusHalf = (fillRatio * Math.min(innerWidth, innerHeight)) / 2;
-toCssTileTransform(frame, square, innerWidth, innerHeight, {
-  anchor: { x: focusHalf, y: innerHeight / 2 }, // flush left
+const flushLeft = { x: focusHalf, y: innerHeight / 2 };
+toCssTileTransform(frame, layout.squares[0], innerWidth, innerHeight, {
+  anchor: flushLeft, // pass the same anchor for every tile in the loop above
 });
 
 // The spiral's convergence point, e.g. as a transform origin or annotation
