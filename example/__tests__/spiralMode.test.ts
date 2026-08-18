@@ -1,4 +1,6 @@
-import { placementForRotation, placementForTrail } from "../spiralMode";
+import { fillsForSpiral, placementForRotation, placementForTrail } from "../spiralMode";
+import { computeRenderModel } from "../../src/utils/renderModel";
+import { hslToCss } from "../../src/utils/colorUtils";
 import { labelFor } from "../SpiralStage";
 import { placementToRotateDeg } from "../../src/utils/gridGenerator";
 import { trailToRotateDeg } from "../../src/utils/spiralCamera";
@@ -56,5 +58,37 @@ describe("labelFor", () => {
     // startIdx 2 of 6: visible indexes 2..5 carry 2..5.
     expect(labelFor(2, 6, 2)).toBe(2);
     expect(labelFor(5, 6, 2)).toBe(5);
+  });
+
+});
+
+describe("fillsForSpiral", () => {
+  it("carries the flat renderer's exact slot colours onto the layout squares", () => {
+    const model = computeRenderModel({ from: 1, to: 4, color: "#7f7ec7", clockwise: true, placement: "right" });
+    const fills = fillsForSpiral(1, 4, "#7f7ec7", true, "right", model.slots.length, 0);
+    model.slots.forEach((slot, i) => {
+      const c = slot.color;
+      expect(c && c.kind === "hsl" ? hslToCss(c.h, c.s, c.l) : undefined).toBe(fills[i]);
+    });
+  });
+
+  it("paints the skipped range with the placeholder's fill", () => {
+    // from index 3: layout has leading skipped squares; the flat renderer
+    // paints the placeholder with the raw base colour.
+    const model = computeRenderModel({ from: 3, to: 6, color: "#7f7ec7", clockwise: true, placement: "right" });
+    const count = model.slots.length + 2; // two skipped leading squares (1, 1)
+    const fills = fillsForSpiral(3, 6, "#7f7ec7", true, "right", count, 2);
+    expect(fills[0]).toBe("#7f7ec7");
+    expect(fills[1]).toBe("#7f7ec7");
+    model.slots.forEach((slot, i) => {
+      const c = slot.color;
+      expect(c && c.kind === "hsl" ? hslToCss(c.h, c.s, c.l) : undefined).toBe(fills[2 + i]);
+    });
+  });
+
+  it("returns no fills when colour is off", () => {
+    expect(fillsForSpiral(1, 4, undefined, true, "right", 4, 0)).toEqual([
+      undefined, undefined, undefined, undefined,
+    ]);
   });
 });

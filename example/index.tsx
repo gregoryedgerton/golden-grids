@@ -8,7 +8,7 @@ import { FIB_STOPS, getGridRange, fullFibonacciUpTo } from "../src/utils/fibonac
 import { generateGoldenGridLayout, placementToRotateDeg } from "../src/utils/gridGenerator";
 import { trailToRotateDeg } from "../src/utils/spiralCamera";
 import type { SpiralTrail } from "../src/utils/spiralCamera";
-import { placementForTrail } from "./spiralMode";
+import { fillsForSpiral, placementForTrail } from "./spiralMode";
 import { SpiralStage } from "./SpiralStage";
 import "./golden-grid.css";
 import { LabelMode, LABEL_MODES, getLabel } from "./labelUtils";
@@ -283,7 +283,15 @@ const ExampleApp = () => {
                         depth={depth}
                         clockwise={inputControl.clockwise}
                         startIdx={range ? range.startIdx : 0}
-                        color={useColor ? inputControl.color : undefined}
+                        fills={fillsForSpiral(
+                            inputControl.from,
+                            inputControl.to,
+                            useColor ? inputControl.color : undefined,
+                            inputControl.clockwise,
+                            exportPlacement,
+                            squareCount,
+                            range ? range.startIdx : 0,
+                        )}
                         outline={useOutline ? outlineValue : undefined}
                         labelMode={labelMode}
                         labelColor={outlineColor}

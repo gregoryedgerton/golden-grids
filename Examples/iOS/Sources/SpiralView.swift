@@ -82,8 +82,11 @@ struct SpiralView: View {
                 }
             }
         }
-        // One camera matrix over the whole stage, top-left origin — the
-        // squares sit at raw layout coordinates used as points.
+        // One camera matrix over the whole stage. transformEffect applies
+        // "relative to the view's coordinate space origin" (its top-leading
+        // corner) — exactly the (0, 0) frame toAffineTransform encodes its
+        // translation for. There is no anchor parameter to get wrong here;
+        // this SDK's only overload is origin-anchored.
         .transformEffect(transform)
         .animation(.linear(duration: 0.05), value: depth)
     }

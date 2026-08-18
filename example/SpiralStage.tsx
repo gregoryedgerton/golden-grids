@@ -1,7 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { spiralCamera, spiralWindow } from "../src/utils/spiralCamera";
 import type { GridLayout } from "../src/utils/gridGenerator";
-import { hexToHsl, hslToCss } from "../src/utils/colorUtils";
 import { getLabel } from "./labelUtils";
 import type { LabelMode } from "./labelUtils";
 
@@ -15,7 +14,9 @@ interface Props {
    * at the smallest visible square, and skipped interior squares render
    * unlabeled — they are the placeholder region, seen from inside. */
   startIdx: number;
-  color?: string;
+  /** CSS fill per layout square index — the flat renderer's own progression
+   * (see fillsForSpiral), so the dial previews the export's exact colours. */
+  fills: Array<string | undefined>;
   outline?: string;
   labelMode: LabelMode;
   labelColor: string;
@@ -39,7 +40,7 @@ export const SpiralStage: React.FC<Props> = ({
   depth,
   clockwise,
   startIdx,
-  color,
+  fills,
   outline,
   labelMode,
   labelColor,
@@ -63,7 +64,6 @@ export const SpiralStage: React.FC<Props> = ({
   // are the flat mode's placeholder region and are not destinations.
   const maxDepth = count - 1 - startIdx;
   const clamped = Math.min(depth, maxDepth);
-  const base = color ? hexToHsl(color) : null;
   const frame =
     size.width > 0 && size.height > 0
       ? spiralCamera(layout, clamped, size.width, size.height, { clockwise })
@@ -75,12 +75,7 @@ export const SpiralStage: React.FC<Props> = ({
         layout.squares.map((square, index) => {
           const window = spiralWindow(index, clamped, count);
           if (window.hidden) return null;
-          // The flat renderer walks its progression largest→smallest over
-          // slots; expressed per square (smallest first) that is the same
-          // lightness ramp reversed.
-          const fill = base
-            ? hslToCss(base[0], base[1], Math.min(95, base[2] + (count - 1 - index) * 3))
-            : undefined;
+          const fill = fills[index];
           // Net texture scale for this square — what one texture pixel spans
           // on screen. Border and label sizes divide by it so they render at
           // their authored screen size regardless of the zoom.
