@@ -338,4 +338,16 @@ describe('trailToRotateDeg', () => {
     expect(() => trailForRotation(45, true, 8)).toThrow(/Invalid rotation/);
     expect(() => trailForRotation(90, true, 0)).toThrow(/at least 2/);
   });
+
+  it("reads an omitted handedness as clockwise, like the generator", () => {
+    // generateGoldenGridLayout(fib, undefined, rotate) builds a CLOCKWISE
+    // layout; solving as counter-clockwise here would hand back a rotation
+    // for a spiral the caller never built — trailing the opposite way at odd
+    // counts.
+    expect(trailToRotateDeg('right', undefined, 3)).toBe(
+      trailToRotateDeg('right', true, 3)
+    );
+    expect(trailForRotation(90, undefined, 3)).toBe(trailForRotation(90, true, 3));
+    expect(measure(3, trailToRotateDeg('right', undefined, 3), true)).toBe('right');
+  });
 });

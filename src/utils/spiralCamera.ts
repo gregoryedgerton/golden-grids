@@ -186,10 +186,14 @@ const TRAIL_ORDER: readonly SpiralTrail[] = ['right', 'bottom', 'left', 'top'];
  * Which side actually is the open one — the reader's viewport, the chrome
  * around it — stays the consumer's decision, exactly as the camera's `anchor`
  * does.
+ *
+ * `clockwise` defaults to true, matching `generateGoldenGridLayout` and the
+ * camera: an omitted handedness must mean the same thing in all three, or a
+ * JavaScript caller gets a rotation solved for the layout it did not build.
  */
 export function trailToRotateDeg(
   trail: SpiralTrail,
-  clockwise: boolean,
+  clockwise: boolean = true,
   squareCount: number
 ): number {
   const wanted = TRAIL_ORDER.indexOf(trail);
@@ -212,7 +216,7 @@ export function trailToRotateDeg(
  */
 export function trailForRotation(
   rotateDeg: number,
-  clockwise: boolean,
+  clockwise: boolean = true,
   squareCount: number
 ): SpiralTrail {
   if (![0, 90, 180, 270].includes(rotateDeg)) {
