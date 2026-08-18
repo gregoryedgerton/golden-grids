@@ -1,3 +1,10 @@
+# [4.4.0](https://github.com/gregoryedgerton/golden-grids/compare/v4.3.0...v4.4.0) (2026-08-18)
+
+
+### Features
+
+* solve for which way the dial trails ([#24](https://github.com/gregoryedgerton/golden-grids/issues/24)) ([2722ecd](https://github.com/gregoryedgerton/golden-grids/commit/2722ecdcd7de64dfc19c810181ef4e2e561bf13b))
+
 # [4.3.0](https://github.com/gregoryedgerton/golden-grids/compare/v4.2.1...v4.3.0) (2026-08-17)
 
 
