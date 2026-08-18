@@ -84,8 +84,13 @@ struct SpiralView: View {
                         }
                         .onEnded { _ in
                             dragStartDepth = nil
+                            // A finger that settled before lifting emits no
+                            // further samples — the stored velocity is stale
+                            // and must not coast. Only a release within the
+                            // live-flick window keeps its speed.
+                            let live = lastSample.map { Date().timeIntervalSince($0.time) < 0.1 } ?? false
                             lastSample = nil
-                            startCoast(velocity: flickVelocity)
+                            startCoast(velocity: live ? flickVelocity : 0)
                             flickVelocity = 0
                         }
                 )
