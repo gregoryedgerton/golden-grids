@@ -1,34 +1,88 @@
 import SwiftUI
 import GoldenGrids
 
-/// Spiral dial — the depth camera over a NINETY-ONE-square layout, the
-/// SwiftUI analogue of the production dial. Scroll the stage (drag, with
-/// inertia) or use the slider — both drive the same depth, so the readout
-/// and slider track whichever input is moving. Each square fades through
-/// `spiralWindow` and every tile carries its own camera-composed transform.
+/// Spiral dial — the depth camera over up to NINETY-ONE squares, the SwiftUI
+/// analogue of the production dial. Scroll the stage (drag, with inertia);
+/// the segmented filter re-dials the SAME numbers through a smaller spiral —
+/// ALL is the untouched 1–91, ODD/EVEN/PRIME keep only matching numbers.
+/// Each square fades through `spiralWindow` and every tile carries its own
+/// camera-composed transform.
 ///
 /// Ninety-one is the integer ceiling, not a taste choice: the 92-square
 /// layout's bounding box is F(93) ≈ 1.22 × 10¹⁹, past Int64.max — and the
 /// web port walls even earlier, at 78 (Number.MAX_SAFE_INTEGER). Going to a
 /// true 100 needs a float-coordinate layout in the library.
+///
+/// The filters are the grego facet lesson as a demo: the spiral is
+/// count-driven, so a filtered set is the SAME machine over fewer squares —
+/// layout and trail re-SOLVED per count, never reused across counts.
 struct SpiralView: View {
-    private static let count = 91
-    private static let fib: [Int] = {
-        var seq = [1, 1]
-        while seq.count < count { seq.append(seq[seq.count - 1] + seq[seq.count - 2]) }
-        return seq
+    private static let fullCount = 91
+
+    /// Which numbers ride the dial. The number is the tile's CONTENT — its
+    /// geometry comes from its position in the filtered layout.
+    enum NumberFilter: String, CaseIterable, Identifiable {
+        case all = "ALL"
+        case odd = "ODD"
+        case even = "EVEN"
+        case prime = "PRIME"
+        var id: String { rawValue }
+
+        var numbers: [Int] {
+            switch self {
+            case .all: return Array(1...SpiralView.fullCount)
+            case .odd: return Array(1...SpiralView.fullCount).filter { $0 % 2 == 1 }
+            case .even: return Array(1...SpiralView.fullCount).filter { $0 % 2 == 0 }
+            case .prime: return Array(1...SpiralView.fullCount).filter(SpiralView.isPrime)
+            }
+        }
+    }
+
+    private static func isPrime(_ n: Int) -> Bool {
+        if n < 2 { return false }
+        if n < 4 { return true }
+        if n % 2 == 0 { return false }
+        var d = 3
+        while d * d <= n {
+            if n % d == 0 { return false }
+            d += 2
+        }
+        return true
+    }
+
+    /// One dial per filter: its numbers, and a spiral laid out for exactly
+    /// that count — fib run and trail rotation both re-solved, because the
+    /// trail direction cycles with the square count.
+    struct Dial {
+        let numbers: [Int]
+        let layout: GoldenGrids.GridLayout
+        var count: Int { numbers.count }
+    }
+
+    private static let dials: [NumberFilter: Dial] = {
+        var out: [NumberFilter: Dial] = [:]
+        for filter in NumberFilter.allCases {
+            let numbers = filter.numbers
+            var fib = [1, 1]
+            while fib.count < numbers.count { fib.append(fib[fib.count - 1] + fib[fib.count - 2]) }
+            out[filter] = Dial(
+                numbers: numbers,
+                layout: generateGoldenGridLayout(
+                    fib,
+                    clockwise: true,
+                    rotate: trailToRotateDeg(.bottom, clockwise: true, squareCount: numbers.count)
+                )
+            )
+        }
+        return out
     }()
 
-    /// Trailing side is solved per count, not hardcoded — the direction the
-    /// composition grows into cycles with the square count (see
-    /// `trailToRotateDeg`). Down suits a portrait phone stage.
-    private static let layout = generateGoldenGridLayout(
-        fib,
-        clockwise: true,
-        rotate: trailToRotateDeg(.bottom, clockwise: true, squareCount: count)
+    @State private var filter: NumberFilter = SpiralView.initialFilter()
+    // Clamped against the INITIAL filter's dial, not the full set — GG_DEPTH
+    // combined with a short GG_FILTER must not start out of range.
+    @State private var depth: Double = SpiralView.initialDepth(
+        for: SpiralView.dials[SpiralView.initialFilter()]!.count
     )
-
-    @State private var depth: Double = SpiralView.initialDepth()
     @State private var dragStartDepth: Double?
     /// Last two drag samples, for a live-flick velocity (depth/second) —
     /// only the final <100 ms of the gesture should decide the coast, or a
@@ -37,15 +91,23 @@ struct SpiralView: View {
     @State private var flickVelocity: Double = 0
     @State private var coastTask: Task<Void, Never>?
 
-    private static let maxDepth = Double(count - 1)
+    private var dial: Dial { Self.dials[filter]! }
+    private var maxDepth: Double { Double(dial.count - 1) }
 
     /// Screenshot hooks, like GG_TAB in App.swift: GG_DEPTH starts the dial
     /// at a depth, GG_AUTOSPIN dials from there at N squares/second — both
     /// demo-only, for recording the README artwork deterministically.
-    private static func initialDepth() -> Double {
+    private static func initialDepth(for count: Int) -> Double {
         guard let raw = ProcessInfo.processInfo.environment["GG_DEPTH"],
               let value = Double(raw) else { return 0 }
-        return min(max(value, 0), maxDepth)
+        return min(max(value, 0), Double(count - 1))
+    }
+
+    /// GG_FILTER selects a segment at launch (all/odd/even/prime) — the same
+    /// deterministic-recording family as GG_TAB/GG_DEPTH/GG_AUTOSPIN.
+    private static func initialFilter() -> NumberFilter {
+        guard let raw = ProcessInfo.processInfo.environment["GG_FILTER"] else { return .all }
+        return NumberFilter(rawValue: raw.uppercased()) ?? .all
     }
 
     private static func autospinRate() -> Double? {
@@ -71,7 +133,7 @@ struct SpiralView: View {
                             let start = dragStartDepth ?? depth
                             dragStartDepth = start
                             // Drag DOWN to dial deeper, one square per ~180pt.
-                            let next = min(max(start + Double(value.translation.height) / 180, 0), Self.maxDepth)
+                            let next = min(max(start + Double(value.translation.height) / 180, 0), maxDepth)
                             let now = Date()
                             if let sample = lastSample {
                                 let dt = now.timeIntervalSince(sample.time)
@@ -96,21 +158,26 @@ struct SpiralView: View {
                 )
 
                 VStack(spacing: 8) {
-                    // The slider and the readout are bound to the SAME depth
-                    // the drag writes, so they track a scroll (and its coast)
-                    // exactly; moving the slider grabs the dial and stops any
-                    // coast in flight.
-                    Slider(
-                        value: Binding(
-                            get: { depth },
-                            set: { newValue in
-                                coastTask?.cancel()
-                                depth = newValue
-                            }
-                        ),
-                        in: 0...Self.maxDepth
-                    )
-                    Text("depth \(depth, specifier: "%.2f") — square \(Self.count - Int(depth.rounded()))")
+                    // Quick filters in the slider's old seat: the same
+                    // numbers re-dialed through a smaller spiral. Switching
+                    // grabs the dial (kills any coast) and re-clamps depth
+                    // into the new, shorter track.
+                    Picker("Filter", selection: $filter) {
+                        ForEach(NumberFilter.allCases) { option in
+                            Text(option.rawValue).tag(option)
+                        }
+                    }
+                    .pickerStyle(.segmented)
+                    // The two-parameter onChange still deploys below iOS 17.
+                    .onChange(of: filter) { _ in
+                        coastTask?.cancel()
+                        depth = min(depth, maxDepth)
+                    }
+                    // Clamp BEFORE indexing: on a filter switch SwiftUI
+                    // renders this body with the new dial before onChange
+                    // has re-clamped the state, and an unclamped depth would
+                    // index outside the shorter dial.
+                    Text("depth \(min(depth, maxDepth), specifier: "%.2f") — square \(dial.numbers[dial.count - 1 - Int(min(depth, maxDepth).rounded())])")
                         .font(.caption.monospacedDigit())
                         .foregroundStyle(.secondary)
                 }
@@ -122,17 +189,18 @@ struct SpiralView: View {
             .onDisappear { coastTask?.cancel() }
             .task {
                 guard let rate = Self.autospinRate() else { return }
+                _ = dial
                 // Advance by measured elapsed time, not per-wakeup: sleeps
                 // are nominal (and drift under load), and the recording hook
                 // promises N squares per wall-clock second.
                 var last = ContinuousClock.now
-                while !Task.isCancelled && depth < Self.maxDepth {
+                while !Task.isCancelled && depth < maxDepth {
                     try? await Task.sleep(nanoseconds: 16_000_000)
                     let now = ContinuousClock.now
                     let elapsed = Double((now - last).components.attoseconds) / 1e18
                         + Double((now - last).components.seconds)
                     last = now
-                    depth = min(depth + rate * elapsed, Self.maxDepth)
+                    depth = min(depth + rate * elapsed, maxDepth)
                 }
             }
         }
@@ -152,12 +220,14 @@ struct SpiralView: View {
             while !Task.isCancelled && abs(v) > 0.01 {
                 try? await Task.sleep(nanoseconds: 16_000_000) // ~60 fps
                 if Task.isCancelled { return }
-                let next = min(max(depth + v / 60, 0), Self.maxDepth)
+                let next = min(max(depth + v / 60, 0), maxDepth)
                 depth = next
                 // Hitting either end kills the coast rather than pinning
                 // against the bound at full speed.
-                if next == 0 || next == Self.maxDepth { return }
-                v *= 0.94
+                if next == 0 || next == maxDepth { return }
+                // Longer coast than the production dial's 0.94: with up to
+                // ninety-one squares the ride IS the demo.
+                v *= 0.97
             }
         }
     }
@@ -179,8 +249,8 @@ struct SpiralView: View {
 
     private func stageContent(in size: CGSize) -> some View {
         let frame = spiralCamera(
-            Self.layout,
-            depth: depth,
+            dial.layout,
+            depth: min(depth, maxDepth),
             viewportWidth: Double(size.width),
             viewportHeight: Double(size.height),
             // A larger fill than the 1/φ default: the dial is the whole
@@ -193,15 +263,15 @@ struct SpiralView: View {
         // precisely for this. Each tile renders into a texturePx box at a net
         // scale near 1, so every era paints at native resolution.
         return ZStack(alignment: .topLeading) {
-            ForEach(Self.layout.squares.indices, id: \.self) { index in
-                let square = Self.layout.squares[index]
-                let window = spiralWindow(index, depth: depth, squareCount: Self.count)
+            ForEach(dial.layout.squares.indices, id: \.self) { index in
+                let square = dial.layout.squares[index]
+                let window = spiralWindow(index, depth: min(depth, maxDepth), squareCount: dial.count)
                 let tileScale = frame.scale * Double(square.size) / Self.texturePx
                 // With ninety-one squares most of the interior is sub-pixel
                 // at any depth — skip tiles that would paint under half a
                 // pixel rather than composite ninety-one views per frame.
                 if !window.hidden && tileScale * Self.texturePx >= 0.5 {
-                    tile(index: index, focused: window.focused, frame: frame)
+                    tile(number: dial.numbers[index], focused: window.focused, frame: frame)
                         .opacity(window.opacity)
                         .transformEffect(
                             toAffineTileTransform(
@@ -218,8 +288,10 @@ struct SpiralView: View {
         .animation(.linear(duration: 0.05), value: depth)
     }
 
-    private func tile(index: Int, focused: Bool, frame: SpiralCameraFrame) -> some View {
-        let hue = Double(index).truncatingRemainder(dividingBy: 15) / 15
+    private func tile(number: Int, focused: Bool, frame: SpiralCameraFrame) -> some View {
+        // Hue keyed to the NUMBER, not the position: 46 keeps its colour in
+        // every filter it appears in.
+        let hue = Double(number).truncatingRemainder(dividingBy: 15) / 15
         let t = Self.texturePx
         // Orientation-lock the label: counter-rotate the content against the
         // dial (about its own centre, the SwiftUI default) so it orbits with
@@ -233,7 +305,7 @@ struct SpiralView: View {
                     .strokeBorder(.black.opacity(0.25), lineWidth: t * 0.005)
             )
             .overlay(
-                Text("\(index + 1)")
+                Text("\(number)")
                     .font(.system(size: t * 0.25, weight: .bold, design: .rounded))
                     .foregroundStyle(.black.opacity(0.45))
                     .rotationEffect(.degrees(content.rotationDeg))

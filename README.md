@@ -242,7 +242,7 @@ A runnable example app lives in [`Examples/iOS`](Examples/iOS) — five screens:
   <img src="https://raw.githubusercontent.com/gregoryedgerton/golden-grids/main/docs/ios/galleries.gif" width="200" alt="Galleries — sky gradients with sun and moon" />
   <img src="https://raw.githubusercontent.com/gregoryedgerton/golden-grids/main/docs/ios/dashboards.gif" width="200" alt="Dashboards — a bento of stats" />
   <img src="https://raw.githubusercontent.com/gregoryedgerton/golden-grids/main/docs/ios/editorial.gif" width="200" alt="Editorial — a line-less copy grid" />
-  <img src="https://raw.githubusercontent.com/gregoryedgerton/golden-grids/main/docs/ios/spiral.gif" width="200" alt="Spiral — dialing through ninety-one squares with inertia" />
+  <img src="https://raw.githubusercontent.com/gregoryedgerton/golden-grids/main/docs/ios/spiral.gif" width="200" alt="Spiral — dialing through ninety-one squares with inertia and number filters" />
 </p>
 
 ### Android (Jetpack Compose)
