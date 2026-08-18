@@ -93,8 +93,22 @@ stage.style.transform = toCssTransform(frame, innerWidth, innerHeight, {
 
 // How present is square k at this depth? One ramp gives you "a few tiles at
 // a time" and the crossfade; hidden fires exactly when opacity reaches zero,
-// so invisible content never stays focusable.
+// so invisible content never stays focusable. Deliberately asymmetric: only
+// OUTWARD squares (larger than the focus, behind the camera) fade — the
+// interior never does, so squares emerge from the centre small but fully
+// present instead of materializing through a fade-in.
 const { opacity, hidden, focused } = spiralWindow(k, depth, layout.squares.length);
+
+// RENDER PER TILE, not one transform on a shared stage: a stage transform
+// rasterizes the 1-unit deep squares and upscales the raster hundreds of
+// times — the deep dial goes to mush. tileTransform composes camera ∘
+// placement flat per tile; render each square into a fixed texture box
+// (512px by default) and its net raster scale stays near 1 at focus.
+tile.style.width = tile.style.height = '512px';
+tile.style.transformOrigin = '0 0';
+tile.style.transform = toCssTileTransform(frame, layout.squares[k], innerWidth, innerHeight);
+// (React Native: toNativeTileTransform; Swift: toAffineTileTransform;
+//  Kotlin: tileTransform + graphicsLayer with TransformOrigin(0f, 0f).)
 
 // The spiral's convergence point, e.g. as a transform origin or annotation
 // anchor (centre of the smallest square; exact in the φ-limit).

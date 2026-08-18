@@ -72,6 +72,8 @@ struct SpiralView: View {
         }
     }
 
+    private static let texturePx: Double = 512
+
     private func stageContent(in size: CGSize) -> some View {
         let frame = spiralCamera(
             Self.layout,
@@ -80,44 +82,47 @@ struct SpiralView: View {
             viewportHeight: Double(size.height),
             options: SpiralCameraOptions(fillRatio: 0.62, clockwise: true)
         )
-        let transform = toAffineTransform(
-            frame,
-            viewportWidth: Double(size.width),
-            viewportHeight: Double(size.height)
-        )
+        // Per-tile composed transforms, NOT one matrix over a shared stage:
+        // a stage transform rasterizes the 1-unit deep squares and upscales
+        // the raster hundreds of times — the library's tileTransform exists
+        // precisely for this. Each tile renders into a texturePx box at a net
+        // scale near 1, so every era paints at native resolution.
         return ZStack(alignment: .topLeading) {
             ForEach(Self.layout.squares.indices, id: \.self) { index in
                 let square = Self.layout.squares[index]
                 let window = spiralWindow(index, depth: depth, squareCount: Self.count)
                 if !window.hidden {
-                    tile(index: index, square: square, focused: window.focused)
+                    tile(index: index, focused: window.focused)
                         .opacity(window.opacity)
+                        .transformEffect(
+                            toAffineTileTransform(
+                                frame,
+                                square: square,
+                                viewportWidth: Double(size.width),
+                                viewportHeight: Double(size.height),
+                                texturePx: Self.texturePx
+                            )
+                        )
                 }
             }
         }
-        // One camera matrix over the whole stage. transformEffect applies
-        // "relative to the view's coordinate space origin" (its top-leading
-        // corner) — exactly the (0, 0) frame toAffineTransform encodes its
-        // translation for. There is no anchor parameter to get wrong here;
-        // this SDK's only overload is origin-anchored.
-        .transformEffect(transform)
         .animation(.linear(duration: 0.05), value: depth)
     }
 
-    private func tile(index: Int, square: Square, focused: Bool) -> some View {
+    private func tile(index: Int, focused: Bool) -> some View {
         let hue = Double(index) / Double(Self.count)
-        return RoundedRectangle(cornerRadius: Double(square.size) * 0.02)
+        let t = Self.texturePx
+        return RoundedRectangle(cornerRadius: t * 0.02)
             .fill(Color(hue: hue, saturation: 0.45, brightness: focused ? 0.95 : 0.75))
             .overlay(
-                RoundedRectangle(cornerRadius: Double(square.size) * 0.02)
-                    .strokeBorder(.black.opacity(0.25), lineWidth: Double(square.size) * 0.005)
+                RoundedRectangle(cornerRadius: t * 0.02)
+                    .strokeBorder(.black.opacity(0.25), lineWidth: t * 0.005)
             )
             .overlay(
                 Text("\(index + 1)")
-                    .font(.system(size: Double(square.size) * 0.3, weight: .bold, design: .rounded))
+                    .font(.system(size: t * 0.3, weight: .bold, design: .rounded))
                     .foregroundStyle(.black.opacity(0.45))
             )
-            .frame(width: Double(square.size), height: Double(square.size))
-            .offset(x: Double(square.x), y: Double(square.y))
+            .frame(width: t, height: t)
     }
 }

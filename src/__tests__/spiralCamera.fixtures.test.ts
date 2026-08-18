@@ -5,6 +5,7 @@ import {
   spiralCamera,
   spiralEye,
   spiralWindow,
+  tileTransform,
   trailForRotation,
   trailToRotateDeg,
 } from "../utils/spiralCamera";
@@ -178,11 +179,53 @@ for (const count of [5, 10, 15]) {
   }
 }
 
+interface TileCase {
+  frameName: string;
+  squareIndex: number;
+  texturePx: number;
+  tile: { translateX: number; translateY: number; rotationDeg: number; scale: number };
+}
+
 interface Fixture {
   frames: FrameCase[];
   windows: WindowCase[];
   trails: TrailCase[];
   eyes: EyeCase[];
+  tiles: TileCase[];
+}
+
+function tileCases(): TileCase[] {
+  // Per-tile transforms for a spread of frames and squares — smallest,
+  // middle and largest — pinning the flat camera∘placement composition every
+  // platform's tile helper decomposes (the raster-clamp fix as a contract).
+  const cases: TileCase[] = [];
+  for (const input of [FRAME_INPUTS[0], FRAME_INPUTS[5], FRAME_INPUTS[30], FRAME_INPUTS[50]]) {
+    if (!input) continue;
+    const layout = generateGoldenGridLayout(fib(input.count), input.clockwise, input.rotate);
+    const current = frameCase(input);
+    for (const squareIndex of [0, Math.floor(input.count / 2), input.count - 1]) {
+      const square = layout.squares[squareIndex];
+      const tile = tileTransform(
+        { ...current.frame },
+        square,
+        input.viewportWidth,
+        input.viewportHeight,
+        { anchor: input.anchor, texturePx: 512 }
+      );
+      cases.push({
+        frameName: current.name,
+        squareIndex,
+        texturePx: 512,
+        tile: {
+          translateX: z(tile.translateX),
+          translateY: z(tile.translateY),
+          rotationDeg: z(tile.rotationDeg),
+          scale: z(tile.scale),
+        },
+      });
+    }
+  }
+  return cases;
 }
 
 function buildAll(): Fixture {
@@ -197,6 +240,7 @@ function buildAll(): Fixture {
     })),
     trails: TRAIL_CASES,
     eyes: EYE_CASES,
+    tiles: tileCases(),
   };
 }
 
@@ -245,6 +289,12 @@ describe("spiral camera — golden-master fixtures", () => {
       expect(trailToRotateDeg(entry.trail, entry.clockwise, entry.count)).toBe(entry.rotate);
       expect(trailForRotation(entry.rotate, entry.clockwise, entry.count)).toBe(entry.trail);
     }
+  });
+
+  test("tiles reproduce the committed fixture", () => {
+    expect(committed.tiles.length).toBeGreaterThan(0);
+    const current = tileCases();
+    expect(current).toEqual(committed.tiles);
   });
 
   test("eyes reproduce the committed fixture", () => {
