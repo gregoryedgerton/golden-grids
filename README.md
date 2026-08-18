@@ -75,7 +75,11 @@ import { trailToRotateDeg, trailForRotation } from '@gifcommit/golden-grids';
 // Grow into the open space: to the right of a side column, below a stacked
 // header. Which side is open is your layout's decision, like the anchor.
 const trail = innerWidth >= innerHeight ? 'right' : 'bottom';
-const rotate = trailToRotateDeg(trail, /* clockwise */ true, squares.length);
+// Solve for the count you are about to LAY OUT — the same sequence, not the
+// unfiltered one. A mismatch here targets the wrong side, and filtering is
+// exactly when it happens.
+const fib = fibonacciFor(items.length);
+const rotate = trailToRotateDeg(trail, /* clockwise */ true, fib.length);
 const layout = generateGoldenGridLayout(fib, true, rotate);
 
 trailForRotation(180, true, 15); // 'bottom'
