@@ -1,3 +1,10 @@
+# [4.7.0](https://github.com/gregoryedgerton/golden-grids/compare/v4.6.0...v4.7.0) (2026-08-18)
+
+
+### Features
+
+* **demo:** number filters replace the slider, longer inertia ([#33](https://github.com/gregoryedgerton/golden-grids/issues/33)) ([333d427](https://github.com/gregoryedgerton/golden-grids/commit/333d427d83cb5516958d54ef333802deba1e0f58))
+
 # [4.6.0](https://github.com/gregoryedgerton/golden-grids/compare/v4.5.1...v4.6.0) (2026-08-18)
 
 
