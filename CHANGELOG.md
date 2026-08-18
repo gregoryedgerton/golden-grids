@@ -1,3 +1,10 @@
+## [4.5.1](https://github.com/gregoryedgerton/golden-grids/compare/v4.5.0...v4.5.1) (2026-08-18)
+
+
+### Bug Fixes
+
+* guard the iOS Spiral stage against a zero-sized proposal ([#29](https://github.com/gregoryedgerton/golden-grids/issues/29)) ([ecf42f4](https://github.com/gregoryedgerton/golden-grids/commit/ecf42f4784b6eb08a5bec149a7b64f9d016f2d75))
+
 # [4.5.0](https://github.com/gregoryedgerton/golden-grids/compare/v4.4.0...v4.5.0) (2026-08-18)
 
 
