@@ -281,6 +281,8 @@ const ExampleApp = () => {
                     <SpiralStage
                         layout={gridLayout}
                         depth={depth}
+                        clockwise={inputControl.clockwise}
+                        startIdx={range ? range.startIdx : 0}
                         color={useColor ? inputControl.color : undefined}
                         outline={useOutline ? outlineValue : undefined}
                         labelMode={labelMode}
@@ -356,20 +358,26 @@ const ExampleApp = () => {
                         <button className="mad-lib-btn" onClick={() => setSpiralMode(m => !m)}>
                             {spiralMode ? "A SPIRAL DIAL" : "A FLAT GRID"}
                         </button>
-                        {spiralMode && squareCount >= 2 && <>{" "}at depth{" "}
+                        {spiralMode && squareCount >= 2 && (() => {
+                            // The dial floors at the smallest VISIBLE square —
+                            // the skipped range is the placeholder, not a
+                            // destination (see SpiralStage).
+                            const maxDepth = squareCount - 1 - (range ? range.startIdx : 0);
+                            return <>{" "}at depth{" "}
                         <span className="mad-lib-depth">
                             <input
                                 className="mad-lib-range"
                                 type="range"
                                 aria-label="Depth"
                                 min={0}
-                                max={squareCount - 1}
+                                max={maxDepth}
                                 step={0.01}
-                                value={Math.min(depth, squareCount - 1)}
+                                value={Math.min(depth, maxDepth)}
                                 onChange={(e) => setDepth(parseFloat(e.target.value))}
                             />
-                            <span className="mad-lib-static">{Math.min(depth, squareCount - 1).toFixed(2)}</span>
-                        </span></>}
+                            <span className="mad-lib-static">{Math.min(depth, maxDepth).toFixed(2)}</span>
+                        </span></>;
+                        })()}
                         , rendered with{" "}
                         <button className="mad-lib-btn" onClick={() => setUseOutline(o => !o)}>
                             {useOutline ? "AN OUTLINE" : "NO OUTLINE"}

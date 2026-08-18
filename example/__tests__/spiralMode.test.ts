@@ -1,4 +1,5 @@
 import { placementForRotation, placementForTrail } from "../spiralMode";
+import { labelFor } from "../SpiralStage";
 import { placementToRotateDeg } from "../../src/utils/gridGenerator";
 import { trailToRotateDeg } from "../../src/utils/spiralCamera";
 import type { SpiralTrail } from "../../src/utils/spiralCamera";
@@ -39,5 +40,21 @@ describe("placementForTrail", () => {
         }
       }
     }
+  });
+
+});
+
+describe("labelFor", () => {
+  it("labels largest = 1 descending when nothing is skipped, like the flat grid", () => {
+    // 4 squares, smallest-first indexes: largest (index 3) carries I.
+    expect(labelFor(3, 4, 0)).toBe(1);
+    expect(labelFor(0, 4, 0)).toBe(4);
+  });
+
+  it("uses the ascending-with-placeholder order when the range skips", () => {
+    // Flat mode: placeholder = 1, smallest visible = 2, … largest = boxCount.
+    // startIdx 2 of 6: visible indexes 2..5 carry 2..5.
+    expect(labelFor(2, 6, 2)).toBe(2);
+    expect(labelFor(5, 6, 2)).toBe(5);
   });
 });

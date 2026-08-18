@@ -8,7 +8,6 @@ import kotlin.math.floor
 import kotlin.math.ln
 import kotlin.math.max
 import kotlin.math.min
-import kotlin.math.round
 import kotlin.math.sin
 
 // Port of src/utils/spiralCamera.ts — the continuous depth-dial camera.
@@ -204,9 +203,11 @@ fun spiralWindow(
     }
     val delta = abs(focusIndexAt(depth, squareCount) - index)
     val raw = if (delta <= hold) 1.0 else max(0.0, (fade - delta) / (fade - hold))
-    // Same rounding the TS does with Number(raw.toFixed(3)): hidden follows
-    // the value the consumer will actually render.
-    val opacity = round(raw * 1000) / 1000
+    // Same rounding the TS does with Number(raw.toFixed(3)) — HALF AWAY FROM
+    // ZERO on a midpoint (raw is never negative here, so floor(x + 0.5)).
+    // Kotlin's round() ties to even, which disagrees with JS and Swift at
+    // exact .0005 boundaries.
+    val opacity = floor(raw * 1000 + 0.5) / 1000
     return SpiralWindow(opacity = opacity, hidden = opacity <= 0, focused = delta < 0.5)
 }
 

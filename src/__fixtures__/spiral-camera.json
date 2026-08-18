@@ -2019,6 +2019,34 @@
         "hidden": true,
         "focused": false
       }
+    },
+    {
+      "input": {
+        "index": 12,
+        "depth": 0.01675,
+        "count": 15,
+        "holdSteps": 1,
+        "fadeSteps": 2.5
+      },
+      "window": {
+        "opacity": 0.345,
+        "hidden": false,
+        "focused": false
+      }
+    },
+    {
+      "input": {
+        "index": 10,
+        "depth": 2.01675,
+        "count": 15,
+        "holdSteps": 1,
+        "fadeSteps": 2.5
+      },
+      "window": {
+        "opacity": 0.345,
+        "hidden": false,
+        "focused": false
+      }
     }
   ],
   "trails": [

@@ -8,6 +8,13 @@ import type { LabelMode } from "./labelUtils";
 interface Props {
   layout: GridLayout;
   depth: number;
+  /** Must match the handedness the layout was built with — the camera's
+   * rotation sign exists to cancel the layout's own quarter-turns. */
+  clockwise: boolean;
+  /** First VISIBLE square (the flat mode's skipped range). The dial floors
+   * at the smallest visible square, and skipped interior squares render
+   * unlabeled — they are the placeholder region, seen from inside. */
+  startIdx: number;
   color?: string;
   outline?: string;
   labelMode: LabelMode;
@@ -30,6 +37,8 @@ const TEXTURE_PX = 512;
 export const SpiralStage: React.FC<Props> = ({
   layout,
   depth,
+  clockwise,
+  startIdx,
   color,
   outline,
   labelMode,
@@ -50,11 +59,14 @@ export const SpiralStage: React.FC<Props> = ({
   }, []);
 
   const count = layout.squares.length;
-  const clamped = Math.min(depth, count - 1);
+  // The dial floors at the smallest VISIBLE square: skipped leading squares
+  // are the flat mode's placeholder region and are not destinations.
+  const maxDepth = count - 1 - startIdx;
+  const clamped = Math.min(depth, maxDepth);
   const base = color ? hexToHsl(color) : null;
   const frame =
     size.width > 0 && size.height > 0
-      ? spiralCamera(layout, clamped, size.width, size.height)
+      ? spiralCamera(layout, clamped, size.width, size.height, { clockwise })
       : null;
 
   return (
@@ -91,12 +103,12 @@ export const SpiralStage: React.FC<Props> = ({
                 opacity: window.opacity,
               }}
             >
-              {labelMode !== "NOTHING" && (
+              {labelMode !== "NOTHING" && index >= startIdx && (
                 <span
                   className="spiral-stage__label"
                   style={{ color: labelColor, fontSize: TEXTURE_PX * 0.22 }}
                 >
-                  {getLabel(index + 1, labelMode)}.
+                  {getLabel(labelFor(index, count, startIdx), labelMode)}.
                 </span>
               )}
             </div>
@@ -112,4 +124,15 @@ export const SpiralStage: React.FC<Props> = ({
  */
 export function scaleOutline(outline: string, netScale: number): string {
   return outline.replace(/^(\d+(?:\.\d+)?)px/, (_match, width) => `${parseFloat(width) / netScale}px`);
+}
+
+/**
+ * The flat renderer's label for a square: largest = 1 descending without a
+ * skipped range, and the flat mode's ascending-with-placeholder order
+ * (placeholder 1, smallest visible 2, … largest visible = boxCount) when the
+ * range skips — so toggling modes never renumbers a box.
+ */
+export function labelFor(index: number, count: number, startIdx: number): number {
+  if (startIdx === 0) return count - index;
+  return 2 + (index - startIdx);
 }

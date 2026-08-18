@@ -165,8 +165,16 @@ The spiral camera ships from the `/native` entry too, plus `toNativeTransform` â
 import { generateGoldenGridLayout, spiralCamera, toNativeTransform } from '@gifcommit/golden-grids/native'
 
 const frame = spiralCamera(layout, depth, width, height)
-// stage is the View's own size in layout units (usually layout.width/height)
-<View style={{ transform: toNativeTransform(frame, width, height, { width: layout.width, height: layout.height }) }} />
+// The stage View must BE the size passed as `stage` â€” RN pivots about the
+// view's own centre, so a flex- or content-sized View would pivot somewhere
+// else and the focus would miss its anchor.
+<View
+  style={{
+    width: layout.width,
+    height: layout.height,
+    transform: toNativeTransform(frame, width, height, { width: layout.width, height: layout.height }),
+  }}
+/>
 ```
 
 ### iOS (SwiftUI)

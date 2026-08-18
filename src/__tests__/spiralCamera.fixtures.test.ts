@@ -137,6 +137,11 @@ for (const depth of [0, 1.5, 7, 14]) {
 // A custom window shape.
 WINDOW_INPUTS.push({ index: 2, depth: 0, count: 8, holdSteps: 0.5, fadeSteps: 4 });
 WINDOW_INPUTS.push({ index: 6, depth: 6, count: 8, holdSteps: 0.5, fadeSteps: 4 });
+// Rounding-tie cases: raw lands exactly on a .0005 boundary, where JS
+// toFixed / Swift round half AWAY FROM ZERO but a ties-to-even port would
+// disagree (0.345 vs 0.344). Pins the tie-breaking rule cross-language.
+WINDOW_INPUTS.push({ index: 12, depth: 0.01675, count: 15, holdSteps: 1, fadeSteps: 2.5 });
+WINDOW_INPUTS.push({ index: 10, depth: 2.01675, count: 15, holdSteps: 1, fadeSteps: 2.5 });
 
 interface TrailCase {
   count: number;
