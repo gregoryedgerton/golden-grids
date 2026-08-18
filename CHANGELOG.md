@@ -1,3 +1,10 @@
+# [4.5.0](https://github.com/gregoryedgerton/golden-grids/compare/v4.4.0...v4.5.0) (2026-08-18)
+
+
+### Features
+
+* spiral camera across all stacks ([#26](https://github.com/gregoryedgerton/golden-grids/issues/26)) ([e4ab4a5](https://github.com/gregoryedgerton/golden-grids/commit/e4ab4a5cde265ea1614812154aeccbf0e076549d)), closes [23/#24](https://github.com/gregoryedgerton/golden-grids/issues/24)
+
 # [4.4.0](https://github.com/gregoryedgerton/golden-grids/compare/v4.3.0...v4.4.0) (2026-08-18)
 
 
