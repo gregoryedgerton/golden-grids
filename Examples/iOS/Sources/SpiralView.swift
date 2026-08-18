@@ -59,7 +59,20 @@ struct SpiralView: View {
         }
     }
 
+    @ViewBuilder
     private func stage(in size: CGSize) -> some View {
+        // A zero-sized proposal is a real state during the tab transition,
+        // and spiralCamera treats it as a caller error by design (the same
+        // contract as the web): skip the frame instead of crashing on the
+        // precondition. The production dial guards exactly like this.
+        if size.width > 0 && size.height > 0 {
+            stageContent(in: size)
+        } else {
+            Color.clear
+        }
+    }
+
+    private func stageContent(in size: CGSize) -> some View {
         let frame = spiralCamera(
             Self.layout,
             depth: depth,
