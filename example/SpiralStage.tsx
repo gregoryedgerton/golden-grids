@@ -80,6 +80,19 @@ export const SpiralStage: React.FC<Props> = ({
           // on screen. Border and label sizes divide by it so they render at
           // their authored screen size regardless of the zoom.
           const netScale = (frame.scale * square.size) / TEXTURE_PX;
+          // The flat renderer's shared-edge rule, in layout space: every
+          // square draws right+bottom, and only squares on the layout's own
+          // top/left boundary draw top/left — so a shared edge carries ONE
+          // line and the dial previews the exported outline thickness.
+          const scaled = outline ? scaleOutline(outline, netScale) : undefined;
+          const borders = scaled
+            ? {
+                borderRight: scaled,
+                borderBottom: scaled,
+                borderTop: square.y === 0 ? scaled : undefined,
+                borderLeft: square.x === 0 ? scaled : undefined,
+              }
+            : undefined;
           const transform =
             `translate(${size.width / 2}px, ${size.height / 2}px) ` +
             `rotate(${frame.rotationDeg}deg) scale(${frame.scale}) ` +
@@ -94,7 +107,7 @@ export const SpiralStage: React.FC<Props> = ({
                 height: TEXTURE_PX,
                 transform,
                 background: fill,
-                border: outline ? scaleOutline(outline, netScale) : undefined,
+                ...borders,
                 opacity: window.opacity,
               }}
             >
