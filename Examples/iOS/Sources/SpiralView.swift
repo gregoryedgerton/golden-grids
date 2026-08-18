@@ -122,9 +122,17 @@ struct SpiralView: View {
             .onDisappear { coastTask?.cancel() }
             .task {
                 guard let rate = Self.autospinRate() else { return }
+                // Advance by measured elapsed time, not per-wakeup: sleeps
+                // are nominal (and drift under load), and the recording hook
+                // promises N squares per wall-clock second.
+                var last = ContinuousClock.now
                 while !Task.isCancelled && depth < Self.maxDepth {
                     try? await Task.sleep(nanoseconds: 16_000_000)
-                    depth = min(depth + rate / 60, Self.maxDepth)
+                    let now = ContinuousClock.now
+                    let elapsed = Double((now - last).components.attoseconds) / 1e18
+                        + Double((now - last).components.seconds)
+                    last = now
+                    depth = min(depth + rate * elapsed, Self.maxDepth)
                 }
             }
         }
