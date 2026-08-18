@@ -7,6 +7,7 @@ export type { Square, GridLayout } from "../utils/gridGenerator";
 export {
   spiralCamera,
   toCssTransform,
+  toNativeTransform,
   spiralWindow,
   spiralEye,
   focusIndexAt,
@@ -19,4 +20,5 @@ export type {
   SpiralWindowOptions,
   SpiralWindow,
   SpiralTrail,
+  NativeTransformPart,
 } from "../utils/spiralCamera";

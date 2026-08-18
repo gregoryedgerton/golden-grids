@@ -8,86 +8,7 @@ Try the [Golden Grid Generator](https://gregoryedgerton.github.io/golden-grids/)
 
 Golden Grids is a responsive layout library driven by the Fibonacci Sequence. Instead of traditional rows and columns you get proportionally aligned boxes that follow the golden ratio. What you do with those boxes is your business, but at least you won't be boring.
 
-## Spiral camera
-
-`spiralCamera` turns a layout into a dialable view: give it a depth and it
-returns the transform that fills the viewport with one square — the focus —
-composed exactly as the spiral places its neighbours. Depth 0 focuses the last
-(largest) square; each whole step moves one square deeper, toward the eye.
-Scale interpolates geometrically and rotation advances 90° per step, so a
-scroll-bound depth feels like one continuous dial. Framework-free: bind it to
-scroll, a slider, or a clock — the camera only answers "where is the viewport
-at depth d".
-
-```ts
-import {
-  generateGoldenGridLayout,
-  spiralCamera,
-  toCssTransform,
-  spiralWindow,
-  spiralEye,
-} from '@gifcommit/golden-grids';
-
-const layout = generateGoldenGridLayout([1, 1, 2, 3, 5, 8, 13], true, 0);
-const frame = spiralCamera(layout, depth, innerWidth, innerHeight);
-// The stage must have transform-origin: 0 0 — the matrix assumes it.
-stage.style.transformOrigin = '0 0';
-stage.style.transform = toCssTransform(frame, innerWidth, innerHeight);
-
-// Optional anchor: where the focused square's centre lands, defaulting to
-// the viewport centre. Pass a point to pin the dial against an edge — half
-// the RENDERED focus size (fillRatio × min side, from the same fillRatio you
-// gave spiralCamera) pins its edge flush AT WHOLE DEPTHS, where a dial
-// rests. Mid-turn the rotated square's half-extent grows by
-// |cosθ| + |sinθ| (up to √2 at 45°), so its corner sweeps past the edge —
-// usually the desired bleed; widen the anchor by that factor if you need
-// flushness at fractional depths too. Which edge to hug, and when, is your
-// layout's decision:
-const fillRatio = 0.62; // must match the spiralCamera call
-const focusHalf = (fillRatio * Math.min(innerWidth, innerHeight)) / 2;
-stage.style.transform = toCssTransform(frame, innerWidth, innerHeight, {
-  x: focusHalf, // flush left
-  y: innerHeight / 2,
-});
-
-// How present is square k at this depth? One ramp gives you "a few tiles at
-// a time" and the crossfade; hidden fires exactly when opacity reaches zero,
-// so invisible content never stays focusable.
-const { opacity, hidden, focused } = spiralWindow(k, depth, layout.squares.length);
-
-// The spiral's convergence point, e.g. as a transform origin or annotation
-// anchor (centre of the smallest square; exact in the φ-limit).
-const eye = spiralEye(layout);
-```
-
-### Which way the dial trails
-
-At depth 0 the whole spiral — everything the reader is about to dial through —
-sits to ONE side of the focused square, and which side cycles with the square
-count as well as `rotate`: fifteen squares at `rotate: 180` trail downward,
-five squares at the same rotation trail *upward*, off the top. Anything that
-filters its content is picking a direction by accident unless it solves for
-one. `trailToRotateDeg` is that solve, and `trailForRotation` reads it back.
-
-```ts
-import { trailToRotateDeg, trailForRotation } from '@gifcommit/golden-grids';
-
-// Grow into the open space: to the right of a side column, below a stacked
-// header. Which side is open is your layout's decision, like the anchor.
-const trail = innerWidth >= innerHeight ? 'right' : 'bottom';
-// Solve for the count you are about to LAY OUT — the same sequence, not the
-// unfiltered one. A mismatch here targets the wrong side, and filtering is
-// exactly when it happens.
-const fib = fibonacciFor(items.length);
-const rotate = trailToRotateDeg(trail, /* clockwise */ true, fib.length);
-const layout = generateGoldenGridLayout(fib, true, rotate);
-
-trailForRotation(180, true, 15); // 'bottom'
-trailForRotation(180, true, 5);  // 'top' — same rotation, different count
-```
-
-Proven in production on [gregoryedgerton.com/projects](https://www.gregoryedgerton.com/projects/)
-before being upstreamed.
+And a golden grid is also a path: every square sits one quarter-turn deeper into the spiral. When a flat grid isn't enough, the [spiral dial](#the-spiral-dial) turns any layout into a continuous, depth-first camera ride toward the spiral's eye — on the web, React Native, iOS and Android alike.
 
 ## Installation
 
@@ -130,9 +51,103 @@ import { GoldenGrid, GoldenBox } from '@gifcommit/golden-grids'
 
 Children map in priority order — first child fills the largest box, last child fills the smallest. When `from > 1`, the final `<GoldenBox>` fills the skipped-range placeholder. Extra `<GoldenBox>` children beyond the slot count are silently ignored, so you can always declare the full set and let `from`/`to` control what renders.
 
+## The spiral dial
+
+`spiralCamera` turns a layout into a dialable view: give it a depth and it
+returns the transform that fills the viewport with one square — the focus —
+composed exactly as the spiral places its neighbours. Depth 0 focuses the last
+(largest) square; each whole step moves one square deeper, toward the eye.
+Scale interpolates geometrically and rotation advances 90° per step, so a
+scroll-bound depth feels like one continuous dial. Framework-free: bind it to
+scroll, a slider, or a clock — the camera only answers "where is the viewport
+at depth d".
+
+```ts
+import {
+  generateGoldenGridLayout,
+  spiralCamera,
+  toCssTransform,
+  spiralWindow,
+  spiralEye,
+} from '@gifcommit/golden-grids';
+
+const layout = generateGoldenGridLayout([1, 1, 2, 3, 5, 8, 13], true, 0);
+const frame = spiralCamera(layout, depth, innerWidth, innerHeight);
+// The stage must have transform-origin: 0 0 — the matrix assumes it.
+stage.style.transformOrigin = '0 0';
+stage.style.transform = toCssTransform(frame, innerWidth, innerHeight);
+
+// How present is square k at this depth? One ramp gives you "a few tiles at
+// a time" and the crossfade; hidden fires exactly when opacity reaches zero,
+// so invisible content never stays focusable.
+const { opacity, hidden, focused } = spiralWindow(k, depth, layout.squares.length);
+
+// The spiral's convergence point, e.g. as a transform origin or annotation
+// anchor (centre of the smallest square; exact in the φ-limit).
+const eye = spiralEye(layout);
+```
+
+Try it without writing code: the [Golden Grid Generator](https://gregoryedgerton.github.io/golden-grids/)
+has a spiral view of its own — flip **FLAT** to **THROUGH THE SPIRAL DIAL** and
+scrub the depth slider through the grid you configured.
+
+### Which way the dial trails
+
+At depth 0 the whole spiral — everything the reader is about to dial through —
+sits to ONE side of the focused square, and which side cycles with the square
+count as well as `rotate`: fifteen squares at `rotate: 180` trail downward,
+five squares at the same rotation trail *upward*, off the top. Anything that
+filters its content is picking a direction by accident unless it solves for
+one. `trailToRotateDeg` is that solve, and `trailForRotation` reads it back.
+
+```ts
+import { trailToRotateDeg, trailForRotation } from '@gifcommit/golden-grids';
+
+// Grow into the open space: to the right of a side column, below a stacked
+// header. Which side is open is your layout's decision, like the anchor.
+const trail = innerWidth >= innerHeight ? 'right' : 'bottom';
+// Solve for the count you are about to LAY OUT — the same sequence, not the
+// unfiltered one. A mismatch here targets the wrong side, and filtering is
+// exactly when it happens.
+const fib = fibonacciFor(items.length);
+const rotate = trailToRotateDeg(trail, /* clockwise */ true, fib.length);
+const layout = generateGoldenGridLayout(fib, true, rotate);
+
+trailForRotation(180, true, 15); // 'bottom'
+trailForRotation(180, true, 5);  // 'top' — same rotation, different count
+```
+
+Because the trailing solve owns the layout's rotation, it supersedes the
+`placement` prop — which is why the generator hides its placement control in
+spiral view.
+
+### Anchoring the dial
+
+`toCssTransform` takes an optional anchor: where the focused square's centre
+lands, defaulting to the viewport centre. Pass a point to pin the dial against
+an edge — half the RENDERED focus size (fillRatio × min side, from the same
+`fillRatio` you gave `spiralCamera`) pins its edge flush AT WHOLE DEPTHS, where
+a dial rests. Mid-turn the rotated square's half-extent grows by
+|cosθ| + |sinθ| (up to √2 at 45°), so its corner sweeps past the edge — usually
+the desired bleed; widen the anchor by that factor if you need flushness at
+fractional depths too. Which edge to hug, and when, is your layout's decision:
+
+```ts
+const fillRatio = 0.62; // must match the spiralCamera call
+const focusHalf = (fillRatio * Math.min(innerWidth, innerHeight)) / 2;
+stage.style.transform = toCssTransform(frame, innerWidth, innerHeight, {
+  x: focusHalf, // flush left
+  y: innerHeight / 2,
+});
+```
+
+Proven in production on [gregoryedgerton.com/projects](https://www.gregoryedgerton.com/projects/)
+before being upstreamed — the dial there hugs the nav column on desktop and the
+header line on mobile.
+
 ## Cross-platform
 
-The grid is computed from one shared, framework-agnostic model, so the same component renders four ways:
+The grid is computed from one shared, framework-agnostic model, so the same component renders four ways — and the spiral camera ships on every platform, each port verified against the same cross-language golden master:
 
 - **Web (React)** — `@gifcommit/golden-grids` (everything above)
 - **React Native** — `@gifcommit/golden-grids/native`
@@ -141,7 +156,7 @@ The grid is computed from one shared, framework-agnostic model, so the same comp
 
 ### Web (React)
 
-The package ships an interactive playground — the **Golden Grid Generator** — where you tune the grid through a mad-lib of dials and toggles (range, colour, outline, spiral direction, labels) and export the result. [Try it live.](https://gregoryedgerton.github.io/golden-grids/)
+The package ships an interactive playground — the **Golden Grid Generator** — where you tune the grid through a mad-lib of dials and toggles (range, colour, outline, spiral direction, labels), scrub through it in spiral view, and export the result. [Try it live.](https://gregoryedgerton.github.io/golden-grids/)
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/gregoryedgerton/golden-grids/main/docs/web/golden-grids.gif" width="600" alt="The Golden Grid Generator — tuning range, colour, outline and labels live" />
@@ -155,6 +170,18 @@ Same API, rendered with native `<View>`s — just import from the `/native` entr
 import { GoldenGrid, GoldenBox } from '@gifcommit/golden-grids/native'
 
 <GoldenGrid from={1} to={5} color="#7f7ec7" />
+```
+
+The spiral dial ships here too: `toNativeTransform` is `toCssTransform` expressed
+as a React Native `transform` array, so a stage view consumes the frame without
+parsing CSS (set `transformOrigin: 'top left'` on the stage — the analogue of
+`transform-origin: 0 0`):
+
+```tsx
+import { spiralCamera, toNativeTransform } from '@gifcommit/golden-grids/native'
+
+const frame = spiralCamera(layout, depth, width, height)
+<View style={{ transformOrigin: 'top left', transform: toNativeTransform(frame, width, height) }} />
 ```
 
 ### iOS (SwiftUI)
@@ -175,7 +202,16 @@ GoldenGrid(from: 1, to: 5, color: "#7f7ec7") { ordinal in
 }
 ```
 
-A runnable example app lives in [`Examples/iOS`](Examples/iOS) — four screens built entirely with `GoldenGrid`: a swipeable featured carousel, a sky gallery, a stats dashboard, and a line-less editorial layout.
+The spiral dial is a first-class Swift citizen: `spiralCamera`, `spiralWindow`, `spiralEye` and the trail solves are ported in `SpiralCamera.swift`, with `toAffineTransform` returning a `CGAffineTransform` for SwiftUI's `.transformEffect` — the analogue of `toCssTransform`:
+
+```swift
+let layout = generateGoldenGridLayout(sequence, clockwise: true,
+    rotate: trailToRotateDeg(.bottom, clockwise: true, squareCount: sequence.count))
+let frame = spiralCamera(layout, depth: depth, viewportWidth: w, viewportHeight: h)
+stage.transformEffect(toAffineTransform(frame, viewportWidth: w, viewportHeight: h))
+```
+
+A runnable example app lives in [`Examples/iOS`](Examples/iOS) — five screens: a swipeable featured carousel, a sky gallery, a stats dashboard and a line-less editorial layout, all built entirely with `GoldenGrid`, plus a spiral depth dial you drag or scrub through, driven by the camera.
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/gregoryedgerton/golden-grids/main/docs/ios/featured.gif" width="200" alt="Featured — a swipeable card carousel" />
@@ -196,7 +232,16 @@ GoldenGrid(from = 1, to = 5, color = "#7f7ec7", modifier = Modifier.fillMaxWidth
 }
 ```
 
-A runnable example app lives in [`android/example`](android/example) — the same four screens as the iOS example, rebuilt in Compose: a swipeable featured carousel, a sky gallery, a stats dashboard, and a text-first editorial layout. The renderer is verified against the same `render-model.json` golden master as every other platform. See [`android/README.md`](android/README.md) to build and run it.
+The spiral dial is ported in the pure Kotlin core (`SpiralCamera.kt`): `spiralCamera`, `spiralWindow`, `spiralEye` and the trail solves, plus `toGraphicsLayerTransform` — the frame decomposed for a Compose `Modifier.graphicsLayer` with a top-left `TransformOrigin`, the analogue of `toCssTransform`:
+
+```kotlin
+val layout = generateGoldenGridLayout(sequence, clockwise = true,
+    rotate = trailToRotateDeg(SpiralTrail.bottom, clockwise = true, squareCount = sequence.size))
+val frame = spiralCamera(layout, depth, viewportW, viewportH)
+val t = toGraphicsLayerTransform(frame, viewportW, viewportH)
+```
+
+A runnable example app lives in [`android/example`](android/example) — the same five screens as the iOS example, rebuilt in Compose: a swipeable featured carousel, a sky gallery, a stats dashboard, a text-first editorial layout, and the spiral depth dial. The layout, colour and camera math are verified against the same `render-model.json` and `spiral-camera.json` golden masters as every other platform. See [`android/README.md`](android/README.md) to build and run it.
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/gregoryedgerton/golden-grids/main/docs/android/featured.gif" width="200" alt="Featured — a swipeable card carousel" />
@@ -216,6 +261,8 @@ A runnable example app lives in [`android/example`](android/example) — the sam
 | `placement` | `"right" \| "bottom" \| "left" \| "top"` | Starting direction of the spiral. Defaults to `"right"`.                                                                                                            |
 | `clockwise` | `boolean`                                | Spiral direction — `true` for clockwise, `false` for counter-clockwise. Defaults to `true`.                                                                         |
 | `children`  | `GoldenBox` elements                     | Optional slot content. Children map largest-to-smallest — first child fills the largest box. When `from > 1`, the last `<GoldenBox>` fills the skipped-range placeholder. |
+
+`placement` orients the *flat* grid. When you drive a camera stage instead, solve the layout's rotation with [`trailToRotateDeg`](#which-way-the-dial-trails) — the trailing solve supersedes `placement`.
 
 ## How it works
 

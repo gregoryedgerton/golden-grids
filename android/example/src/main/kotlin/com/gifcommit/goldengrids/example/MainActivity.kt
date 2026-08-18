@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Article
+import androidx.compose.material.icons.filled.Cyclone
 import androidx.compose.material.icons.filled.GridView
 import androidx.compose.material.icons.filled.PhotoLibrary
 import androidx.compose.material.icons.filled.Star
@@ -28,9 +29,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 
 /**
- * Mirrors Examples/iOS — four screens, icons-only bottom navigation, each built
- * entirely with the GoldenGrid composable: a swipeable Featured carousel, a sky
- * Gallery, a stats Dashboard, and a text-first Editorial article.
+ * Mirrors Examples/iOS — five screens, icons-only bottom navigation: a swipeable
+ * Featured carousel, a sky Gallery, a stats Dashboard, and a text-first
+ * Editorial article, each built entirely with the GoldenGrid composable — plus
+ * the Spiral depth dial driven by the core's spiralCamera.
  */
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -42,8 +44,8 @@ class MainActivity : ComponentActivity() {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun AppShell() {
-    val titles = listOf("Featured", "Galleries", "Dashboards", "Editorial")
-    val icons = listOf(Icons.Filled.Star, Icons.Filled.PhotoLibrary, Icons.Filled.GridView, Icons.Filled.Article)
+    val titles = listOf("Featured", "Galleries", "Dashboards", "Editorial", "Spiral")
+    val icons = listOf(Icons.Filled.Star, Icons.Filled.PhotoLibrary, Icons.Filled.GridView, Icons.Filled.Article, Icons.Filled.Cyclone)
     var selected by rememberSaveable { mutableIntStateOf(0) }
 
     Scaffold(
@@ -67,7 +69,8 @@ private fun AppShell() {
                 0 -> FeaturedScreen()
                 1 -> GalleryScreen()
                 2 -> DashboardScreen()
-                else -> EditorialScreen()
+                3 -> EditorialScreen()
+                else -> SpiralScreen()
             }
         }
     }

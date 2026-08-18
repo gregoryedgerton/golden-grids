@@ -1,0 +1,526 @@
+{
+  "camera": [
+    {
+      "name": "shallow-default-fill",
+      "input": {
+        "fibCount": 7,
+        "clockwise": true,
+        "rotate": 0,
+        "depth": 0,
+        "viewportWidth": 1024,
+        "viewportHeight": 768
+      },
+      "frame": {
+        "scale": 36.62769230769231,
+        "rotationDeg": 0,
+        "centerX": 3.5,
+        "centerY": 9.5
+      }
+    },
+    {
+      "name": "fractional-depth",
+      "input": {
+        "fibCount": 7,
+        "clockwise": true,
+        "rotate": 0,
+        "depth": 1.25,
+        "viewportWidth": 1024,
+        "viewportHeight": 768,
+        "fillRatio": 0.62
+      },
+      "frame": {
+        "scale": 66.94111135065917,
+        "rotationDeg": 112.5,
+        "centerX": 4.375,
+        "centerY": -1.375
+      }
+    },
+    {
+      "name": "rotated-portrait",
+      "input": {
+        "fibCount": 7,
+        "clockwise": true,
+        "rotate": 90,
+        "depth": 3.5,
+        "viewportWidth": 390,
+        "viewportHeight": 844,
+        "fillRatio": 0.5
+      },
+      "frame": {
+        "scale": 79.6084166404533,
+        "rotationDeg": 315,
+        "centerX": -0.75,
+        "centerY": -0.25
+      }
+    },
+    {
+      "name": "deepest-square",
+      "input": {
+        "fibCount": 15,
+        "clockwise": true,
+        "rotate": 180,
+        "depth": 14,
+        "viewportWidth": 1200,
+        "viewportHeight": 800
+      },
+      "frame": {
+        "scale": 496,
+        "rotationDeg": 1260,
+        "centerX": 0.5,
+        "centerY": 0.5
+      }
+    },
+    {
+      "name": "counter-clockwise",
+      "input": {
+        "fibCount": 7,
+        "clockwise": false,
+        "rotate": 270,
+        "depth": 2.75,
+        "viewportWidth": 800,
+        "viewportHeight": 800
+      },
+      "frame": {
+        "scale": 145.51180714984105,
+        "rotationDeg": -247.5,
+        "centerX": 0.5,
+        "centerY": 2.25
+      }
+    },
+    {
+      "name": "full-bleed",
+      "input": {
+        "fibCount": 5,
+        "clockwise": true,
+        "rotate": 0,
+        "depth": 4,
+        "viewportWidth": 500,
+        "viewportHeight": 900,
+        "fillRatio": 1
+      },
+      "frame": {
+        "scale": 500,
+        "rotationDeg": 360,
+        "centerX": 0.5,
+        "centerY": 0.5
+      }
+    }
+  ],
+  "window": [
+    {
+      "name": "focused-default",
+      "input": {
+        "index": 6,
+        "depth": 0,
+        "squareCount": 7
+      },
+      "window": {
+        "opacity": 1,
+        "hidden": false,
+        "focused": true
+      }
+    },
+    {
+      "name": "mid-fade",
+      "input": {
+        "index": 4,
+        "depth": 0,
+        "squareCount": 7
+      },
+      "window": {
+        "opacity": 0.333,
+        "hidden": false,
+        "focused": false
+      }
+    },
+    {
+      "name": "hidden",
+      "input": {
+        "index": 0,
+        "depth": 0,
+        "squareCount": 7
+      },
+      "window": {
+        "opacity": 0,
+        "hidden": true,
+        "focused": false
+      }
+    },
+    {
+      "name": "fractional-focus",
+      "input": {
+        "index": 3,
+        "depth": 3.2,
+        "squareCount": 7
+      },
+      "window": {
+        "opacity": 1,
+        "hidden": false,
+        "focused": true
+      }
+    },
+    {
+      "name": "custom-window",
+      "input": {
+        "index": 2,
+        "depth": 1.5,
+        "squareCount": 7,
+        "holdSteps": 0.5,
+        "fadeSteps": 3
+      },
+      "window": {
+        "opacity": 0.2,
+        "hidden": false,
+        "focused": false
+      }
+    }
+  ],
+  "trail": [
+    {
+      "input": {
+        "trail": "right",
+        "clockwise": true,
+        "squareCount": 2
+      },
+      "rotateDeg": 180
+    },
+    {
+      "input": {
+        "trail": "right",
+        "clockwise": true,
+        "squareCount": 3
+      },
+      "rotateDeg": 90
+    },
+    {
+      "input": {
+        "trail": "right",
+        "clockwise": true,
+        "squareCount": 5
+      },
+      "rotateDeg": 270
+    },
+    {
+      "input": {
+        "trail": "right",
+        "clockwise": true,
+        "squareCount": 8
+      },
+      "rotateDeg": 0
+    },
+    {
+      "input": {
+        "trail": "right",
+        "clockwise": true,
+        "squareCount": 15
+      },
+      "rotateDeg": 90
+    },
+    {
+      "input": {
+        "trail": "right",
+        "clockwise": false,
+        "squareCount": 2
+      },
+      "rotateDeg": 180
+    },
+    {
+      "input": {
+        "trail": "right",
+        "clockwise": false,
+        "squareCount": 3
+      },
+      "rotateDeg": 270
+    },
+    {
+      "input": {
+        "trail": "right",
+        "clockwise": false,
+        "squareCount": 5
+      },
+      "rotateDeg": 90
+    },
+    {
+      "input": {
+        "trail": "right",
+        "clockwise": false,
+        "squareCount": 8
+      },
+      "rotateDeg": 0
+    },
+    {
+      "input": {
+        "trail": "right",
+        "clockwise": false,
+        "squareCount": 15
+      },
+      "rotateDeg": 270
+    },
+    {
+      "input": {
+        "trail": "bottom",
+        "clockwise": true,
+        "squareCount": 2
+      },
+      "rotateDeg": 270
+    },
+    {
+      "input": {
+        "trail": "bottom",
+        "clockwise": true,
+        "squareCount": 3
+      },
+      "rotateDeg": 180
+    },
+    {
+      "input": {
+        "trail": "bottom",
+        "clockwise": true,
+        "squareCount": 5
+      },
+      "rotateDeg": 0
+    },
+    {
+      "input": {
+        "trail": "bottom",
+        "clockwise": true,
+        "squareCount": 8
+      },
+      "rotateDeg": 90
+    },
+    {
+      "input": {
+        "trail": "bottom",
+        "clockwise": true,
+        "squareCount": 15
+      },
+      "rotateDeg": 180
+    },
+    {
+      "input": {
+        "trail": "bottom",
+        "clockwise": false,
+        "squareCount": 2
+      },
+      "rotateDeg": 270
+    },
+    {
+      "input": {
+        "trail": "bottom",
+        "clockwise": false,
+        "squareCount": 3
+      },
+      "rotateDeg": 0
+    },
+    {
+      "input": {
+        "trail": "bottom",
+        "clockwise": false,
+        "squareCount": 5
+      },
+      "rotateDeg": 180
+    },
+    {
+      "input": {
+        "trail": "bottom",
+        "clockwise": false,
+        "squareCount": 8
+      },
+      "rotateDeg": 90
+    },
+    {
+      "input": {
+        "trail": "bottom",
+        "clockwise": false,
+        "squareCount": 15
+      },
+      "rotateDeg": 0
+    },
+    {
+      "input": {
+        "trail": "left",
+        "clockwise": true,
+        "squareCount": 2
+      },
+      "rotateDeg": 0
+    },
+    {
+      "input": {
+        "trail": "left",
+        "clockwise": true,
+        "squareCount": 3
+      },
+      "rotateDeg": 270
+    },
+    {
+      "input": {
+        "trail": "left",
+        "clockwise": true,
+        "squareCount": 5
+      },
+      "rotateDeg": 90
+    },
+    {
+      "input": {
+        "trail": "left",
+        "clockwise": true,
+        "squareCount": 8
+      },
+      "rotateDeg": 180
+    },
+    {
+      "input": {
+        "trail": "left",
+        "clockwise": true,
+        "squareCount": 15
+      },
+      "rotateDeg": 270
+    },
+    {
+      "input": {
+        "trail": "left",
+        "clockwise": false,
+        "squareCount": 2
+      },
+      "rotateDeg": 0
+    },
+    {
+      "input": {
+        "trail": "left",
+        "clockwise": false,
+        "squareCount": 3
+      },
+      "rotateDeg": 90
+    },
+    {
+      "input": {
+        "trail": "left",
+        "clockwise": false,
+        "squareCount": 5
+      },
+      "rotateDeg": 270
+    },
+    {
+      "input": {
+        "trail": "left",
+        "clockwise": false,
+        "squareCount": 8
+      },
+      "rotateDeg": 180
+    },
+    {
+      "input": {
+        "trail": "left",
+        "clockwise": false,
+        "squareCount": 15
+      },
+      "rotateDeg": 90
+    },
+    {
+      "input": {
+        "trail": "top",
+        "clockwise": true,
+        "squareCount": 2
+      },
+      "rotateDeg": 90
+    },
+    {
+      "input": {
+        "trail": "top",
+        "clockwise": true,
+        "squareCount": 3
+      },
+      "rotateDeg": 0
+    },
+    {
+      "input": {
+        "trail": "top",
+        "clockwise": true,
+        "squareCount": 5
+      },
+      "rotateDeg": 180
+    },
+    {
+      "input": {
+        "trail": "top",
+        "clockwise": true,
+        "squareCount": 8
+      },
+      "rotateDeg": 270
+    },
+    {
+      "input": {
+        "trail": "top",
+        "clockwise": true,
+        "squareCount": 15
+      },
+      "rotateDeg": 0
+    },
+    {
+      "input": {
+        "trail": "top",
+        "clockwise": false,
+        "squareCount": 2
+      },
+      "rotateDeg": 90
+    },
+    {
+      "input": {
+        "trail": "top",
+        "clockwise": false,
+        "squareCount": 3
+      },
+      "rotateDeg": 180
+    },
+    {
+      "input": {
+        "trail": "top",
+        "clockwise": false,
+        "squareCount": 5
+      },
+      "rotateDeg": 0
+    },
+    {
+      "input": {
+        "trail": "top",
+        "clockwise": false,
+        "squareCount": 8
+      },
+      "rotateDeg": 270
+    },
+    {
+      "input": {
+        "trail": "top",
+        "clockwise": false,
+        "squareCount": 15
+      },
+      "rotateDeg": 180
+    }
+  ],
+  "eye": [
+    {
+      "name": "clockwise-flat",
+      "input": {
+        "fibCount": 10,
+        "clockwise": true,
+        "rotate": 0
+      },
+      "eye": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    {
+      "name": "counter-clockwise-rotated",
+      "input": {
+        "fibCount": 8,
+        "clockwise": false,
+        "rotate": 90
+      },
+      "eye": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    }
+  ]
+}

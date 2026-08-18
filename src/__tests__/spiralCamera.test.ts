@@ -5,6 +5,7 @@ import {
   spiralEye,
   spiralWindow,
   toCssTransform,
+  toNativeTransform,
   trailForRotation,
   trailToRotateDeg,
 } from '../utils/spiralCamera';
@@ -146,6 +147,36 @@ describe('toCssTransform', () => {
     const frame = spiralCamera(layout, 0, 1200, 800);
     expect(() => toCssTransform(frame, 1200, 800, { x: NaN, y: 0 })).toThrow('finite');
     expect(() => toCssTransform(frame, 1200, 800, { x: 0, y: Infinity })).toThrow('finite');
+  });
+});
+
+describe('toNativeTransform', () => {
+  it('mirrors the CSS composition entry for entry', () => {
+    const layout = generateGoldenGridLayout(fib(5), true, 0);
+    const frame = spiralCamera(layout, 1, 1200, 800);
+    expect(toNativeTransform(frame, 1200, 800)).toEqual([
+      { translateX: 600 },
+      { translateY: 400 },
+      { rotate: `${frame.rotationDeg}deg` },
+      { scale: frame.scale },
+      { translateX: -frame.centerX },
+      { translateY: -frame.centerY },
+    ]);
+  });
+
+  it('pins the focus to a custom anchor, like its CSS counterpart', () => {
+    const layout = generateGoldenGridLayout(fib(5), true, 0);
+    const frame = spiralCamera(layout, 0, 1200, 800);
+    const parts = toNativeTransform(frame, 1200, 800, { x: 400, y: 400 });
+    expect(parts[0]).toEqual({ translateX: 400 });
+    expect(parts[1]).toEqual({ translateY: 400 });
+  });
+
+  it('rejects a non-finite anchor', () => {
+    const layout = generateGoldenGridLayout(fib(5), true, 0);
+    const frame = spiralCamera(layout, 0, 1200, 800);
+    expect(() => toNativeTransform(frame, 1200, 800, { x: NaN, y: 0 })).toThrow('finite');
+    expect(() => toNativeTransform(frame, 1200, 800, { x: 0, y: Infinity })).toThrow('finite');
   });
 });
 

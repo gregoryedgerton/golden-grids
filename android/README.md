@@ -11,7 +11,7 @@ across every platform.
 
 | Module      | Type                  | What it is                                                                 |
 | ----------- | --------------------- | -------------------------------------------------------------------------- |
-| `:core`     | Kotlin/JVM library    | Pure `computeRenderModel` (spiral layout, fibonacci range, hex→HSL). No Android dependency. |
+| `:core`     | Kotlin/JVM library    | Pure `computeRenderModel` + the `spiralCamera` depth dial (layout, fibonacci range, hex→HSL, camera math). No Android dependency. |
 | `:renderer` | Android library       | The `GoldenGrid` composable — a thin renderer over the core model.         |
 | `:example`  | Android app           | A runnable showcase: a colour-progression grid and content-mapped slots.   |
 
@@ -65,10 +65,14 @@ Built and verified with Gradle 8.11.1, AGP 8.7.3, Kotlin 2.1.0, Compose BOM 2024
 
 ## Example screens
 
-`:example` mirrors `Examples/iOS` — four screens, icons-only bottom navigation, each
-built entirely with `GoldenGrid`: a swipeable **Featured** carousel, a sky **Gallery**,
-a stats **Dashboard** (count-up figures, a settling plot, a dusk→night gradient, gliding
-selectors), and a text-first **Editorial** article. Each screen builds itself in on appear.
+`:example` mirrors `Examples/iOS` — five screens, icons-only bottom navigation: a
+swipeable **Featured** carousel, a sky **Gallery**, a stats **Dashboard** (count-up
+figures, a settling plot, a dusk→night gradient, gliding selectors), and a text-first
+**Editorial** article, each built entirely with `GoldenGrid` — plus **Spiral**, the
+depth dial: twelve Fibonacci squares from the core's `generateGoldenGridLayout`,
+viewed through `spiralCamera` with the rotation solved by `trailToRotateDeg` and
+tile presence from `spiralWindow`. Drag or scrub to travel one square deeper per
+step. Each screen builds itself in on appear.
 
 <p align="center">
   <img src="../docs/android/featured.gif" width="200" alt="Featured — a swipeable card carousel" />

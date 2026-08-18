@@ -160,6 +160,42 @@ export function toCssTransform(
   );
 }
 
+/** One entry of a React Native `transform` array. */
+export type NativeTransformPart =
+  | { translateX: number }
+  | { translateY: number }
+  | { rotate: string }
+  | { scale: number };
+
+/**
+ * The frame as a React Native `transform` array — the exact composition of
+ * `toCssTransform`, expressed as RN transform entries so a native stage can
+ * consume the frame without parsing a CSS string. The stage view MUST set
+ * `transformOrigin: 'top left'` (React Native defaults to the view's centre)
+ * — the analogue of the CSS `transform-origin: 0 0` requirement.
+ */
+export function toNativeTransform(
+  frame: SpiralCameraFrame,
+  viewportWidth: number,
+  viewportHeight: number,
+  anchor: { x: number; y: number } = {
+    x: viewportWidth / 2,
+    y: viewportHeight / 2,
+  }
+): NativeTransformPart[] {
+  if (!Number.isFinite(anchor.x) || !Number.isFinite(anchor.y)) {
+    throw new Error(`Anchor (${anchor.x}, ${anchor.y}) must be finite.`);
+  }
+  return [
+    { translateX: anchor.x },
+    { translateY: anchor.y },
+    { rotate: `${frame.rotationDeg}deg` },
+    { scale: frame.scale },
+    { translateX: -frame.centerX },
+    { translateY: -frame.centerY },
+  ];
+}
+
 /** The side of the focused square the spiral's interior trails toward. */
 export type SpiralTrail = 'right' | 'bottom' | 'left' | 'top';
 

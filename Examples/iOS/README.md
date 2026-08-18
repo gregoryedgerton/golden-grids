@@ -1,7 +1,7 @@
 # Golden Grids — iOS example app
 
 A small runnable SwiftUI app that shows `GoldenGrid` (from the root Swift
-package) used four different ways. It depends on the package via a local path
+package) used four different ways, plus the spiral camera driving a depth dial. It depends on the package via a local path
 (`../..`), so it always builds against the source in this repo.
 
 ## Run it
@@ -24,7 +24,7 @@ xcodebuild -project GoldenGridsExamples.xcodeproj -scheme GoldenGridsExamples \
   -destination 'platform=iOS Simulator,name=iPhone 16 Pro' build
 ```
 
-## The four screens
+## The five screens
 
 Each is a thin SwiftUI view over `GoldenGrid`. The slot closure is keyed by child
 ordinal (`0` = the largest / most prominent slot). The grids keep the box count
@@ -62,4 +62,15 @@ GoldenGrid(from: 1, to: 4, placement: .top) { ordinal in
 GoldenGrid(from: 1, to: 3, placement: .right) { ordinal in
     switch ordinal { case 0: Body(); case 1: Platforms(); default: Headline() }
 }
+```
+
+**Spiral** — the depth dial: twelve Fibonacci squares from `generateGoldenGridLayout`, viewed through `spiralCamera`. Drag or scrub to travel one square deeper per step; the rotation is solved with `trailToRotateDeg(.bottom, …)` so the rest of the sequence trails off the bottom of the screen, and `spiralWindow` fades tiles in and out around the focus:
+
+```swift
+let layout = generateGoldenGridLayout(sequence, clockwise: true,
+    rotate: trailToRotateDeg(.bottom, clockwise: true, squareCount: sequence.count))
+let frame = spiralCamera(layout, depth: depth,
+    viewportWidth: geo.size.width, viewportHeight: geo.size.height)
+// compose tiles from the frame, or transform a point-sized stage with
+// toAffineTransform(frame, viewportWidth: …, viewportHeight: …)
 ```

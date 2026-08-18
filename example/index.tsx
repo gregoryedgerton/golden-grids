@@ -1,4 +1,4 @@
-import React, { useState, useRef, useCallback, useMemo } from "react";
+import React, { useState, useRef, useCallback, useMemo, useEffect } from "react";
 import { createRoot } from "react-dom/client";
 import { GoldenGrid, GoldenBox } from "@gifcommit/golden-grids";
 import { GridProvider, useGrid } from "./GridContext";
@@ -6,6 +6,9 @@ import type { InputControlType } from "./GridContext";
 import { generateGridHTML } from "./exportGrid";
 import { FIB_STOPS, getGridRange, fullFibonacciUpTo } from "../src/utils/fibonacci";
 import { generateGoldenGridLayout, placementToRotateDeg } from "../src/utils/gridGenerator";
+import { spiralCamera, toCssTransform, trailToRotateDeg } from "../src/utils/spiralCamera";
+import type { SpiralTrail } from "../src/utils/spiralCamera";
+import { placementForRotation, buildSpiralStage } from "./spiralView";
 import "./golden-grid.css";
 import { LabelMode, LABEL_MODES, getLabel } from "./labelUtils";
 
@@ -175,6 +178,9 @@ const ExampleApp = () => {
     const [outlineColor, setOutlineColor] = useState('#000000');
     const [useColor, setUseColor] = useState(true);
     const [labelMode, setLabelMode] = useState<LabelMode>('ROMAN NUMERALS');
+    const [spiralView, setSpiralView] = useState(false);
+    const [depth, setDepth] = useState(0);
+    const [trail, setTrail] = useState<SpiralTrail>('right');
 
     const lowerIdx = Math.min(inputControl.from, inputControl.to);
     const upperIdx = Math.max(inputControl.from, inputControl.to);
@@ -196,17 +202,52 @@ const ExampleApp = () => {
         boxCount = range.endIdx - range.startIdx + 1 + (hasPlaceholder ? 1 : 0);
     }
 
+    // Spiral view: the trailing solve (trailToRotateDeg) owns the layout's
+    // rotation, superseding the placement control — the equivalent placement
+    // is derived back from it so <GoldenGrid> and the export stay faithful.
+    const spiralInfo = useMemo(() => {
+        const r = getGridRange(start, end);
+        if (!r || (r.startIdx === 0 && r.endIdx === 0)) return null;
+        const fullSeq = fullFibonacciUpTo(Math.max(...r.userSequence));
+        const rot = trailToRotateDeg(trail, inputControl.clockwise, fullSeq.length);
+        return {
+            placement: placementForRotation(rot, inputControl.clockwise, r.startIdx),
+            stage: buildSpiralStage(fullSeq, inputControl.clockwise, rot),
+            maxDepth: fullSeq.length - 1,
+        };
+    }, [start, end, trail, inputControl.clockwise]);
+    const spiralActive = spiralView && spiralInfo !== null;
+    const effectivePlacement = spiralActive ? spiralInfo!.placement : inputControl.placement;
+    const clampedDepth = spiralActive ? Math.min(depth, spiralInfo!.maxDepth) : 0;
+
     const gridLayout = useMemo(() => {
         const r = getGridRange(start, end);
         if (!r || (r.startIdx === 0 && r.endIdx === 0)) return null;
         const maxVal = Math.max(...r.userSequence);
         const fullSeq = fullFibonacciUpTo(maxVal);
-        const rot = placementToRotateDeg(inputControl.placement, inputControl.clockwise, r.startIdx);
+        const rot = placementToRotateDeg(effectivePlacement, inputControl.clockwise, r.startIdx);
         return generateGoldenGridLayout(fullSeq, inputControl.clockwise, rot);
-    }, [start, end, inputControl.placement, inputControl.clockwise]);
+    }, [start, end, effectivePlacement, inputControl.clockwise]);
     const gridRatioW = gridLayout ? gridLayout.width : 1;
     const gridRatioH = gridLayout ? gridLayout.height : 1;
     const panelEdge = gridRatioW >= gridRatioH ? 'top' : 'left';
+
+    // The dial needs the stage container's pixel size — the camera's viewport.
+    const viewportRef = useRef<HTMLDivElement>(null);
+    const [viewport, setViewport] = useState<{ w: number; h: number } | null>(null);
+    useEffect(() => {
+        if (!spiralActive) return;
+        const el = viewportRef.current;
+        if (!el) return;
+        const measure = () => {
+            const rect = el.getBoundingClientRect();
+            if (rect.width > 0 && rect.height > 0) setViewport({ w: rect.width, h: rect.height });
+        };
+        measure();
+        const observer = new ResizeObserver(measure);
+        observer.observe(el);
+        return () => observer.disconnect();
+    }, [spiralActive]);
 
     const outlineValue = `${outlineWidth}px ${outlineStyle} ${outlineColor}`;
 
@@ -216,7 +257,7 @@ const ExampleApp = () => {
               inputControl.to,
               useColor ? inputControl.color : undefined,
               inputControl.clockwise,
-              inputControl.placement,
+              effectivePlacement,
               useOutline ? outlineValue : undefined
           )
         : "";
@@ -249,43 +290,74 @@ const ExampleApp = () => {
         URL.revokeObjectURL(url);
     };
 
+    const grid = (
+        <GoldenGrid
+            from={inputControl.from}
+            to={inputControl.to}
+            color={useColor ? inputControl.color : undefined}
+            clockwise={inputControl.clockwise}
+            outline={useOutline ? outlineValue : undefined}
+            placement={effectivePlacement}
+        >
+            {Array.from({ length: 79 }, (_, i) => {
+                // When a placeholder exists it occupies the last child slot (index 78)
+                // and is labeled 1 (first in sequence). Visible slot children sit at
+                // positions 0..77; GoldenGrid's priority mapping reverses them so
+                // position 0 → largest box. Using boxCount - i means position 0 carries
+                // the highest label (boxCount), which after inversion lands on the largest
+                // visible box — giving ascending sequence order: placeholder=1, smallest
+                // visible=2, …, largest visible=boxCount.
+                // Without a placeholder the natural priority order (1..N) applies.
+                const labelIndex = hasPlaceholder
+                    ? (i < 78 ? boxCount - i : 1)
+                    : i + 1;
+                return (
+                    <GoldenBox key={i}>
+                        {labelMode !== 'NOTHING' && (
+                            <span className="box-label" style={{ color: outlineColor }}>
+                                {getLabel(labelIndex, labelMode)}.
+                            </span>
+                        )}
+                    </GoldenBox>
+                );
+            })}
+        </GoldenGrid>
+    );
+
     return (
         <div>
             <section
-                className={`grid-preview grid-preview--panel-${panelEdge}`}
+                className={`grid-preview grid-preview--panel-${panelEdge}${spiralActive ? ' grid-preview--spiral' : ''}`}
                 style={{ '--grid-ratio-w': gridRatioW, '--grid-ratio-h': gridRatioH } as React.CSSProperties}
             >
-                <GoldenGrid
-                    from={inputControl.from}
-                    to={inputControl.to}
-                    color={useColor ? inputControl.color : undefined}
-                    clockwise={inputControl.clockwise}
-                    outline={useOutline ? outlineValue : undefined}
-                    placement={inputControl.placement}
-                >
-                    {Array.from({ length: 79 }, (_, i) => {
-                        // When a placeholder exists it occupies the last child slot (index 78)
-                        // and is labeled 1 (first in sequence). Visible slot children sit at
-                        // positions 0..77; GoldenGrid's priority mapping reverses them so
-                        // position 0 → largest box. Using boxCount - i means position 0 carries
-                        // the highest label (boxCount), which after inversion lands on the largest
-                        // visible box — giving ascending sequence order: placeholder=1, smallest
-                        // visible=2, …, largest visible=boxCount.
-                        // Without a placeholder the natural priority order (1..N) applies.
-                        const labelIndex = hasPlaceholder
-                            ? (i < 78 ? boxCount - i : 1)
-                            : i + 1;
-                        return (
-                            <GoldenBox key={i}>
-                                {labelMode !== 'NOTHING' && (
-                                    <span className="box-label" style={{ color: outlineColor }}>
-                                        {getLabel(labelIndex, labelMode)}.
-                                    </span>
-                                )}
-                            </GoldenBox>
-                        );
-                    })}
-                </GoldenGrid>
+                {spiralActive ? (
+                    <div className="spiral-viewport" ref={viewportRef}>
+                        {viewport && (
+                            <div
+                                className="spiral-stage"
+                                style={{
+                                    width: spiralInfo!.stage.width,
+                                    height: spiralInfo!.stage.height,
+                                    transform: toCssTransform(
+                                        spiralCamera(
+                                            spiralInfo!.stage,
+                                            clampedDepth,
+                                            viewport.w,
+                                            viewport.h,
+                                            { clockwise: inputControl.clockwise }
+                                        ),
+                                        viewport.w,
+                                        viewport.h
+                                    ),
+                                }}
+                            >
+                                {grid}
+                            </div>
+                        )}
+                    </div>
+                ) : (
+                    grid
+                )}
             </section>
 
             <div className={`control-float control-float--${panelEdge}${panelOpen ? '' : ' control-float--closed'}`}>
@@ -344,12 +416,29 @@ const ExampleApp = () => {
                         <input className="mad-lib-color" type="color" aria-label="Grid color"
                             value={inputControl.color}
                             onChange={(e) => setInputControl({ ...inputControl, color: e.target.value })} />
-                        </>}{boxCount > 1 && <>{" "}with the second box placed to the{" "}
+                        </>}{boxCount > 1 && <>{" "}viewed{" "}
+                        <button className="mad-lib-btn" onClick={() => setSpiralView(v => !v)}>
+                            {spiralView ? "THROUGH THE SPIRAL DIAL" : "FLAT"}
+                        </button>
+                        {/* Placement is superseded in spiral view: the trailing solve
+                            (trailToRotateDeg) owns the rotation, so the control hides. */}
+                        {!spiralView && <>{" "}with the second box placed to the{" "}
                         <button className="mad-lib-btn" onClick={() => {
                             const order = inputControl.clockwise ? PLACEMENT_STOPS : [...PLACEMENT_STOPS].reverse();
                             const idx = order.indexOf(inputControl.placement);
                             setInputControl({ ...inputControl, placement: order[(idx + 1) % order.length] });
-                        }}>{inputControl.placement.toUpperCase()}</button>
+                        }}>{inputControl.placement.toUpperCase()}</button></>}
+                        {spiralView && <>{" "}with the rest of the sequence trailing{" "}
+                        <button className="mad-lib-btn" onClick={() => {
+                            const idx = PLACEMENT_STOPS.indexOf(trail);
+                            setTrail(PLACEMENT_STOPS[(idx + 1) % PLACEMENT_STOPS.length]);
+                        }}>{trail.toUpperCase()}</button>
+                        {" "}dialed to a depth of{" "}
+                        <input className="mad-lib-range" type="range" aria-label="Spiral depth"
+                            min={0} max={spiralInfo ? spiralInfo.maxDepth : 0} step={0.01}
+                            value={clampedDepth}
+                            onChange={(e) => setDepth(parseFloat(e.target.value))} />
+                        <span className="mad-lib-static">{clampedDepth.toFixed(2)}</span></>}
                           {" "}and spirals{" "}
                         <button className="mad-lib-btn" onClick={() => setInputControl({ ...inputControl, clockwise: !inputControl.clockwise })}>
                             {inputControl.clockwise ? "CLOCKWISE" : "COUNTER-CLOCKWISE"}

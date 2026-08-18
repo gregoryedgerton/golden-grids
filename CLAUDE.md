@@ -50,7 +50,7 @@ import { GoldenGrid, GoldenBox } from '@gifcommit/golden-grids'
 }
 ```
 
-Exported from the library: `GoldenGrid`, `GoldenGridProps`, `GoldenBox`, `GoldenBoxProps`, `generateGoldenGridLayout` (raw coordinates for non-React use cases), the spiral camera (`spiralCamera`, `toCssTransform`, `spiralWindow`, `spiralEye`, `focusIndexAt` — framework-free depth-dial math in `src/utils/spiralCamera.ts`), and types `Square`, `GridLayout`, `PlacementValue`, `SpiralCameraOptions`, `SpiralCameraFrame`, `SpiralWindowOptions`, `SpiralWindow`.
+Exported from the library: `GoldenGrid`, `GoldenGridProps`, `GoldenBox`, `GoldenBoxProps`, `generateGoldenGridLayout` (raw coordinates for non-React use cases), the spiral camera (`spiralCamera`, `toCssTransform`, `toNativeTransform`, `spiralWindow`, `spiralEye`, `focusIndexAt`, `trailToRotateDeg`, `trailForRotation` — framework-free depth-dial math in `src/utils/spiralCamera.ts`), and types `Square`, `GridLayout`, `PlacementValue`, `SpiralCameraOptions`, `SpiralCameraFrame`, `SpiralWindowOptions`, `SpiralWindow`, `SpiralTrail`, `NativeTransformPart`. The same surface is exported from the `/native` entry (`src/native/index.ts`).
 
 `GridProvider`, `useGrid`, `InputControlType`, `generateGridHTML`, `FIB_STOPS`, and `getGridRange` are **not exported** — they are demo-only internals.
 
@@ -106,13 +106,16 @@ A dual CSS approach (injected + separate `dist/style.css`) was considered and re
 | --------------------------------- | --------------------------------------------------------------------------------- |
 | `src/utils/fibonacci.ts`          | `FIB_STOPS`, `getGridRange()`, `fullFibonacciUpTo()` — internal, not exported    |
 | `src/utils/gridGenerator.ts`      | Spiral layout algorithm — `generateGoldenGridLayout` is exported                 |
+| `src/utils/spiralCamera.ts`       | Depth-dial camera — exported; ported to Swift/Kotlin, fixture-verified            |
+| `src/__fixtures__/`               | Cross-language golden masters (`render-model.json`, `spiral-camera.json`) regenerated via `npm run gen:fixtures`; Swift (`Tests/GoldenGridsTests`) and Kotlin (`android/core`) ports assert against them |
 | `src/components/GoldenGrid.tsx`   | Main React component — declarative JSX, child mapping, color + outline logic     |
 | `src/components/GoldenBox.tsx`    | Slot marker component — fills 100%×100% of its positioned parent                 |
 | `src/utils/colorUtils.ts`         | `hexToHsl()`, `hslToCss()` — internal, not exported                              |
 | `src/styles/grid.css`             | Library CSS — injected automatically by the bundler                               |
 | `example/GridContext.tsx`         | Demo-only `GridProvider` + `useGrid()` hook + `InputControlType`                 |
 | `example/exportGrid.ts`           | Demo-only — generates a self-contained HTML string for the export modal           |
-| `example/index.tsx`               | Demo app — mad-lib UI, export modal, label cycle                                  |
+| `example/index.tsx`               | Demo app — mad-lib UI, export modal, label cycle, spiral dial view                |
+| `example/spiralView.ts`           | Demo-only — camera stage scaling + placement↔rotation inversion for spiral view   |
 | `example/golden-grid.css`         | Demo-only styles — not part of the distributed library                            |
 | `src/__tests__/`                  | Library unit tests — 100% statement/branch/function/line coverage                 |
 | `example/__tests__/`              | Demo unit tests — `exportGrid` and `GridContext` validation                       |

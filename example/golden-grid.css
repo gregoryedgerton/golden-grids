@@ -240,6 +240,44 @@ body {
   width: min(var(--h-avail), calc(var(--v-avail) * var(--grid-ratio-w, 1) / var(--grid-ratio-h, 1)));
 }
 
+/* Spiral dial view — the camera transforms a pixel-sized stage, so the
+   preview becomes a full-bleed clipped viewport instead of an aspect box */
+.grid-preview--spiral {
+  padding: 0;
+}
+
+.spiral-viewport {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+.spiral-stage {
+  position: absolute;
+  left: 0;
+  top: 0;
+  /* toCssTransform's matrix assumes the CSS default origin is overridden */
+  transform-origin: 0 0;
+  will-change: transform;
+}
+
+.grid-preview--spiral .spiral-stage .golden-grid {
+  width: 100%;
+}
+
+.mad-lib-range {
+  width: 8em;
+  margin: 0 0.5em;
+  vertical-align: middle;
+  accent-color: #222;
+  cursor: ew-resize;
+}
+
+.mad-lib-range:focus-visible {
+  outline: 2px solid #4a90d9;
+  outline-offset: 2px;
+}
+
 /* Panel — single element, adaptive top or left anchor */
 .control-float {
   position: fixed;
