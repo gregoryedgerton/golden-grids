@@ -143,7 +143,7 @@ The grid is computed from one shared, framework-agnostic model, so the same comp
 
 The package ships an interactive playground — the **Golden Grid Generator** — where you tune the grid through a mad-lib of dials and toggles (range, colour, outline, spiral direction, labels) and export the result. [Try it live.](https://gregoryedgerton.github.io/golden-grids/)
 
-The generator also has a **spiral dial mode**: flip the grid from "A FLAT GRID" to "A SPIRAL DIAL" and a continuous depth slider dials the same layout through `spiralCamera`. In dial mode the placement control gives way to a **trailing side** — the rotation is solved per square count with `trailToRotateDeg` (see [Which way the dial trails](#which-way-the-dial-trails)) — and export derives the equivalent `placement`, so the exported flat grid carries exactly the rotation the dial showed.
+For the spiral camera on the web, the production dial at [gregoryedgerton.com/projects](https://www.gregoryedgerton.com/projects/) is the reference implementation; a standalone web example is planned. (The generator stays a flat-grid tool — its mad-lib chrome is built around the static composition, and a dial deserves a page of its own.)
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/gregoryedgerton/golden-grids/main/docs/web/golden-grids.gif" width="600" alt="The Golden Grid Generator — tuning range, colour, outline and labels live" />

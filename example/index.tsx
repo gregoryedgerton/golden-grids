@@ -6,16 +6,11 @@ import type { InputControlType } from "./GridContext";
 import { generateGridHTML } from "./exportGrid";
 import { FIB_STOPS, getGridRange, fullFibonacciUpTo } from "../src/utils/fibonacci";
 import { generateGoldenGridLayout, placementToRotateDeg } from "../src/utils/gridGenerator";
-import { trailToRotateDeg } from "../src/utils/spiralCamera";
-import type { SpiralTrail } from "../src/utils/spiralCamera";
-import { fillsForSpiral, placementForTrail } from "./spiralMode";
-import { SpiralStage } from "./SpiralStage";
 import "./golden-grid.css";
 import { LabelMode, LABEL_MODES, getLabel } from "./labelUtils";
 
 const FIB_INDEX_STOPS = FIB_STOPS.map((_: number, i: number) => i);
 const PLACEMENT_STOPS = ["right", "bottom", "left", "top"] as const;
-const TRAIL_STOPS: SpiralTrail[] = ["right", "bottom", "left", "top"];
 const OUTLINE_STYLES = ['solid', 'dashed', 'dotted', 'double', 'groove', 'ridge', 'inset', 'outset'];
 const OUTLINE_WIDTH_STOPS = [1, 2, 3, 4, 5, 6, 7, 8];
 
@@ -180,15 +175,6 @@ const ExampleApp = () => {
     const [outlineColor, setOutlineColor] = useState('#000000');
     const [useColor, setUseColor] = useState(true);
     const [labelMode, setLabelMode] = useState<LabelMode>('ROMAN NUMERALS');
-    // Spiral mode: dial through the layout with the depth camera instead of
-    // the flat composition. The trailing side replaces `placement` here —
-    // the trail SOLVE supersedes it (the rotation that grows toward a side
-    // depends on the square count, so a fixed placement stops meaning
-    // anything once the range changes) — and export derives the equivalent
-    // placement back from the solved rotation (see spiralMode.ts).
-    const [spiralMode, setSpiralMode] = useState(false);
-    const [trail, setTrail] = useState<SpiralTrail>("bottom");
-    const [depth, setDepth] = useState(0);
 
     const lowerIdx = Math.min(inputControl.from, inputControl.to);
     const upperIdx = Math.max(inputControl.from, inputControl.to);
@@ -215,17 +201,9 @@ const ExampleApp = () => {
         if (!r || (r.startIdx === 0 && r.endIdx === 0)) return null;
         const maxVal = Math.max(...r.userSequence);
         const fullSeq = fullFibonacciUpTo(maxVal);
-        const rot = spiralMode
-            ? trailToRotateDeg(trail, inputControl.clockwise, fullSeq.length)
-            : placementToRotateDeg(inputControl.placement, inputControl.clockwise, r.startIdx);
+        const rot = placementToRotateDeg(inputControl.placement, inputControl.clockwise, r.startIdx);
         return generateGoldenGridLayout(fullSeq, inputControl.clockwise, rot);
-    }, [start, end, inputControl.placement, inputControl.clockwise, spiralMode, trail]);
-    const squareCount = gridLayout ? gridLayout.squares.length : 0;
-    // Spiral-mode export speaks the flat format's vocabulary: the placement
-    // that produces the solved rotation, so the exported grid IS the dialed one.
-    const exportPlacement = spiralMode && range && squareCount >= 2
-        ? placementForTrail(trail, inputControl.clockwise, squareCount, range.startIdx)
-        : inputControl.placement;
+    }, [start, end, inputControl.placement, inputControl.clockwise]);
     const gridRatioW = gridLayout ? gridLayout.width : 1;
     const gridRatioH = gridLayout ? gridLayout.height : 1;
     const panelEdge = gridRatioW >= gridRatioH ? 'top' : 'left';
@@ -238,18 +216,18 @@ const ExampleApp = () => {
               inputControl.to,
               useColor ? inputControl.color : undefined,
               inputControl.clockwise,
-              exportPlacement,
+              inputControl.placement,
               useOutline ? outlineValue : undefined
           )
         : "";
 
     const html = labelMode !== 'NOTHING' && baseHtml
         ? (() => {
-              // Match BOTH previews' numbering (see labelFor in SpiralStage):
-              // with a placeholder the DOM order (placeholder, then visible
-              // ascending) is already the ascending-with-placeholder rule;
-              // without one, the largest square carries 1 — and the export
-              // emits smallest-first, so the sequence counts DOWN.
+              // Match the preview's numbering: with a placeholder the DOM
+              // order (placeholder, then visible ascending) is already the
+              // ascending-with-placeholder rule; without one, the largest
+              // square carries 1 — and the export emits smallest-first, so
+              // the sequence counts DOWN.
               let domIndex = 0;
               const labelStyle = `position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:sans-serif;font-size:clamp(1rem,3cqw,1.5rem);pointer-events:none;color:${outlineColor};`;
               return baseHtml.replace(
@@ -283,29 +261,9 @@ const ExampleApp = () => {
     return (
         <div>
             <section
-                className={`grid-preview grid-preview--panel-${panelEdge}${spiralMode ? ' grid-preview--spiral' : ''}`}
+                className={`grid-preview grid-preview--panel-${panelEdge}`}
                 style={{ '--grid-ratio-w': gridRatioW, '--grid-ratio-h': gridRatioH } as React.CSSProperties}
             >
-                {spiralMode && gridLayout && squareCount >= 2 ? (
-                    <SpiralStage
-                        layout={gridLayout}
-                        depth={depth}
-                        clockwise={inputControl.clockwise}
-                        startIdx={range ? range.startIdx : 0}
-                        fills={fillsForSpiral(
-                            inputControl.from,
-                            inputControl.to,
-                            useColor ? inputControl.color : undefined,
-                            inputControl.clockwise,
-                            exportPlacement,
-                            squareCount,
-                            range ? range.startIdx : 0,
-                        )}
-                        outline={useOutline ? outlineValue : undefined}
-                        labelMode={labelMode}
-                        labelColor={outlineColor}
-                    />
-                ) : (
                 <GoldenGrid
                     from={inputControl.from}
                     to={inputControl.to}
@@ -337,7 +295,6 @@ const ExampleApp = () => {
                         );
                     })}
                 </GoldenGrid>
-                )}
             </section>
 
             <div className={`control-float control-float--${panelEdge}${panelOpen ? '' : ' control-float--closed'}`}>
@@ -371,31 +328,7 @@ const ExampleApp = () => {
                                     setInputControl({ ...inputControl, [upperKey]: v });
                                 }} /><sup>{ordinalSuffix(upperIdx)}</sup>
                         </span>
-                        {" "}digits of the Fibonacci sequence, viewed as{" "}
-                        <button className="mad-lib-btn" onClick={() => setSpiralMode(m => !m)}>
-                            {spiralMode ? "A SPIRAL DIAL" : "A FLAT GRID"}
-                        </button>
-                        {spiralMode && squareCount >= 2 && (() => {
-                            // The dial floors at the smallest VISIBLE square —
-                            // the skipped range is the placeholder, not a
-                            // destination (see SpiralStage).
-                            const maxDepth = squareCount - 1 - (range ? range.startIdx : 0);
-                            return <>{" "}at depth{" "}
-                        <span className="mad-lib-depth">
-                            <input
-                                className="mad-lib-range"
-                                type="range"
-                                aria-label="Depth"
-                                min={0}
-                                max={maxDepth}
-                                step={0.01}
-                                value={Math.min(depth, maxDepth)}
-                                onChange={(e) => setDepth(parseFloat(e.target.value))}
-                            />
-                            <span className="mad-lib-static">{Math.min(depth, maxDepth).toFixed(2)}</span>
-                        </span></>;
-                        })()}
-                        , rendered with{" "}
+                        {" "}digits of the Fibonacci sequence, rendered with{" "}
                         <button className="mad-lib-btn" onClick={() => setUseOutline(o => !o)}>
                             {useOutline ? "AN OUTLINE" : "NO OUTLINE"}
                         </button>
@@ -420,21 +353,13 @@ const ExampleApp = () => {
                         <input className="mad-lib-color" type="color" aria-label="Grid color"
                             value={inputControl.color}
                             onChange={(e) => setInputControl({ ...inputControl, color: e.target.value })} />
-                        </>}{boxCount > 1 && !spiralMode && <>{" "}with the second box placed to the{" "}
+                        </>}{boxCount > 1 && <>{" "}with the second box placed to the{" "}
                         <button className="mad-lib-btn" onClick={() => {
                             const order = inputControl.clockwise ? PLACEMENT_STOPS : [...PLACEMENT_STOPS].reverse();
                             const idx = order.indexOf(inputControl.placement);
                             setInputControl({ ...inputControl, placement: order[(idx + 1) % order.length] });
                         }}>{inputControl.placement.toUpperCase()}</button>
                           {" "}and spirals{" "}
-                        <button className="mad-lib-btn" onClick={() => setInputControl({ ...inputControl, clockwise: !inputControl.clockwise })}>
-                            {inputControl.clockwise ? "CLOCKWISE" : "COUNTER-CLOCKWISE"}
-                        </button></>}{boxCount > 1 && spiralMode && <>{" "}trailing out to the{" "}
-                        <button className="mad-lib-btn" onClick={() => {
-                            const idx = TRAIL_STOPS.indexOf(trail);
-                            setTrail(TRAIL_STOPS[(idx + 1) % TRAIL_STOPS.length]);
-                        }}>{trail.toUpperCase()}</button>
-                          {" "}and spiraling{" "}
                         <button className="mad-lib-btn" onClick={() => setInputControl({ ...inputControl, clockwise: !inputControl.clockwise })}>
                             {inputControl.clockwise ? "CLOCKWISE" : "COUNTER-CLOCKWISE"}
                         </button></>}.
