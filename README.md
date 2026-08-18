@@ -64,16 +64,52 @@ at depth d".
 import {
   generateGoldenGridLayout,
   spiralCamera,
-  toCssTransform,
-  spiralWindow,
   spiralEye,
+  spiralWindow,
+  toCssContentTransform,
+  toCssTileTransform,
 } from '@gifcommit/golden-grids';
 
 const layout = generateGoldenGridLayout([1, 1, 2, 3, 5, 8, 13], true, 0);
 const frame = spiralCamera(layout, depth, innerWidth, innerHeight);
-// The stage must have transform-origin: 0 0 — the matrix assumes it.
-stage.style.transformOrigin = '0 0';
-stage.style.transform = toCssTransform(frame, innerWidth, innerHeight);
+
+// RENDER PER TILE — not one camera transform on a shared stage. A stage
+// transform rasterizes the 1-unit deep squares and upscales the raster
+// hundreds of times, so the deep dial goes to mush. toCssTileTransform
+// composes camera ∘ placement flat per tile: render each square into a
+// fixed texture box (512px by default) and its net raster scale stays near
+// 1 at focus. The tiles sit at the stage origin, untransformed stage.
+for (const [k, square] of layout.squares.entries()) {
+  const tile = tiles[k];
+  tile.style.width = tile.style.height = '512px';
+  tile.style.transformOrigin = '0 0'; // the decomposition assumes it
+  tile.style.transform = toCssTileTransform(frame, square, innerWidth, innerHeight);
+
+  // How present is square k at this depth? One ramp gives you "a few tiles
+  // at a time" and the crossfade; hidden fires exactly when opacity reaches
+  // zero, so invisible content never stays focusable. Deliberately
+  // asymmetric: only OUTWARD squares (larger than the focus, behind the
+  // camera) fade — the interior never does, so squares emerge from the
+  // centre small but fully present instead of materializing through a
+  // fade-in.
+  const { opacity, hidden } = spiralWindow(k, depth, layout.squares.length);
+  tile.style.opacity = String(opacity);
+  tile.style.visibility = hidden ? 'hidden' : 'visible';
+
+  // Keep the CONTENT readable while the dial turns: counter-rotate the
+  // tile's content element against the stage about its own centre
+  // (transform-origin 50% 50% — not the tile's 0 0), so it orbits with its
+  // tile but never spins. The |cosθ|+|sinθ| cover swell keeps the clip box
+  // full mid-turn (exactly 1 at rest, √2 at worst). A configuration detail:
+  // { counterRotate: false } is the identity for consumers who want content
+  // to ride the spiral; { cover: false } for content that must never scale.
+  const art = tile.firstElementChild as HTMLElement;
+  art.style.transformOrigin = '50% 50%';
+  art.style.transform = toCssContentTransform(frame);
+}
+// (React Native: toNativeTileTransform / toNativeContentTransform;
+//  Swift: toAffineTileTransform + contentTransform;
+//  Kotlin: tileTransform + contentTransform, graphicsLayer pivots.)
 
 // Optional anchor: where the focused square's centre lands, defaulting to
 // the viewport centre. Pass a point to pin the dial against an edge — half
@@ -81,25 +117,27 @@ stage.style.transform = toCssTransform(frame, innerWidth, innerHeight);
 // gave spiralCamera) pins its edge flush AT WHOLE DEPTHS, where a dial
 // rests. Mid-turn the rotated square's half-extent grows by
 // |cosθ| + |sinθ| (up to √2 at 45°), so its corner sweeps past the edge —
-// usually the desired bleed; widen the anchor by that factor if you need
-// flushness at fractional depths too. Which edge to hug, and when, is your
-// layout's decision:
+// usually the desired bleed. Which edge to hug, and when, is your layout's
+// decision:
 const fillRatio = 0.62; // must match the spiralCamera call
 const focusHalf = (fillRatio * Math.min(innerWidth, innerHeight)) / 2;
-stage.style.transform = toCssTransform(frame, innerWidth, innerHeight, {
-  x: focusHalf, // flush left
-  y: innerHeight / 2,
+const flushLeft = { x: focusHalf, y: innerHeight / 2 };
+toCssTileTransform(frame, layout.squares[0], innerWidth, innerHeight, {
+  anchor: flushLeft, // pass the same anchor for every tile in the loop above
 });
-
-// How present is square k at this depth? One ramp gives you "a few tiles at
-// a time" and the crossfade; hidden fires exactly when opacity reaches zero,
-// so invisible content never stays focusable.
-const { opacity, hidden, focused } = spiralWindow(k, depth, layout.squares.length);
 
 // The spiral's convergence point, e.g. as a transform origin or annotation
 // anchor (centre of the smallest square; exact in the φ-limit).
 const eye = spiralEye(layout);
 ```
+
+(`toCssTransform` — one matrix for a whole stage — still exists for cases
+where every square is a similar size on screen; for a deep dial, use the
+per-tile form above.)
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/gregoryedgerton/golden-grids/main/docs/ios/spiral.gif" width="240" alt="The spiral dial — ninety-one squares, per-tile transforms, orientation-locked labels" />
+</p>
 
 ### Which way the dial trails
 
@@ -204,6 +242,7 @@ A runnable example app lives in [`Examples/iOS`](Examples/iOS) — five screens:
   <img src="https://raw.githubusercontent.com/gregoryedgerton/golden-grids/main/docs/ios/galleries.gif" width="200" alt="Galleries — sky gradients with sun and moon" />
   <img src="https://raw.githubusercontent.com/gregoryedgerton/golden-grids/main/docs/ios/dashboards.gif" width="200" alt="Dashboards — a bento of stats" />
   <img src="https://raw.githubusercontent.com/gregoryedgerton/golden-grids/main/docs/ios/editorial.gif" width="200" alt="Editorial — a line-less copy grid" />
+  <img src="https://raw.githubusercontent.com/gregoryedgerton/golden-grids/main/docs/ios/spiral.gif" width="200" alt="Spiral — dialing through ninety-one squares with inertia" />
 </p>
 
 ### Android (Jetpack Compose)
@@ -281,6 +320,8 @@ useEffect(() => {
 
 ## How big can I go?
 
-The theoretical maximum is the 78th Fibonacci number: `8,944,394,323,791,464`. That's the largest value that fits within JavaScript's `Number.MAX_SAFE_INTEGER` (`9,007,199,254,740,991`). Beyond this threshold, integer arithmetic loses precision and the sequence values can't be trusted. The library generates all 78 valid stops automatically, giving you index positions 0 through 78 to work with.
+On the web, the maximum is the 78th Fibonacci number: `8,944,394,323,791,464`. That's the largest value that fits within JavaScript's `Number.MAX_SAFE_INTEGER` (`9,007,199,254,740,991`). Beyond this threshold, integer arithmetic loses precision and the sequence values can't be trusted. The library generates all 78 valid stops automatically, giving you index positions 0 through 78 to work with.
+
+The native ports carry further — Swift `Int` and Kotlin `Long` are true 64-bit integers — but the LAYOUT walls before the values do: a 92-square layout's bounding box is F(93) ≈ 1.22 × 10¹⁹, past `Int64.max`, so **91 squares is the native ceiling** (the iOS example's spiral dial ships at exactly that). Dialing past it — a true 100 — needs a float-coordinate layout, tracked in [#31](https://github.com/gregoryedgerton/golden-grids/issues/31).
 
 To be honest it's less about the absolute number and more about controlling the range. After all, a similar range at the start and end of the sequence renders comparably — `8/16` is still `1/2`, same relative proportions. Shorter ranges are easier on the eyes and more practical to use. You can still reach for `5,702,887`, but pair it with the 32nd digit `2,178,309` for a lovely 4-box golden grid dawg.

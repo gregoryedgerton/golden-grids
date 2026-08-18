@@ -1,10 +1,15 @@
 import { generateGoldenGridLayout } from '../utils/gridGenerator';
 import {
+  contentTransform,
   focusIndexAt,
   spiralCamera,
   spiralEye,
   spiralWindow,
+  tileTransform,
+  toCssContentTransform,
+  toCssTileTransform,
   toCssTransform,
+  toNativeTileTransform,
   toNativeTransform,
   trailForRotation,
   trailToRotateDeg,
@@ -155,18 +160,28 @@ describe('spiralWindow', () => {
     expect(spiralWindow(14, 0, 15)).toEqual({ opacity: 1, hidden: false, focused: true });
   });
 
-  it('fades with distance and leaves paint exactly when opacity hits zero', () => {
-    expect(spiralWindow(13, 0, 15).opacity).toBe(1);
-    expect(spiralWindow(12, 0, 15).opacity).toBeCloseTo(1 / 3, 2);
-    const gone = spiralWindow(11, 0, 15);
+  it('fades OUTWARD with distance and leaves paint exactly at zero', () => {
+    // Depth 5 focuses index 9; larger squares are behind the camera.
+    expect(spiralWindow(10, 5, 15).opacity).toBe(1);
+    expect(spiralWindow(11, 5, 15).opacity).toBeCloseTo(1 / 3, 2);
+    const gone = spiralWindow(12, 5, 15);
     expect(gone.opacity).toBe(0);
     expect(gone.hidden).toBe(true);
   });
 
+  it('never fades the interior — squares emerge from the centre, small but present', () => {
+    // The asymmetry the production dial proved: a faded interior renders the
+    // spiral's centre as a hole, and a fade-in reads as materializing rather
+    // than approaching. Inward squares hold full presence at ANY distance.
+    expect(spiralWindow(0, 0, 15)).toEqual({ opacity: 1, hidden: false, focused: false });
+    expect(spiralWindow(7, 0, 15).opacity).toBe(1);
+    expect(spiralWindow(0, 5, 15).hidden).toBe(false);
+  });
+
   it('hides content whose rendered opacity rounds to zero', () => {
-    // Raw opacity just inside the boundary (≈0.0003) rounds to 0.000 — the
-    // consumer renders 0, so hidden must agree with what is rendered.
-    const nearZero = spiralWindow(9, 2.4995, 15);
+    // Outward 2.4995: raw opacity ≈0.0003 rounds to 0.000 — the consumer
+    // renders 0, so hidden must agree with what is rendered.
+    const nearZero = spiralWindow(12, 4.4995, 15);
     expect(nearZero.opacity).toBe(0);
     expect(nearZero.hidden).toBe(true);
   });
@@ -174,7 +189,7 @@ describe('spiralWindow', () => {
   it('agrees with itself at the fade boundary', () => {
     // A gap between "invisible" and "gone" would leave transparent content
     // focusable — the boundary is one number by design.
-    const atBoundary = spiralWindow(9, 2.5, 15);
+    const atBoundary = spiralWindow(12, 4.5, 15);
     expect(atBoundary.opacity).toBe(0);
     expect(atBoundary.hidden).toBe(true);
   });
@@ -217,9 +232,11 @@ describe('spiralWindow', () => {
   });
 
   it('honours custom hold and fade distances', () => {
-    const wide = spiralWindow(11, 0, 15, { holdSteps: 3, fadeSteps: 5 });
+    // Depth 5 focuses index 9; outward 3 inside a hold of 3 stays opaque…
+    const wide = spiralWindow(12, 5, 15, { holdSteps: 3, fadeSteps: 5 });
     expect(wide.opacity).toBe(1);
-    const narrow = spiralWindow(13, 0, 15, { holdSteps: 0.25, fadeSteps: 0.5 });
+    // …and outward 1 beyond a 0.5 fade is gone.
+    const narrow = spiralWindow(10, 5, 15, { holdSteps: 0.25, fadeSteps: 0.5 });
     expect(narrow.hidden).toBe(true);
   });
 });
@@ -434,5 +451,120 @@ describe('toNativeTransform', () => {
     expect(() =>
       toNativeTransform(frame, 800, 600, { width: 10, height: 10 }, { x: NaN, y: 0 })
     ).toThrow(/must be finite/);
+  });
+});
+
+describe('tileTransform', () => {
+  const layout = generateGoldenGridLayout(fib(15), true, 0);
+
+  it('lands every tile corner exactly where the stage matrix would', () => {
+    // The whole point: camera ∘ placement composed per tile must be the SAME
+    // mapping as one camera matrix over squares at layout coordinates — only
+    // the rasterization differs. Check the tile's four texture-box corners.
+    const frame = spiralCamera(layout, 3.5, 960, 720, { fillRatio: 1 });
+    const anchor = { x: 360, y: 360 };
+    const rad = (frame.rotationDeg * Math.PI) / 180;
+    for (const square of [layout.squares[0], layout.squares[7], layout.squares[14]]) {
+      const tile = tileTransform(frame, square, 960, 720, { anchor, texturePx: 512 });
+      const tileRad = (tile.rotationDeg * Math.PI) / 180;
+      for (const [u, v] of [[0, 0], [512, 0], [0, 512], [512, 512]] as const) {
+        // Through the tile decomposition…
+        const tx = tile.translateX + tile.scale * (Math.cos(tileRad) * u - Math.sin(tileRad) * v);
+        const ty = tile.translateY + tile.scale * (Math.sin(tileRad) * u + Math.cos(tileRad) * v);
+        // …and through the stage mapping of the same layout point.
+        const px = square.x + (u / 512) * square.size;
+        const py = square.y + (v / 512) * square.size;
+        const sx = anchor.x + frame.scale * (Math.cos(rad) * (px - frame.centerX) - Math.sin(rad) * (py - frame.centerY));
+        const sy = anchor.y + frame.scale * (Math.sin(rad) * (px - frame.centerX) + Math.cos(rad) * (py - frame.centerY));
+        expect(tx).toBeCloseTo(sx, 9);
+        expect(ty).toBeCloseTo(sy, 9);
+      }
+    }
+  });
+
+  it('keeps the net raster scale near one at the focus', () => {
+    // The raster-clamp fix in one number: the focused square's texture box
+    // renders at ~viewportMin/texturePx regardless of how deep the dial is.
+    for (const depth of [0, 7, 14]) {
+      const frame = spiralCamera(layout, depth, 960, 720, { fillRatio: 1 });
+      const focus = layout.squares[14 - depth];
+      const tile = tileTransform(frame, focus, 960, 720, { texturePx: 512 });
+      expect(tile.scale).toBeCloseTo(720 / 512, 9);
+    }
+  });
+
+  it('emits the css and native forms of the same decomposition', () => {
+    const frame = spiralCamera(layout, 2, 800, 600);
+    const square = layout.squares[10];
+    const tile = tileTransform(frame, square, 800, 600);
+    expect(toCssTileTransform(frame, square, 800, 600)).toBe(
+      `translate(${tile.translateX}px, ${tile.translateY}px) ` +
+        `rotate(${tile.rotationDeg}deg) scale(${tile.scale})`
+    );
+    const native = toNativeTileTransform(frame, square, 800, 600);
+    // Centre-pivot application over the 512 box lands the origin corner where
+    // the top-left decomposition puts it.
+    const tx = (native[0] as { translateX: number }).translateX;
+    const ty = (native[1] as { translateY: number }).translateY;
+    const rad = (tile.rotationDeg * Math.PI) / 180;
+    const mid = 256;
+    const x = mid + tx + tile.scale * (Math.cos(rad) * (0 - mid) - Math.sin(rad) * (0 - mid));
+    const y = mid + ty + tile.scale * (Math.sin(rad) * (0 - mid) + Math.cos(rad) * (0 - mid));
+    expect(x).toBeCloseTo(tile.translateX, 9);
+    expect(y).toBeCloseTo(tile.translateY, 9);
+  });
+
+  it('rejects a non-finite anchor or a degenerate texture box', () => {
+    const frame = spiralCamera(layout, 0, 800, 600);
+    const square = layout.squares[0];
+    expect(() =>
+      tileTransform(frame, square, 800, 600, { anchor: { x: NaN, y: 0 } })
+    ).toThrow(/must be finite/);
+    expect(() =>
+      tileTransform(frame, square, 800, 600, { texturePx: 0 })
+    ).toThrow(/texturePx/);
+  });
+});
+
+describe('contentTransform', () => {
+  const layout = generateGoldenGridLayout(fib(15), true, 0);
+
+  it('cancels the stage rotation exactly, with a cover of one at rest', () => {
+    for (const depth of [0, 1, 7, 14]) {
+      const frame = spiralCamera(layout, depth, 800, 600);
+      const content = contentTransform(frame);
+      expect(content.rotationDeg).toBe(-frame.rotationDeg);
+      // Whole depths are where the dial rests: no permanent crop.
+      expect(content.scale).toBeCloseTo(1, 9);
+    }
+  });
+
+  it('swells mid-turn so the clip box stays covered, peaking at root two', () => {
+    const frame = spiralCamera(layout, 0.5, 800, 600); // 45° residual
+    const content = contentTransform(frame);
+    expect(content.scale).toBeCloseTo(Math.SQRT2, 9);
+    expect(contentTransform(frame, { cover: false }).scale).toBe(1);
+  });
+
+  it('is a configuration detail: counterRotate false is the identity', () => {
+    // One call site, one switch — content rides the spiral when that is the
+    // look the consumer wants.
+    const frame = spiralCamera(layout, 3.25, 800, 600);
+    expect(contentTransform(frame, { counterRotate: false })).toEqual({
+      rotationDeg: 0,
+      scale: 1,
+    });
+    expect(contentTransform(frame, { counterRotate: false, cover: true })).toEqual({
+      rotationDeg: 0,
+      scale: 1,
+    });
+  });
+
+  it('emits the css form of the same decomposition', () => {
+    const frame = spiralCamera(layout, 2.5, 800, 600);
+    const content = contentTransform(frame);
+    expect(toCssContentTransform(frame)).toBe(
+      `rotate(${content.rotationDeg}deg) scale(${content.scale})`
+    );
   });
 });

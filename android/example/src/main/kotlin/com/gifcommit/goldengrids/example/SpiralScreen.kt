@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -33,8 +32,9 @@ import com.gifcommit.goldengrids.SpiralCameraOptions
 import com.gifcommit.goldengrids.SpiralTrail
 import com.gifcommit.goldengrids.generateGoldenGridLayout
 import com.gifcommit.goldengrids.spiralCamera
+import com.gifcommit.goldengrids.contentTransform
 import com.gifcommit.goldengrids.spiralWindow
-import com.gifcommit.goldengrids.toGraphicsLayerTransform
+import com.gifcommit.goldengrids.tileTransform
 import com.gifcommit.goldengrids.trailToRotateDeg
 
 /**
@@ -99,6 +99,8 @@ fun SpiralScreen() {
     }
 }
 
+private const val TEXTURE_PX = 512.0
+
 @Composable
 private fun Stage(depth: Double, size: IntSize) {
     val density = LocalDensity.current
@@ -109,45 +111,54 @@ private fun Stage(depth: Double, size: IntSize) {
         viewportHeight = size.height.toDouble(),
         options = SpiralCameraOptions(fillRatio = 0.62, clockwise = true),
     )
-    val transform = toGraphicsLayerTransform(
-        frame,
-        viewportWidth = size.width.toDouble(),
-        viewportHeight = size.height.toDouble(),
-    )
 
-    // One camera transform over the whole stage, top-left pivot — the squares
-    // sit at raw layout coordinates used as pixels, so offsets and sizes are
-    // converted from px to dp for the layout modifiers.
-    Box(
-        Modifier
-            .fillMaxSize()
-            .graphicsLayer {
-                transformOrigin = TransformOrigin(0f, 0f)
-                translationX = transform.translationX.toFloat()
-                translationY = transform.translationY.toFloat()
-                rotationZ = transform.rotationZ.toFloat()
-                scaleX = transform.scale.toFloat()
-                scaleY = transform.scale.toFloat()
-            },
-    ) {
+    // Per-tile composed transforms, NOT one camera transform over a shared
+    // stage: a stage transform rasterizes the 1-unit deep squares and then
+    // upscales the raster hundreds of times. tileTransform is the library's
+    // answer — each tile renders into a TEXTURE_PX box at a net scale near 1,
+    // so every era paints at native resolution.
+    Box(Modifier.fillMaxSize()) {
         layout.squares.forEachIndexed { index, square ->
             val window = spiralWindow(index, depth = depth, squareCount = COUNT)
             if (!window.hidden) {
+                val tile = tileTransform(
+                    frame,
+                    square = square,
+                    viewportWidth = size.width.toDouble(),
+                    viewportHeight = size.height.toDouble(),
+                    texturePx = TEXTURE_PX,
+                )
                 val hue = 360f * index / COUNT
                 val color = Color.hsv(hue, 0.45f, if (window.focused) 0.95f else 0.75f)
                 with(density) {
                     Box(
                         Modifier
-                            .offset(x = square.x.toFloat().toDp(), y = square.y.toFloat().toDp())
-                            .size(square.size.toFloat().toDp())
-                            .graphicsLayer { alpha = window.opacity.toFloat() }
-                            .background(color, RoundedCornerShape((square.size * 0.02f).toFloat().toDp())),
+                            .size(TEXTURE_PX.toFloat().toDp())
+                            .graphicsLayer {
+                                transformOrigin = TransformOrigin(0f, 0f)
+                                translationX = tile.translateX.toFloat()
+                                translationY = tile.translateY.toFloat()
+                                rotationZ = tile.rotationDeg.toFloat()
+                                scaleX = tile.scale.toFloat()
+                                scaleY = tile.scale.toFloat()
+                                alpha = window.opacity.toFloat()
+                            }
+                            .background(color, RoundedCornerShape((TEXTURE_PX * 0.02).toFloat().toDp())),
                         contentAlignment = Alignment.Center,
                     ) {
+                        // Orientation-lock the label (Compose pivots at the
+                        // centre by default). A configuration detail — pass
+                        // counterRotate = false to let content ride the dial.
+                        val content = contentTransform(frame)
                         Text(
                             text = "${index + 1}",
                             color = Color.Black.copy(alpha = 0.45f),
-                            fontSize = with(density) { (square.size * 0.3f).toFloat().toSp() },
+                            fontSize = with(density) { (TEXTURE_PX * 0.3).toFloat().toSp() },
+                            modifier = Modifier.graphicsLayer {
+                                rotationZ = content.rotationDeg.toFloat()
+                                scaleX = content.scale.toFloat()
+                                scaleY = content.scale.toFloat()
+                            },
                         )
                     }
                 }

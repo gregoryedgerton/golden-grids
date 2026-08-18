@@ -13,6 +13,12 @@ export {
   trailToRotateDeg,
   trailForRotation,
   toNativeTransform,
+  tileTransform,
+  toCssTileTransform,
+  toNativeTileTransform,
+  contentTransform,
+  toCssContentTransform,
+  toNativeContentTransform,
 } from "./utils/spiralCamera";
 export type {
   SpiralCameraOptions,
@@ -21,4 +27,7 @@ export type {
   SpiralWindow,
   SpiralTrail,
   NativeTransform,
+  TileTransform,
+  ContentTransform,
+  ContentTransformOptions,
 } from "./utils/spiralCamera";

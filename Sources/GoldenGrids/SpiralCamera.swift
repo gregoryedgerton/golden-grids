@@ -114,6 +114,93 @@ public func toAffineTransform(
 }
 #endif
 
+/// One tile's complete screen transform, decomposed about a TOP-LEFT pivot —
+/// camera ∘ placement, composed flat per tile. Mirrors `tileTransform`: this
+/// is the raster-clamp fix as an API — a single camera transform over a
+/// shared stage rasterizes 1-unit squares and upscales them hundreds of
+/// times; per tile, each renders into a fixed `texturePx` box at a net scale
+/// near 1.
+public struct TileTransform: Equatable, Sendable {
+    public var translateX: Double
+    public var translateY: Double
+    public var rotationDeg: Double
+    /// Net uniform scale: frame.scale × square.size / texturePx.
+    public var scale: Double
+}
+
+public func tileTransform(
+    _ frame: SpiralCameraFrame,
+    square: Square,
+    viewportWidth: Double,
+    viewportHeight: Double,
+    anchor: CGPoint? = nil,
+    texturePx: Double = 512
+) -> TileTransform {
+    let a = anchor ?? CGPoint(x: viewportWidth / 2, y: viewportHeight / 2)
+    precondition(a.x.isFinite && a.y.isFinite, "Anchor (\(a.x), \(a.y)) must be finite.")
+    precondition(texturePx.isFinite && texturePx > 0, "texturePx (\(texturePx)) must be a positive finite number.")
+    let radians = frame.rotationDeg * .pi / 180
+    let cosR = cos(radians)
+    let sinR = sin(radians)
+    let dx = Double(square.x) - frame.centerX
+    let dy = Double(square.y) - frame.centerY
+    return TileTransform(
+        translateX: Double(a.x) + frame.scale * (cosR * dx - sinR * dy),
+        translateY: Double(a.y) + frame.scale * (sinR * dx + cosR * dy),
+        rotationDeg: frame.rotationDeg,
+        scale: frame.scale * Double(square.size) / texturePx
+    )
+}
+
+#if canImport(CoreGraphics)
+/// The tile transform as a `CGAffineTransform` for a tile view of
+/// `texturePx` square positioned at the stage origin (0 0 transform origin).
+public func toAffineTileTransform(
+    _ frame: SpiralCameraFrame,
+    square: Square,
+    viewportWidth: Double,
+    viewportHeight: Double,
+    anchor: CGPoint? = nil,
+    texturePx: Double = 512
+) -> CGAffineTransform {
+    let tile = tileTransform(
+        frame, square: square,
+        viewportWidth: viewportWidth, viewportHeight: viewportHeight,
+        anchor: anchor, texturePx: texturePx
+    )
+    let radians = tile.rotationDeg * .pi / 180
+    let cosR = cos(radians)
+    let sinR = sin(radians)
+    let s = tile.scale
+    return CGAffineTransform(
+        a: s * cosR, b: s * sinR, c: -s * sinR, d: s * cosR,
+        tx: tile.translateX, ty: tile.translateY
+    )
+}
+#endif
+
+/// The transform that keeps a tile's CONTENT readable while the dial turns —
+/// counter-rotation about the content's own centre, with the |cos|+|sin|
+/// cover swell. Mirrors `contentTransform`, including its two switches:
+/// `counterRotate: false` is the identity (the whole feature is a
+/// configuration detail), and `cover: false` skips the swell for content
+/// that must never scale.
+public struct ContentTransform: Equatable, Sendable {
+    public var rotationDeg: Double
+    public var scale: Double
+}
+
+public func contentTransform(
+    _ frame: SpiralCameraFrame,
+    counterRotate: Bool = true,
+    cover: Bool = true
+) -> ContentTransform {
+    if !counterRotate { return ContentTransform(rotationDeg: 0, scale: 1) }
+    let radians = frame.rotationDeg * .pi / 180
+    let scale = cover ? abs(cos(radians)) + abs(sin(radians)) : 1
+    return ContentTransform(rotationDeg: -frame.rotationDeg, scale: scale)
+}
+
 // MARK: - Trail solve
 
 /// The side of the focused square the spiral's interior trails toward.
@@ -165,8 +252,10 @@ public struct SpiralWindow: Equatable, Sendable {
     public var focused: Bool
 }
 
-/// The legibility window around the focus. Mirrors `spiralWindow`, including
-/// the 3-decimal rounding that `hidden` derives from.
+/// The legibility window around the focus. Mirrors `spiralWindow`: only
+/// OUTWARD squares (larger than the focus) fade and leave; the interior
+/// never fades — squares emerge from the centre small but fully present.
+/// Includes the 3-decimal rounding that `hidden` derives from.
 public func spiralWindow(
     _ index: Int,
     depth: Double,
@@ -185,12 +274,12 @@ public func spiralWindow(
         "Legibility window needs depth (\(depth)) and index (\(index)) inside "
             + "[0, \(squareCount - 1)] for a finite squareCount (\(squareCount))."
     )
-    let delta = abs(focusIndexAt(depth, squareCount) - Double(index))
-    let raw = delta <= hold ? 1 : max(0, (fade - delta) / (fade - hold))
+    let outward = Double(index) - focusIndexAt(depth, squareCount)
+    let raw = outward <= hold ? 1 : max(0, (fade - outward) / (fade - hold))
     // Same rounding the TS does with Number(raw.toFixed(3)): hidden follows
     // the value the consumer will actually render.
     let opacity = (raw * 1000).rounded() / 1000
-    return SpiralWindow(opacity: opacity, hidden: opacity <= 0, focused: delta < 0.5)
+    return SpiralWindow(opacity: opacity, hidden: opacity <= 0, focused: abs(outward) < 0.5)
 }
 
 // MARK: - Eye

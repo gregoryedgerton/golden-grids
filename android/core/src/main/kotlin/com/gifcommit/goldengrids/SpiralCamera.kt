@@ -131,6 +131,68 @@ fun toGraphicsLayerTransform(
     )
 }
 
+/**
+ * One tile's complete screen transform, decomposed about a TOP-LEFT pivot —
+ * camera ∘ placement, composed flat per tile. Mirrors `tileTransform`: the
+ * raster-clamp fix as an API. Apply via `Modifier.graphicsLayer` with
+ * `TransformOrigin(0f, 0f)` on a tile box of `texturePx` square at the stage
+ * origin.
+ */
+data class TileTransform(
+    val translateX: Double,
+    val translateY: Double,
+    val rotationDeg: Double,
+    /** Net uniform scale: frame.scale × square.size / texturePx. */
+    val scale: Double,
+)
+
+fun tileTransform(
+    frame: SpiralCameraFrame,
+    square: Square,
+    viewportWidth: Double,
+    viewportHeight: Double,
+    anchorX: Double = viewportWidth / 2,
+    anchorY: Double = viewportHeight / 2,
+    texturePx: Double = 512.0,
+): TileTransform {
+    require(anchorX.isFinite() && anchorY.isFinite()) { "Anchor ($anchorX, $anchorY) must be finite." }
+    require(texturePx.isFinite() && texturePx > 0) { "texturePx ($texturePx) must be a positive finite number." }
+    val radians = Math.toRadians(frame.rotationDeg)
+    val cosR = cos(radians)
+    val sinR = sin(radians)
+    val dx = square.x - frame.centerX
+    val dy = square.y - frame.centerY
+    return TileTransform(
+        translateX = anchorX + frame.scale * (cosR * dx - sinR * dy),
+        translateY = anchorY + frame.scale * (sinR * dx + cosR * dy),
+        rotationDeg = frame.rotationDeg,
+        scale = frame.scale * square.size / texturePx,
+    )
+}
+
+/**
+ * The transform that keeps a tile's CONTENT readable while the dial turns —
+ * counter-rotation about the content's own centre (Compose's default pivot),
+ * with the |cos|+|sin| cover swell. Mirrors `contentTransform`, including
+ * its two switches: `counterRotate = false` is the identity, `cover = false`
+ * skips the swell.
+ */
+data class ContentTransform(
+    val rotationDeg: Double,
+    val scale: Double,
+)
+
+fun contentTransform(
+    frame: SpiralCameraFrame,
+    counterRotate: Boolean = true,
+    cover: Boolean = true,
+): ContentTransform {
+    if (!counterRotate) return ContentTransform(rotationDeg = 0.0, scale = 1.0)
+    val radians = Math.toRadians(frame.rotationDeg)
+    val scale = if (cover) abs(cos(radians)) + abs(sin(radians)) else 1.0
+    return ContentTransform(rotationDeg = -frame.rotationDeg, scale = scale)
+}
+
 // ---- trail solve ----
 
 /** The side of the focused square the spiral's interior trails toward. */
@@ -180,7 +242,9 @@ data class SpiralWindow(
 )
 
 /**
- * The legibility window around the focus. Mirrors `spiralWindow`, including
+ * The legibility window around the focus. Mirrors `spiralWindow`: only
+ * OUTWARD squares (larger than the focus) fade and leave; the interior never
+ * fades — squares emerge from the centre small but fully present. Includes
  * the 3-decimal rounding that `hidden` derives from.
  */
 fun spiralWindow(
@@ -201,14 +265,14 @@ fun spiralWindow(
         "Legibility window needs depth ($depth) and index ($index) inside " +
             "[0, ${squareCount - 1}] for a finite squareCount ($squareCount)."
     }
-    val delta = abs(focusIndexAt(depth, squareCount) - index)
-    val raw = if (delta <= hold) 1.0 else max(0.0, (fade - delta) / (fade - hold))
+    val outward = index - focusIndexAt(depth, squareCount)
+    val raw = if (outward <= hold) 1.0 else max(0.0, (fade - outward) / (fade - hold))
     // Same rounding the TS does with Number(raw.toFixed(3)) — HALF AWAY FROM
     // ZERO on a midpoint (raw is never negative here, so floor(x + 0.5)).
     // Kotlin's round() ties to even, which disagrees with JS and Swift at
     // exact .0005 boundaries.
     val opacity = floor(raw * 1000 + 0.5) / 1000
-    return SpiralWindow(opacity = opacity, hidden = opacity <= 0, focused = delta < 0.5)
+    return SpiralWindow(opacity = opacity, hidden = opacity <= 0, focused = abs(outward) < 0.5)
 }
 
 // ---- eye ----

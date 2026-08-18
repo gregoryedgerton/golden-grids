@@ -61,11 +61,35 @@ final class SpiralCameraFixtureTests: XCTestCase {
         let input: EyeInput
         let eye: Eye
     }
+    struct TileEntry: Decodable {
+        let translateX: Double
+        let translateY: Double
+        let rotationDeg: Double
+        let scale: Double
+    }
+    struct TileCase: Decodable {
+        let frameName: String
+        let squareIndex: Int
+        let texturePx: Double
+        let tile: TileEntry
+    }
+    struct ContentEntry: Decodable {
+        let rotationDeg: Double
+        let scale: Double
+    }
+    struct ContentCase: Decodable {
+        let frameName: String
+        let counterRotate: Bool
+        let cover: Bool
+        let content: ContentEntry
+    }
     struct Fixture: Decodable {
         let frames: [FrameCase]
         let windows: [WindowCase]
         let trails: [TrailCase]
         let eyes: [EyeCase]
+        let tiles: [TileCase]
+        let contents: [ContentCase]
     }
 
     private let tol = 1e-9
@@ -179,6 +203,62 @@ final class SpiralCameraFixtureTests: XCTestCase {
             let eye = spiralEye(layout)
             XCTAssertEqual(eye.x, entry.eye.x, accuracy: tol, "eye x")
             XCTAssertEqual(eye.y, entry.eye.y, accuracy: tol, "eye y")
+        }
+    }
+
+    func testTilesReproduceEveryFixture() throws {
+        let fixture = try loadFixture()
+        XCTAssertFalse(fixture.tiles.isEmpty, "no tile fixtures loaded")
+        let framesByName = Dictionary(uniqueKeysWithValues: fixture.frames.map { ($0.name, $0) })
+
+        for entry in fixture.tiles {
+            guard let frameCase = framesByName[entry.frameName] else {
+                XCTFail("tile references unknown frame \(entry.frameName)"); continue
+            }
+            let layout = generateGoldenGridLayout(
+                fib(frameCase.input.count),
+                clockwise: frameCase.input.clockwise,
+                rotate: frameCase.input.rotate
+            )
+            let frame = SpiralCameraFrame(
+                scale: frameCase.frame.scale,
+                rotationDeg: frameCase.frame.rotationDeg,
+                centerX: frameCase.frame.centerX,
+                centerY: frameCase.frame.centerY
+            )
+            let tile = tileTransform(
+                frame,
+                square: layout.squares[entry.squareIndex],
+                viewportWidth: frameCase.input.viewportWidth,
+                viewportHeight: frameCase.input.viewportHeight,
+                anchor: CGPoint(x: frameCase.input.anchor.x, y: frameCase.input.anchor.y),
+                texturePx: entry.texturePx
+            )
+            XCTAssertEqual(tile.translateX, entry.tile.translateX, accuracy: tol, "[\(entry.frameName)#\(entry.squareIndex)] tx")
+            XCTAssertEqual(tile.translateY, entry.tile.translateY, accuracy: tol, "[\(entry.frameName)#\(entry.squareIndex)] ty")
+            XCTAssertEqual(tile.rotationDeg, entry.tile.rotationDeg, accuracy: tol, "[\(entry.frameName)#\(entry.squareIndex)] rot")
+            XCTAssertEqual(tile.scale, entry.tile.scale, accuracy: tol, "[\(entry.frameName)#\(entry.squareIndex)] scale")
+        }
+    }
+
+    func testContentsReproduceEveryFixture() throws {
+        let fixture = try loadFixture()
+        XCTAssertFalse(fixture.contents.isEmpty, "no content fixtures loaded")
+        let framesByName = Dictionary(uniqueKeysWithValues: fixture.frames.map { ($0.name, $0) })
+
+        for entry in fixture.contents {
+            guard let frameCase = framesByName[entry.frameName] else {
+                XCTFail("content references unknown frame \(entry.frameName)"); continue
+            }
+            let frame = SpiralCameraFrame(
+                scale: frameCase.frame.scale,
+                rotationDeg: frameCase.frame.rotationDeg,
+                centerX: frameCase.frame.centerX,
+                centerY: frameCase.frame.centerY
+            )
+            let content = contentTransform(frame, counterRotate: entry.counterRotate, cover: entry.cover)
+            XCTAssertEqual(content.rotationDeg, entry.content.rotationDeg, accuracy: tol, "[\(entry.frameName)] content rot")
+            XCTAssertEqual(content.scale, entry.content.scale, accuracy: tol, "[\(entry.frameName)] content scale")
         }
     }
 }

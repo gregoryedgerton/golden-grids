@@ -160,6 +160,168 @@ export function toCssTransform(
   );
 }
 
+/**
+ * One tile's complete screen transform, decomposed about a TOP-LEFT pivot:
+ * camera ∘ placement, composed flat per tile.
+ *
+ * This exists because the obvious alternative — one camera transform on a
+ * shared stage layer — pixelates: the deepest squares are 1 layout unit, the
+ * renderer rasterizes them at that size (where even a hairline border floors
+ * to a device pixel) and then upscales the raster by hundreds of times.
+ * Composed per tile, each tile renders into a fixed `texturePx` box and its
+ * net raster scale stays near 1 at focus, so every era paints at native
+ * resolution. Proven on the production dial, then in the web demo.
+ *
+ * Apply as: position the tile's box (sized `texturePx` square) at the stage
+ * origin with a 0 0 transform origin, then translate/rotate/scale by these
+ * fields — `toCssTileTransform` and the platform ports do exactly that.
+ */
+export interface TileTransform {
+  translateX: number;
+  translateY: number;
+  rotationDeg: number;
+  /** Net uniform scale: frame.scale × square.size / texturePx. */
+  scale: number;
+}
+
+export function tileTransform(
+  frame: SpiralCameraFrame,
+  square: { x: number; y: number; size: number },
+  viewportWidth: number,
+  viewportHeight: number,
+  options: {
+    anchor?: { x: number; y: number };
+    /** Size of the tile's own render box in px. Default 512. */
+    texturePx?: number;
+  } = {}
+): TileTransform {
+  const texturePx = options.texturePx ?? 512;
+  const anchor = options.anchor ?? { x: viewportWidth / 2, y: viewportHeight / 2 };
+  if (!Number.isFinite(anchor.x) || !Number.isFinite(anchor.y)) {
+    throw new Error(`Anchor (${anchor.x}, ${anchor.y}) must be finite.`);
+  }
+  if (!Number.isFinite(texturePx) || texturePx <= 0) {
+    throw new Error(`texturePx (${texturePx}) must be a positive finite number.`);
+  }
+  const radians = (frame.rotationDeg * Math.PI) / 180;
+  const cos = Math.cos(radians);
+  const sin = Math.sin(radians);
+  const dx = square.x - frame.centerX;
+  const dy = square.y - frame.centerY;
+  return {
+    translateX: anchor.x + frame.scale * (cos * dx - sin * dy),
+    translateY: anchor.y + frame.scale * (sin * dx + cos * dy),
+    rotationDeg: frame.rotationDeg,
+    scale: (frame.scale * square.size) / texturePx,
+  };
+}
+
+/**
+ * The tile transform as a CSS string for a tile box of `texturePx` square
+ * positioned at the stage origin with `transform-origin: 0 0`.
+ */
+export function toCssTileTransform(
+  frame: SpiralCameraFrame,
+  square: { x: number; y: number; size: number },
+  viewportWidth: number,
+  viewportHeight: number,
+  options: { anchor?: { x: number; y: number }; texturePx?: number } = {}
+): string {
+  const tile = tileTransform(frame, square, viewportWidth, viewportHeight, options);
+  return (
+    `translate(${tile.translateX}px, ${tile.translateY}px) ` +
+    `rotate(${tile.rotationDeg}deg) scale(${tile.scale})`
+  );
+}
+
+/**
+ * The tile transform as a React Native `transform` array for a tile View of
+ * `texturePx` square — the same centre-pivot correction `toNativeTransform`
+ * applies, per tile.
+ */
+export function toNativeTileTransform(
+  frame: SpiralCameraFrame,
+  square: { x: number; y: number; size: number },
+  viewportWidth: number,
+  viewportHeight: number,
+  options: { anchor?: { x: number; y: number }; texturePx?: number } = {}
+): NativeTransform[] {
+  const texturePx = options.texturePx ?? 512;
+  const tile = tileTransform(frame, square, viewportWidth, viewportHeight, options);
+  const radians = (tile.rotationDeg * Math.PI) / 180;
+  const cos = Math.cos(radians);
+  const sin = Math.sin(radians);
+  const mid = texturePx / 2;
+  // Solve T for a centre pivot: v = T + M + R·s·(p − M) must equal the
+  // top-left mapping v = tile.translate + R·s·p.
+  return [
+    { translateX: tile.translateX + tile.scale * (cos * mid - sin * mid) - mid },
+    { translateY: tile.translateY + tile.scale * (sin * mid + cos * mid) - mid },
+    { rotate: `${tile.rotationDeg}deg` },
+    { scale: tile.scale },
+  ];
+}
+
+/**
+ * The transform that keeps a tile's CONTENT readable while the dial turns:
+ * counter-rotate by exactly the stage rotation about the content's own
+ * centre, so content orbits with its tile but never spins — the
+ * orientation-lock illusion the production dial uses for its artwork.
+ *
+ * `cover` (default true) adds the |cosθ| + |sinθ| swell: mid-turn the
+ * counter-rotated square no longer axis-aligns with its clip box and corners
+ * would show through; the factor is exactly 1 at whole depths (no permanent
+ * crop) and √2 at worst. Turn it off for content that should never scale —
+ * padded text, say — and accept the corners instead.
+ *
+ * `counterRotate` (default true) is the whole feature's switch: false returns
+ * the identity, so a consumer wiring configuration can keep one call site
+ * and let content rotate with the spiral when that is the look they want.
+ *
+ * Apply about the content's CENTRE (transform-origin 50% 50% on the web —
+ * NOT the tile's 0 0 — and the default pivot on RN/Compose), inside a tile
+ * that clips overflow.
+ */
+export interface ContentTransform {
+  rotationDeg: number;
+  scale: number;
+}
+
+export interface ContentTransformOptions {
+  counterRotate?: boolean;
+  cover?: boolean;
+}
+
+export function contentTransform(
+  frame: SpiralCameraFrame,
+  options: ContentTransformOptions = {}
+): ContentTransform {
+  const { counterRotate = true, cover = true } = options;
+  if (!counterRotate) return { rotationDeg: 0, scale: 1 };
+  const radians = (frame.rotationDeg * Math.PI) / 180;
+  const scale = cover ? Math.abs(Math.cos(radians)) + Math.abs(Math.sin(radians)) : 1;
+  return { rotationDeg: -frame.rotationDeg, scale };
+}
+
+/** The content transform as a CSS string (transform-origin 50% 50%). */
+export function toCssContentTransform(
+  frame: SpiralCameraFrame,
+  options: ContentTransformOptions = {}
+): string {
+  const content = contentTransform(frame, options);
+  return `rotate(${content.rotationDeg}deg) scale(${content.scale})`;
+}
+
+/** The content transform as an RN `transform` array (RN pivots at centre
+ * natively, so no translation correction is needed here). */
+export function toNativeContentTransform(
+  frame: SpiralCameraFrame,
+  options: ContentTransformOptions = {}
+): NativeTransform[] {
+  const content = contentTransform(frame, options);
+  return [{ rotate: `${content.rotationDeg}deg` }, { scale: content.scale }];
+}
+
 /** The side of the focused square the spiral's interior trails toward. */
 export type SpiralTrail = 'right' | 'bottom' | 'left' | 'top';
 
@@ -314,6 +476,13 @@ export interface SpiralWindow {
 /**
  * The legibility window around the focus: how present square `index` is at
  * `depth`. One ramp gives you "a few tiles at a time" and the crossfade.
+ *
+ * Deliberately ASYMMETRIC: only OUTWARD squares — larger than the focus,
+ * behind the camera — fade and leave. The interior never fades: those squares
+ * shrink toward the eye naturally, so they enter small and fully present
+ * rather than materializing through a fade-in — and a faded interior renders
+ * the centre of the spiral as a hole. Proven on the production dial, where it
+ * replaced a symmetric window for exactly that reason.
  */
 export function spiralWindow(
   index: number,
@@ -352,11 +521,13 @@ export function spiralWindow(
         `[0, ${squareCount - 1}] for a finite squareCount (${squareCount}).`
     );
   }
-  const delta = Math.abs(focusIndexAt(depth, squareCount) - index);
+  // Signed: positive = outward (larger squares, behind the camera). Only
+  // that side fades; the interior holds full presence at any distance.
+  const outward = index - focusIndexAt(depth, squareCount);
   const raw =
-    delta <= holdSteps
+    outward <= holdSteps
       ? 1
-      : Math.max(0, (fadeSteps - delta) / (fadeSteps - holdSteps));
+      : Math.max(0, (fadeSteps - outward) / (fadeSteps - holdSteps));
   // hidden derives from the ROUNDED value the consumer will actually render:
   // a raw opacity of 0.0004 rounds to 0, and content rendered at 0 must also
   // leave the paint and the tab order.
@@ -364,7 +535,7 @@ export function spiralWindow(
   return {
     opacity,
     hidden: opacity <= 0,
-    focused: delta < 0.5,
+    focused: Math.abs(outward) < 0.5,
   };
 }
 
