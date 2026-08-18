@@ -5,6 +5,7 @@ import {
   spiralEye,
   spiralWindow,
   toCssTransform,
+  toNativeTransform,
   trailForRotation,
   trailToRotateDeg,
 } from '../utils/spiralCamera';
@@ -349,5 +350,89 @@ describe('trailToRotateDeg', () => {
     );
     expect(trailForRotation(90, undefined, 3)).toBe(trailForRotation(90, true, 3));
     expect(measure(3, trailToRotateDeg('right', undefined, 3), true)).toBe('right');
+  });
+});
+
+describe('toNativeTransform', () => {
+  const layout = generateGoldenGridLayout(fib(15), true, 0);
+
+  /** Apply an RN transform array (centre pivot) to a stage point. */
+  const applyNative = (
+    entries: ReturnType<typeof toNativeTransform>,
+    point: { x: number; y: number },
+    stage: { width: number; height: number }
+  ) => {
+    const tx = (entries[0] as { translateX: number }).translateX;
+    const ty = (entries[1] as { translateY: number }).translateY;
+    const deg = parseFloat((entries[2] as { rotate: string }).rotate);
+    const s = (entries[3] as { scale: number }).scale;
+    const rad = (deg * Math.PI) / 180;
+    const mid = { x: stage.width / 2, y: stage.height / 2 };
+    const dx = (point.x - mid.x) * s;
+    const dy = (point.y - mid.y) * s;
+    return {
+      x: mid.x + tx + dx * Math.cos(rad) - dy * Math.sin(rad),
+      y: mid.y + ty + dx * Math.sin(rad) + dy * Math.cos(rad),
+    };
+  };
+
+  it('lands every point exactly where the CSS matrix does', () => {
+    // The RN decomposition pivots about the view centre, the CSS one about
+    // 0 0 — same mapping, different origin. Equality of the MAPPING is the
+    // whole contract: check the focus centre and off-centre corners, at a
+    // whole and a fractional depth, default and explicit anchors.
+    const stage = { width: layout.width, height: layout.height };
+    for (const depth of [0, 3.5]) {
+      for (const anchor of [undefined, { x: 100, y: 640 }] as const) {
+        const frame = spiralCamera(layout, depth, 960, 720, { fillRatio: 1 });
+        const native = toNativeTransform(frame, 960, 720, stage, anchor);
+        const rad = (frame.rotationDeg * Math.PI) / 180;
+        const a = anchor ?? { x: 480, y: 360 };
+        for (const point of [
+          { x: frame.centerX, y: frame.centerY },
+          { x: 0, y: 0 },
+          { x: layout.width, y: layout.height / 3 },
+        ]) {
+          const cssX =
+            a.x +
+            frame.scale *
+              ((point.x - frame.centerX) * Math.cos(rad) -
+                (point.y - frame.centerY) * Math.sin(rad));
+          const cssY =
+            a.y +
+            frame.scale *
+              ((point.x - frame.centerX) * Math.sin(rad) +
+                (point.y - frame.centerY) * Math.cos(rad));
+          const rn = applyNative(native, point, stage);
+          expect(rn.x).toBeCloseTo(cssX, 9);
+          expect(rn.y).toBeCloseTo(cssY, 9);
+        }
+      }
+    }
+  });
+
+  it('emits entries in CSS list order with a degree-string rotation', () => {
+    const frame = spiralCamera(layout, 2, 800, 600);
+    const native = toNativeTransform(frame, 800, 600, {
+      width: layout.width,
+      height: layout.height,
+    });
+    expect(Object.keys(native[0])).toEqual(['translateX']);
+    expect(Object.keys(native[1])).toEqual(['translateY']);
+    expect(native[2]).toEqual({ rotate: `${frame.rotationDeg}deg` });
+    expect(native[3]).toEqual({ scale: frame.scale });
+  });
+
+  it('rejects a non-finite anchor or a degenerate stage', () => {
+    const frame = spiralCamera(layout, 0, 800, 600);
+    expect(() =>
+      toNativeTransform(frame, 800, 600, { width: 0, height: 10 })
+    ).toThrow(/positive finite/);
+    expect(() =>
+      toNativeTransform(frame, 800, 600, { width: NaN, height: 10 })
+    ).toThrow(/positive finite/);
+    expect(() =>
+      toNativeTransform(frame, 800, 600, { width: 10, height: 10 }, { x: NaN, y: 0 })
+    ).toThrow(/must be finite/);
   });
 });

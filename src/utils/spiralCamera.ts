@@ -229,6 +229,72 @@ export function trailForRotation(
   return TRAIL_ORDER[(((rotateDeg / 90 + natural) % 4) + 4) % 4];
 }
 
+/**
+ * One entry of a React Native `transform` array. RN has no CSS string to
+ * hand a matrix to, and its transform origin is fixed at the view's CENTRE —
+ * so the web decomposition (which assumes a 0 0 origin) cannot be reused
+ * directly.
+ */
+export type NativeTransform =
+  | { translateX: number }
+  | { translateY: number }
+  | { rotate: string }
+  | { scale: number };
+
+/**
+ * The frame as a React Native `transform` array for a stage View whose
+ * children sit at layout coordinates used as pixels.
+ *
+ * `stage` is the SIZE OF THAT VIEW in the same units (usually the layout's
+ * own width/height): RN pivots about the view centre and offers no
+ * transform-origin, so the centre must enter the decomposition — the
+ * translation below is exactly the web matrix re-expressed about it.
+ * Entries compose in array order, matching the CSS list `translateX()
+ * translateY() rotate() scale()`.
+ *
+ * `anchor` is the same anchor `toCssTransform` takes: where the focused
+ * square's centre lands, defaulting to the viewport centre.
+ */
+export function toNativeTransform(
+  frame: SpiralCameraFrame,
+  viewportWidth: number,
+  viewportHeight: number,
+  stage: { width: number; height: number },
+  anchor: { x: number; y: number } = {
+    x: viewportWidth / 2,
+    y: viewportHeight / 2,
+  }
+): NativeTransform[] {
+  if (!Number.isFinite(anchor.x) || !Number.isFinite(anchor.y)) {
+    throw new Error(`Anchor (${anchor.x}, ${anchor.y}) must be finite.`);
+  }
+  if (
+    !Number.isFinite(stage.width) ||
+    !Number.isFinite(stage.height) ||
+    stage.width <= 0 ||
+    stage.height <= 0
+  ) {
+    throw new Error(
+      `Stage (${stage.width}x${stage.height}) must have positive finite dimensions.`
+    );
+  }
+  const radians = (frame.rotationDeg * Math.PI) / 180;
+  const cos = Math.cos(radians);
+  const sin = Math.sin(radians);
+  const midX = stage.width / 2;
+  const midY = stage.height / 2;
+  // Solve T so that pivot-about-centre reproduces the web mapping
+  // v = anchor + R·s·(p − center):  T = anchor − mid + R·s·(mid − center).
+  const dx = midX - frame.centerX;
+  const dy = midY - frame.centerY;
+  return [
+    { translateX: anchor.x - midX + frame.scale * (cos * dx - sin * dy) },
+    { translateY: anchor.y - midY + frame.scale * (sin * dx + cos * dy) },
+    { rotate: `${frame.rotationDeg}deg` },
+    { scale: frame.scale },
+  ];
+}
+
 export interface SpiralWindowOptions {
   /** Distance (in depth steps) a tile stays fully opaque. Default 1. */
   holdSteps?: number;
