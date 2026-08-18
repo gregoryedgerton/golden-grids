@@ -245,11 +245,20 @@ const ExampleApp = () => {
 
     const html = labelMode !== 'NOTHING' && baseHtml
         ? (() => {
-              let counter = 0;
+              // Match BOTH previews' numbering (see labelFor in SpiralStage):
+              // with a placeholder the DOM order (placeholder, then visible
+              // ascending) is already the ascending-with-placeholder rule;
+              // without one, the largest square carries 1 — and the export
+              // emits smallest-first, so the sequence counts DOWN.
+              let domIndex = 0;
               const labelStyle = `position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:sans-serif;font-size:clamp(1rem,3cqw,1.5rem);pointer-events:none;color:${outlineColor};`;
               return baseHtml.replace(
                   /(<div class="golden-grid__box[^"]*"[^>]*>)<\/div>/g,
-                  (_match, openTag) => `${openTag}<span style="${labelStyle}">${getLabel(++counter, labelMode)}.</span></div>`
+                  (_match, openTag) => {
+                      const i = domIndex++;
+                      const label = hasPlaceholder ? i + 1 : boxCount - i;
+                      return `${openTag}<span style="${labelStyle}">${getLabel(label, labelMode)}.</span></div>`;
+                  }
               );
           })()
         : baseHtml;

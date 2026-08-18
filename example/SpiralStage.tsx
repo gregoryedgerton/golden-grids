@@ -64,6 +64,9 @@ export const SpiralStage: React.FC<Props> = ({
   // are the flat mode's placeholder region and are not destinations.
   const maxDepth = count - 1 - startIdx;
   const clamped = Math.min(depth, maxDepth);
+  const rendered = layout.squares.map(
+    (_square, index) => !spiralWindow(index, clamped, count).hidden
+  );
   const frame =
     size.width > 0 && size.height > 0
       ? spiralCamera(layout, clamped, size.width, size.height, { clockwise })
@@ -81,18 +84,23 @@ export const SpiralStage: React.FC<Props> = ({
           // their authored screen size regardless of the zoom.
           const netScale = (frame.scale * square.size) / TEXTURE_PX;
           // The flat renderer's shared-edge rule, in layout space: every
-          // square draws right+bottom, and only squares on the layout's own
-          // top/left boundary draw top/left — so a shared edge carries ONE
-          // line and the dial previews the exported outline thickness. The
-          // boundary is layout.minX/minY, NOT zero: rotated layouts keep
-          // negative coordinates (the renderers subtract the minima).
+          // square draws right+bottom, and top/left belong to the neighbour
+          // across the edge — so a shared edge carries ONE line and the dial
+          // previews the exported outline thickness. Unlike the flat grid,
+          // the window can HIDE that owner, so a visible square also paints
+          // its own top/left when any square across the edge is not rendered
+          // (or the edge is the layout boundary — layout.minX/minY, not
+          // zero: rotated layouts keep negative coordinates). Where an edge
+          // is split between a visible and a hidden neighbour this doubles
+          // the visible segment briefly; an unpainted edge on the focused
+          // tile reads far worse.
           const scaled = outline ? scaleOutline(outline, netScale) : undefined;
           const borders = scaled
             ? {
                 borderRight: scaled,
                 borderBottom: scaled,
-                borderTop: square.y === layout.minY ? scaled : undefined,
-                borderLeft: square.x === layout.minX ? scaled : undefined,
+                borderTop: edgeExposed(layout, rendered, index, "top") ? scaled : undefined,
+                borderLeft: edgeExposed(layout, rendered, index, "left") ? scaled : undefined,
               }
             : undefined;
           const transform =
@@ -145,4 +153,38 @@ export function scaleOutline(outline: string, netScale: number): string {
 export function labelFor(index: number, count: number, startIdx: number): number {
   if (startIdx === 0) return count - index;
   return 2 + (index - startIdx);
+}
+
+/**
+ * Whether a square's top/left edge needs its own line: true when any part of
+ * that edge is NOT covered by a rendered neighbour's owning border (the
+ * neighbour across it draws right/bottom). Covers the layout boundary for
+ * free — nothing sits across it.
+ */
+export function edgeExposed(
+  layout: GridLayout,
+  rendered: boolean[],
+  index: number,
+  side: "top" | "left"
+): boolean {
+  const square = layout.squares[index];
+  return layout.squares.some((other, otherIndex) => {
+    if (otherIndex === index || rendered[otherIndex]) return false;
+    return side === "top"
+      ? other.y + other.size === square.y &&
+          other.x < square.x + square.size &&
+          other.x + other.size > square.x
+      : other.x + other.size === square.x &&
+          other.y < square.y + square.size &&
+          other.y + other.size > square.y;
+  }) || !layout.squares.some((other, otherIndex) => {
+    if (otherIndex === index) return false;
+    return side === "top"
+      ? other.y + other.size === square.y &&
+          other.x < square.x + square.size &&
+          other.x + other.size > square.x
+      : other.x + other.size === square.x &&
+          other.y < square.y + square.size &&
+          other.y + other.size > square.y;
+  });
 }

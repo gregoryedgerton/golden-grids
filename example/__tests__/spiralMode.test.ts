@@ -1,7 +1,8 @@
 import { fillsForSpiral, placementForRotation, placementForTrail } from "../spiralMode";
 import { computeRenderModel } from "../../src/utils/renderModel";
 import { hslToCss } from "../../src/utils/colorUtils";
-import { labelFor } from "../SpiralStage";
+import { edgeExposed, labelFor } from "../SpiralStage";
+import { generateGoldenGridLayout } from "../../src/utils/gridGenerator";
 import { placementToRotateDeg } from "../../src/utils/gridGenerator";
 import { trailToRotateDeg } from "../../src/utils/spiralCamera";
 import type { SpiralTrail } from "../../src/utils/spiralCamera";
@@ -90,5 +91,56 @@ describe("fillsForSpiral", () => {
     expect(fillsForSpiral(1, 4, undefined, true, "right", 4, 0)).toEqual([
       undefined, undefined, undefined, undefined,
     ]);
+  });
+
+});
+
+describe("edgeExposed", () => {
+  const fib = [1, 1, 2, 3, 5];
+  const layout = generateGoldenGridLayout(fib, true, 0);
+  const all = layout.squares.map(() => true);
+
+  it("leaves interior top/left edges to their rendered owners", () => {
+    // Every square rendered: only boundary edges need their own line —
+    // matching the flat renderer exactly.
+    for (let index = 0; index < layout.squares.length; index += 1) {
+      const square = layout.squares[index];
+      expect(edgeExposed(layout, all, index, "top")).toBe(
+        !layout.squares.some(
+          (other, i) =>
+            i !== index &&
+            other.y + other.size === square.y &&
+            other.x < square.x + square.size &&
+            other.x + other.size > square.x,
+        ),
+      );
+    }
+  });
+
+  it("paints an edge whose owning neighbour the window hid", () => {
+    // Find a square with a neighbour above, hide that neighbour, and the
+    // edge must become the visible square's own.
+    const index = layout.squares.findIndex((square) =>
+      layout.squares.some(
+        (other, i) =>
+          i !== layout.squares.indexOf(square) &&
+          other.y + other.size === square.y &&
+          other.x < square.x + square.size &&
+          other.x + other.size > square.x,
+      ),
+    );
+    expect(index).toBeGreaterThanOrEqual(0);
+    const square = layout.squares[index];
+    const rendered = layout.squares.map(
+      (other, i) =>
+        !(
+          i !== index &&
+          other.y + other.size === square.y &&
+          other.x < square.x + square.size &&
+          other.x + other.size > square.x
+        ),
+    );
+    expect(edgeExposed(layout, all, index, "top")).toBe(false);
+    expect(edgeExposed(layout, rendered, index, "top")).toBe(true);
   });
 });
