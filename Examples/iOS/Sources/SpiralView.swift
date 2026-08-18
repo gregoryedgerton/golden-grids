@@ -1,13 +1,18 @@
 import SwiftUI
 import GoldenGrids
 
-/// Spiral dial — the depth camera over a fifteen-square layout, the SwiftUI
-/// analogue of the web demo's spiral mode. A slider (or a vertical drag on
-/// the stage) dials depth continuously; the stage applies one
-/// `toAffineTransform` about a top-left origin, and each square fades through
-/// `spiralWindow` so only a few tiles read at a time.
+/// Spiral dial — the depth camera over a NINETY-ONE-square layout, the
+/// SwiftUI analogue of the production dial. Scroll the stage (drag, with
+/// inertia) or use the slider — both drive the same depth, so the readout
+/// and slider track whichever input is moving. Each square fades through
+/// `spiralWindow` and every tile carries its own camera-composed transform.
+///
+/// Ninety-one is the integer ceiling, not a taste choice: the 92-square
+/// layout's bounding box is F(93) ≈ 1.22 × 10¹⁹, past Int64.max — and the
+/// web port walls even earlier, at 78 (Number.MAX_SAFE_INTEGER). Going to a
+/// true 100 needs a float-coordinate layout in the library.
 struct SpiralView: View {
-    private static let count = 15
+    private static let count = 91
     private static let fib: [Int] = {
         var seq = [1, 1]
         while seq.count < count { seq.append(seq[seq.count - 1] + seq[seq.count - 2]) }
@@ -25,6 +30,14 @@ struct SpiralView: View {
 
     @State private var depth: Double = 0
     @State private var dragStartDepth: Double?
+    /// Last two drag samples, for a live-flick velocity (depth/second) —
+    /// only the final <100 ms of the gesture should decide the coast, or a
+    /// slow settle at the end of a fast drag inherits stale speed.
+    @State private var lastSample: (time: Date, depth: Double)?
+    @State private var flickVelocity: Double = 0
+    @State private var coastTask: Task<Void, Never>?
+
+    private static let maxDepth = Double(count - 1)
 
     var body: some View {
         NavigationStack {
@@ -37,17 +50,46 @@ struct SpiralView: View {
                 .gesture(
                     DragGesture()
                         .onChanged { value in
-                            // Drag DOWN to dial deeper, one square per ~180pt.
+                            // A new touch interrupts any coast — grabbing the
+                            // dial stops it, like grabbing a real wheel.
+                            coastTask?.cancel()
                             let start = dragStartDepth ?? depth
                             dragStartDepth = start
-                            let travelled = Double(value.translation.height) / 180
-                            depth = min(max(start + travelled, 0), Double(Self.count - 1))
+                            // Drag DOWN to dial deeper, one square per ~180pt.
+                            let next = min(max(start + Double(value.translation.height) / 180, 0), Self.maxDepth)
+                            let now = Date()
+                            if let sample = lastSample {
+                                let dt = now.timeIntervalSince(sample.time)
+                                // Live flick only: a sample older than 100 ms
+                                // means the finger settled — no inherited speed.
+                                flickVelocity = dt > 0 && dt < 0.1 ? (next - sample.depth) / dt : 0
+                            }
+                            lastSample = (now, next)
+                            depth = next
                         }
-                        .onEnded { _ in dragStartDepth = nil }
+                        .onEnded { _ in
+                            dragStartDepth = nil
+                            lastSample = nil
+                            startCoast(velocity: flickVelocity)
+                            flickVelocity = 0
+                        }
                 )
 
                 VStack(spacing: 8) {
-                    Slider(value: $depth, in: 0...Double(Self.count - 1))
+                    // The slider and the readout are bound to the SAME depth
+                    // the drag writes, so they track a scroll (and its coast)
+                    // exactly; moving the slider grabs the dial and stops any
+                    // coast in flight.
+                    Slider(
+                        value: Binding(
+                            get: { depth },
+                            set: { newValue in
+                                coastTask?.cancel()
+                                depth = newValue
+                            }
+                        ),
+                        in: 0...Self.maxDepth
+                    )
                     Text("depth \(depth, specifier: "%.2f") — square \(Self.count - Int(depth.rounded()))")
                         .font(.caption.monospacedDigit())
                         .foregroundStyle(.secondary)
@@ -57,6 +99,31 @@ struct SpiralView: View {
             .padding(.horizontal, 4)
             .padding(.bottom, 12)
             .navigationTitle("Spiral")
+            .onDisappear { coastTask?.cancel() }
+        }
+    }
+
+    /// Decaying inertia after a flick — deliberately in the DEMO, not the
+    /// library: the camera answers "where is the viewport at depth d", and
+    /// how depth moves (gesture feel, decay rate, interrupts) is the
+    /// consumer's interaction design. Same shape the production dial uses:
+    /// multiply velocity by ~0.94 per frame and stop when it dies or the
+    /// reader grabs the dial.
+    private func startCoast(velocity: Double) {
+        coastTask?.cancel()
+        guard abs(velocity) > 0.05 else { return }
+        var v = velocity
+        coastTask = Task { @MainActor in
+            while !Task.isCancelled && abs(v) > 0.01 {
+                try? await Task.sleep(nanoseconds: 16_000_000) // ~60 fps
+                if Task.isCancelled { return }
+                let next = min(max(depth + v / 60, 0), Self.maxDepth)
+                depth = next
+                // Hitting either end kills the coast rather than pinning
+                // against the bound at full speed.
+                if next == 0 || next == Self.maxDepth { return }
+                v *= 0.94
+            }
         }
     }
 
@@ -94,7 +161,11 @@ struct SpiralView: View {
             ForEach(Self.layout.squares.indices, id: \.self) { index in
                 let square = Self.layout.squares[index]
                 let window = spiralWindow(index, depth: depth, squareCount: Self.count)
-                if !window.hidden {
+                let tileScale = frame.scale * Double(square.size) / Self.texturePx
+                // With ninety-one squares most of the interior is sub-pixel
+                // at any depth — skip tiles that would paint under half a
+                // pixel rather than composite ninety-one views per frame.
+                if !window.hidden && tileScale * Self.texturePx >= 0.5 {
                     tile(index: index, focused: window.focused, frame: frame)
                         .opacity(window.opacity)
                         .transformEffect(
@@ -113,7 +184,7 @@ struct SpiralView: View {
     }
 
     private func tile(index: Int, focused: Bool, frame: SpiralCameraFrame) -> some View {
-        let hue = Double(index) / Double(Self.count)
+        let hue = Double(index).truncatingRemainder(dividingBy: 15) / 15
         let t = Self.texturePx
         // Orientation-lock the label: counter-rotate the content against the
         // dial (about its own centre, the SwiftUI default) so it orbits with
@@ -128,7 +199,7 @@ struct SpiralView: View {
             )
             .overlay(
                 Text("\(index + 1)")
-                    .font(.system(size: t * 0.3, weight: .bold, design: .rounded))
+                    .font(.system(size: t * 0.25, weight: .bold, design: .rounded))
                     .foregroundStyle(.black.opacity(0.45))
                     .rotationEffect(.degrees(content.rotationDeg))
                     .scaleEffect(content.scale)
