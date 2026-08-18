@@ -28,7 +28,7 @@ struct SpiralView: View {
         rotate: trailToRotateDeg(.bottom, clockwise: true, squareCount: count)
     )
 
-    @State private var depth: Double = 0
+    @State private var depth: Double = SpiralView.initialDepth()
     @State private var dragStartDepth: Double?
     /// Last two drag samples, for a live-flick velocity (depth/second) —
     /// only the final <100 ms of the gesture should decide the coast, or a
@@ -38,6 +38,21 @@ struct SpiralView: View {
     @State private var coastTask: Task<Void, Never>?
 
     private static let maxDepth = Double(count - 1)
+
+    /// Screenshot hooks, like GG_TAB in App.swift: GG_DEPTH starts the dial
+    /// at a depth, GG_AUTOSPIN dials from there at N squares/second — both
+    /// demo-only, for recording the README artwork deterministically.
+    private static func initialDepth() -> Double {
+        guard let raw = ProcessInfo.processInfo.environment["GG_DEPTH"],
+              let value = Double(raw) else { return 0 }
+        return min(max(value, 0), maxDepth)
+    }
+
+    private static func autospinRate() -> Double? {
+        guard let raw = ProcessInfo.processInfo.environment["GG_AUTOSPIN"],
+              let value = Double(raw), value > 0 else { return nil }
+        return value
+    }
 
     var body: some View {
         NavigationStack {
@@ -100,6 +115,13 @@ struct SpiralView: View {
             .padding(.bottom, 12)
             .navigationTitle("Spiral")
             .onDisappear { coastTask?.cancel() }
+            .task {
+                guard let rate = Self.autospinRate() else { return }
+                while !Task.isCancelled && depth < Self.maxDepth {
+                    try? await Task.sleep(nanoseconds: 16_000_000)
+                    depth = min(depth + rate / 60, Self.maxDepth)
+                }
+            }
         }
     }
 

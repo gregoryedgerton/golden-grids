@@ -65,13 +65,22 @@ GoldenGrid(from: 1, to: 3, placement: .right) { ordinal in
 }
 ```
 
-**Spiral** — the depth camera rather than the flat grid: fifteen squares laid
-out with the trail solved for a portrait stage (`trailToRotateDeg`), one
-`toAffineTransform` on the stage, `spiralWindow` fading tiles in and out, and
-depth bound to a slider or a vertical drag:
+**Spiral** — the depth camera rather than the flat grid: NINETY-ONE squares
+(the Int64 ceiling — a 92-square layout's bounds overflow) laid out with the
+trail solved for a portrait stage (`trailToRotateDeg`). Every tile carries its
+own `toAffineTileTransform` (never one matrix on a shared stage — that
+rasterizes the deep squares and upscales the mush), labels stay upright via
+`contentTransform`, `spiralWindow` fades only the outward squares, and depth
+is driven by a drag with flick inertia or the slider — both bound to the same
+value, so the readout tracks either:
 
 ```swift
 let frame = spiralCamera(layout, depth: depth, viewportWidth: w, viewportHeight: h,
-                         options: SpiralCameraOptions(fillRatio: 0.62, clockwise: true))
-stage.transformEffect(toAffineTransform(frame, viewportWidth: w, viewportHeight: h))
+                         options: SpiralCameraOptions(fillRatio: 0.85, clockwise: true))
+tileView.transformEffect(toAffineTileTransform(frame, square: square,
+                                               viewportWidth: w, viewportHeight: h))
 ```
+
+Screenshot hooks for this screen: `SIMCTL_CHILD_GG_DEPTH` starts the dial at a
+depth, `SIMCTL_CHILD_GG_AUTOSPIN` dials at N squares/second (how the README
+gif is recorded).

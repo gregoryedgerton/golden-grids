@@ -133,6 +133,10 @@ const eye = spiralEye(layout);
 where every square is a similar size on screen; for a deep dial, use the
 per-tile form above.)
 
+<p align="center">
+  <img src="https://raw.githubusercontent.com/gregoryedgerton/golden-grids/main/docs/ios/spiral.gif" width="240" alt="The spiral dial — ninety-one squares, per-tile transforms, orientation-locked labels" />
+</p>
+
 ### Which way the dial trails
 
 At depth 0 the whole spiral — everything the reader is about to dial through —
@@ -236,6 +240,7 @@ A runnable example app lives in [`Examples/iOS`](Examples/iOS) — five screens:
   <img src="https://raw.githubusercontent.com/gregoryedgerton/golden-grids/main/docs/ios/galleries.gif" width="200" alt="Galleries — sky gradients with sun and moon" />
   <img src="https://raw.githubusercontent.com/gregoryedgerton/golden-grids/main/docs/ios/dashboards.gif" width="200" alt="Dashboards — a bento of stats" />
   <img src="https://raw.githubusercontent.com/gregoryedgerton/golden-grids/main/docs/ios/editorial.gif" width="200" alt="Editorial — a line-less copy grid" />
+  <img src="https://raw.githubusercontent.com/gregoryedgerton/golden-grids/main/docs/ios/spiral.gif" width="200" alt="Spiral — dialing through ninety-one squares with inertia" />
 </p>
 
 ### Android (Jetpack Compose)
@@ -313,6 +318,8 @@ useEffect(() => {
 
 ## How big can I go?
 
-The theoretical maximum is the 78th Fibonacci number: `8,944,394,323,791,464`. That's the largest value that fits within JavaScript's `Number.MAX_SAFE_INTEGER` (`9,007,199,254,740,991`). Beyond this threshold, integer arithmetic loses precision and the sequence values can't be trusted. The library generates all 78 valid stops automatically, giving you index positions 0 through 78 to work with.
+On the web, the maximum is the 78th Fibonacci number: `8,944,394,323,791,464`. That's the largest value that fits within JavaScript's `Number.MAX_SAFE_INTEGER` (`9,007,199,254,740,991`). Beyond this threshold, integer arithmetic loses precision and the sequence values can't be trusted. The library generates all 78 valid stops automatically, giving you index positions 0 through 78 to work with.
+
+The native ports carry further — Swift `Int` and Kotlin `Long` are true 64-bit integers — but the LAYOUT walls before the values do: a 92-square layout's bounding box is F(93) ≈ 1.22 × 10¹⁹, past `Int64.max`, so **91 squares is the native ceiling** (the iOS example's spiral dial ships at exactly that). Dialing past it — a true 100 — needs a float-coordinate layout, tracked in [#31](https://github.com/gregoryedgerton/golden-grids/issues/31).
 
 To be honest it's less about the absolute number and more about controlling the range. After all, a similar range at the start and end of the sequence renders comparably — `8/16` is still `1/2`, same relative proportions. Shorter ranges are easier on the eyes and more practical to use. You can still reach for `5,702,887`, but pair it with the 32nd digit `2,178,309` for a lovely 4-box golden grid dawg.
