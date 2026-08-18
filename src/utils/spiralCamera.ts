@@ -17,7 +17,7 @@ import type { GridLayout } from './gridGenerator';
  * Framework-free by design: the camera answers "where is the viewport at
  * depth d" and nothing else. Scroll binding, styling, and what lives in the
  * squares belong to the consumer. Proven in production on
- * gregoryedgerton.com/timeline before being upstreamed here.
+ * gregoryedgerton.com/projects before being upstreamed here.
  */
 
 export interface SpiralCameraOptions {
@@ -134,7 +134,7 @@ export function spiralCamera(
  * wants the focus flush against an edge passes the point directly (e.g.
  * `{ x: focusSize / 2, y: viewportHeight / 2 }` pins the focused square's
  * left edge to x = 0). Which edge to hug is the consumer's layout decision —
- * proven on gregoryedgerton.com/timeline, where the dial hugs the nav column
+ * proven on gregoryedgerton.com/projects, where the dial hugs the nav column
  * on desktop and the header line on mobile.
  *
  * The stage MUST have `transform-origin: 0 0` — the matrix assumes it. The
@@ -158,6 +158,75 @@ export function toCssTransform(
     `rotate(${frame.rotationDeg}deg) scale(${frame.scale}) ` +
     `translate(${-frame.centerX}px, ${-frame.centerY}px)`
   );
+}
+
+/** The side of the focused square the spiral's interior trails toward. */
+export type SpiralTrail = 'right' | 'bottom' | 'left' | 'top';
+
+const TRAIL_ORDER: readonly SpiralTrail[] = ['right', 'bottom', 'left', 'top'];
+
+/**
+ * The layout rotation that makes the dial trail toward a given side.
+ *
+ * At depth 0 the camera focuses the LAST square and the rest of the spiral —
+ * everything the reader is about to dial through — sits to one side of it.
+ * Which side is not free: each square is placed one quarter-turn on from the
+ * last, so the answer cycles with the square COUNT as well as the layout's
+ * `rotate`. A layout built for fifteen squares trails downward at rotate 180;
+ * the same rotation over five squares trails upward, off the top of the
+ * viewport. A consumer that filters its content is therefore choosing a trail
+ * direction by accident unless it solves for one.
+ *
+ * That solve is this function — the camera-side counterpart to
+ * `placementToRotateDeg`, which answers the same question for the layout's
+ * FIRST square. Pass the count you are about to lay out and the side you want
+ * the composition to grow into; pass the result as `generateGoldenGridLayout`'s
+ * `rotate`.
+ *
+ * Which side actually is the open one — the reader's viewport, the chrome
+ * around it — stays the consumer's decision, exactly as the camera's `anchor`
+ * does.
+ *
+ * `clockwise` defaults to true, matching `generateGoldenGridLayout` and the
+ * camera: an omitted handedness must mean the same thing in all three, or a
+ * JavaScript caller gets a rotation solved for the layout it did not build.
+ */
+export function trailToRotateDeg(
+  trail: SpiralTrail,
+  clockwise: boolean = true,
+  squareCount: number
+): number {
+  const wanted = TRAIL_ORDER.indexOf(trail);
+  if (wanted < 0) {
+    throw new Error(`Unknown trail side: ${trail}.`);
+  }
+  if (!Number.isInteger(squareCount) || squareCount < 2) {
+    throw new Error(`squareCount (${squareCount}) must be an integer of at least 2.`);
+  }
+  // Stepping the count by one turns the trail one quarter — the same
+  // quarter-turn cycle the placement walks — so the rotation has to unwind it.
+  const natural = clockwise ? squareCount : -squareCount;
+  return (((wanted - natural) % 4) + 4) % 4 * 90;
+}
+
+/**
+ * The side the interior trails toward for a layout that already exists — the
+ * inverse of `trailToRotateDeg`, and the direct way to assert a composition
+ * grows the way it was meant to.
+ */
+export function trailForRotation(
+  rotateDeg: number,
+  clockwise: boolean = true,
+  squareCount: number
+): SpiralTrail {
+  if (![0, 90, 180, 270].includes(rotateDeg)) {
+    throw new Error(`Invalid rotation value: ${rotateDeg}. Only 0, 90, 180, and 270 are allowed.`);
+  }
+  if (!Number.isInteger(squareCount) || squareCount < 2) {
+    throw new Error(`squareCount (${squareCount}) must be an integer of at least 2.`);
+  }
+  const natural = clockwise ? squareCount : -squareCount;
+  return TRAIL_ORDER[(((rotateDeg / 90 + natural) % 4) + 4) % 4];
 }
 
 export interface SpiralWindowOptions {
