@@ -3,8 +3,9 @@ import GoldenGrids
 
 /// Spiral dial — the depth camera over up to NINETY-ONE squares, the SwiftUI
 /// analogue of the production dial. Scroll the stage (drag, with inertia);
-/// the segmented filter re-dials the SAME numbers through a smaller spiral —
-/// ALL is the untouched 1–91, ODD/EVEN/PRIME keep only matching numbers.
+/// the segmented sets re-dial through spirals of their own size — ALL is the
+/// untouched 1–91, DUO/TRIO/QUAD are the smallest spirals that exist (two,
+/// three and four squares).
 /// Each square fades through `spiralWindow` and every tile carries its own
 /// camera-composed transform.
 ///
@@ -23,31 +24,19 @@ struct SpiralView: View {
     /// geometry comes from its position in the filtered layout.
     enum NumberFilter: String, CaseIterable, Identifiable {
         case all = "ALL"
-        case odd = "ODD"
-        case even = "EVEN"
-        case prime = "PRIME"
+        case duo = "DUO"
+        case trio = "TRIO"
+        case quad = "QUAD"
         var id: String { rawValue }
 
         var numbers: [Int] {
             switch self {
             case .all: return Array(1...SpiralView.fullCount)
-            case .odd: return Array(1...SpiralView.fullCount).filter { $0 % 2 == 1 }
-            case .even: return Array(1...SpiralView.fullCount).filter { $0 % 2 == 0 }
-            case .prime: return Array(1...SpiralView.fullCount).filter(SpiralView.isPrime)
+            case .duo: return [1, 2]
+            case .trio: return [1, 2, 3]
+            case .quad: return [1, 2, 3, 4]
             }
         }
-    }
-
-    private static func isPrime(_ n: Int) -> Bool {
-        if n < 2 { return false }
-        if n < 4 { return true }
-        if n % 2 == 0 { return false }
-        var d = 3
-        while d * d <= n {
-            if n % d == 0 { return false }
-            d += 2
-        }
-        return true
     }
 
     /// One dial per filter: its numbers, and a spiral laid out for exactly
@@ -103,7 +92,7 @@ struct SpiralView: View {
         return min(max(value, 0), Double(count - 1))
     }
 
-    /// GG_FILTER selects a segment at launch (all/odd/even/prime) — the same
+    /// GG_FILTER selects a segment at launch (all/duo/trio/quad) — the same
     /// deterministic-recording family as GG_TAB/GG_DEPTH/GG_AUTOSPIN.
     private static func initialFilter() -> NumberFilter {
         guard let raw = ProcessInfo.processInfo.environment["GG_FILTER"] else { return .all }
@@ -185,7 +174,7 @@ struct SpiralView: View {
             }
             .padding(.horizontal, 4)
             .padding(.bottom, 12)
-            .navigationTitle("Spiral")
+            .navigationTitle("Interactive Experiences")
             .onDisappear { coastTask?.cancel() }
             .task {
                 guard let rate = Self.autospinRate() else { return }
