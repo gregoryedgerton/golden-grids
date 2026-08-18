@@ -50,7 +50,9 @@ import { GoldenGrid, GoldenBox } from '@gifcommit/golden-grids'
 }
 ```
 
-Exported from the library: `GoldenGrid`, `GoldenGridProps`, `GoldenBox`, `GoldenBoxProps`, `generateGoldenGridLayout` (raw coordinates for non-React use cases), the spiral camera (`spiralCamera`, `toCssTransform`, `spiralWindow`, `spiralEye`, `focusIndexAt` — framework-free depth-dial math in `src/utils/spiralCamera.ts`), and types `Square`, `GridLayout`, `PlacementValue`, `SpiralCameraOptions`, `SpiralCameraFrame`, `SpiralWindowOptions`, `SpiralWindow`.
+Exported from the library: `GoldenGrid`, `GoldenGridProps`, `GoldenBox`, `GoldenBoxProps`, `generateGoldenGridLayout` (raw coordinates for non-React use cases), the spiral camera (`spiralCamera`, `toCssTransform`, `toNativeTransform` — the frame as an RN `transform` array, centre-pivot decomposition — `spiralWindow`, `spiralEye`, `focusIndexAt`, and the trail solves `trailToRotateDeg` / `trailForRotation` — framework-free depth-dial math in `src/utils/spiralCamera.ts`), and types `Square`, `GridLayout`, `PlacementValue`, `SpiralCameraOptions`, `SpiralCameraFrame`, `SpiralWindowOptions`, `SpiralWindow`, `SpiralTrail`, `NativeTransform`. The `/native` entry re-exports all of it.
+
+The camera is ported natively: `Sources/GoldenGrids/SpiralCamera.swift` (with `toAffineTransform` → `CGAffineTransform`) and `android/core/.../SpiralCamera.kt` (with `toGraphicsLayerTransform` for a top-left-pivot `graphicsLayer`). Both are asserted against `src/__fixtures__/spiral-camera.json` — a golden master generated from the TypeScript source of truth by `spiralCamera.fixtures.test.ts` (regenerate with `npm run gen:fixtures`) — within 1e-9, the same contract `render-model.json` carries for the grid.
 
 `GridProvider`, `useGrid`, `InputControlType`, `generateGridHTML`, `FIB_STOPS`, and `getGridRange` are **not exported** — they are demo-only internals.
 

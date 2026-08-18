@@ -8,7 +8,48 @@ Try the [Golden Grid Generator](https://gregoryedgerton.github.io/golden-grids/)
 
 Golden Grids is a responsive layout library driven by the Fibonacci Sequence. Instead of traditional rows and columns you get proportionally aligned boxes that follow the golden ratio. What you do with those boxes is your business, but at least you won't be boring.
 
-## Spiral camera
+## Installation
+
+```bash
+npm install @gifcommit/golden-grids
+```
+
+or visit [![npm](https://img.shields.io/npm/v/@gifcommit/golden-grids)](https://www.npmjs.com/package/@gifcommit/golden-grids) for the latest published package
+
+## Usage
+
+```tsx
+import { GoldenGrid, GoldenBox } from '@gifcommit/golden-grids'
+// CSS is auto-injected — no separate import needed
+
+// Transparent layout slots:
+<GoldenGrid from={1} to={5} />
+
+// With outline:
+<GoldenGrid from={1} to={5} outline="2px solid #000000" />
+
+// With HSL color progression:
+<GoldenGrid from={1} to={5} color="#7f7ec7" />
+
+// Map your content into grid slots — children map largest to smallest:
+<GoldenGrid from={1} to={3}>
+  <GoldenBox><h1>Largest box</h1></GoldenBox>
+  <GoldenBox><p>Second box</p></GoldenBox>
+  <GoldenBox><p>Smallest box</p></GoldenBox>
+</GoldenGrid>
+
+// When from > 1, the skipped range becomes a placeholder slot — declare it last:
+<GoldenGrid from={3} to={5}>
+  <GoldenBox><h1>Largest visible box</h1></GoldenBox>
+  <GoldenBox><p>Second visible box</p></GoldenBox>
+  <GoldenBox><p>Smallest visible box</p></GoldenBox>
+  <GoldenBox><p>Skipped-range area</p></GoldenBox>
+</GoldenGrid>
+```
+
+Children map in priority order — first child fills the largest box, last child fills the smallest. When `from > 1`, the final `<GoldenBox>` fills the skipped-range placeholder. Extra `<GoldenBox>` children beyond the slot count are silently ignored, so you can always declare the full set and let `from`/`to` control what renders.
+
+## Spiral dial
 
 `spiralCamera` turns a layout into a dialable view: give it a depth and it
 returns the transform that fills the viewport with one square — the focus —
@@ -89,47 +130,6 @@ trailForRotation(180, true, 5);  // 'top' — same rotation, different count
 Proven in production on [gregoryedgerton.com/projects](https://www.gregoryedgerton.com/projects/)
 before being upstreamed.
 
-## Installation
-
-```bash
-npm install @gifcommit/golden-grids
-```
-
-or visit [![npm](https://img.shields.io/npm/v/@gifcommit/golden-grids)](https://www.npmjs.com/package/@gifcommit/golden-grids) for the latest published package
-
-## Usage
-
-```tsx
-import { GoldenGrid, GoldenBox } from '@gifcommit/golden-grids'
-// CSS is auto-injected — no separate import needed
-
-// Transparent layout slots:
-<GoldenGrid from={1} to={5} />
-
-// With outline:
-<GoldenGrid from={1} to={5} outline="2px solid #000000" />
-
-// With HSL color progression:
-<GoldenGrid from={1} to={5} color="#7f7ec7" />
-
-// Map your content into grid slots — children map largest to smallest:
-<GoldenGrid from={1} to={3}>
-  <GoldenBox><h1>Largest box</h1></GoldenBox>
-  <GoldenBox><p>Second box</p></GoldenBox>
-  <GoldenBox><p>Smallest box</p></GoldenBox>
-</GoldenGrid>
-
-// When from > 1, the skipped range becomes a placeholder slot — declare it last:
-<GoldenGrid from={3} to={5}>
-  <GoldenBox><h1>Largest visible box</h1></GoldenBox>
-  <GoldenBox><p>Second visible box</p></GoldenBox>
-  <GoldenBox><p>Smallest visible box</p></GoldenBox>
-  <GoldenBox><p>Skipped-range area</p></GoldenBox>
-</GoldenGrid>
-```
-
-Children map in priority order — first child fills the largest box, last child fills the smallest. When `from > 1`, the final `<GoldenBox>` fills the skipped-range placeholder. Extra `<GoldenBox>` children beyond the slot count are silently ignored, so you can always declare the full set and let `from`/`to` control what renders.
-
 ## Cross-platform
 
 The grid is computed from one shared, framework-agnostic model, so the same component renders four ways:
@@ -143,6 +143,8 @@ The grid is computed from one shared, framework-agnostic model, so the same comp
 
 The package ships an interactive playground — the **Golden Grid Generator** — where you tune the grid through a mad-lib of dials and toggles (range, colour, outline, spiral direction, labels) and export the result. [Try it live.](https://gregoryedgerton.github.io/golden-grids/)
 
+The generator also has a **spiral dial mode**: flip the grid from "A FLAT GRID" to "A SPIRAL DIAL" and a continuous depth slider dials the same layout through `spiralCamera`. In dial mode the placement control gives way to a **trailing side** — the rotation is solved per square count with `trailToRotateDeg` (see [Which way the dial trails](#which-way-the-dial-trails)) — and export derives the equivalent `placement`, so the exported flat grid carries exactly the rotation the dial showed.
+
 <p align="center">
   <img src="https://raw.githubusercontent.com/gregoryedgerton/golden-grids/main/docs/web/golden-grids.gif" width="600" alt="The Golden Grid Generator — tuning range, colour, outline and labels live" />
 </p>
@@ -155,6 +157,16 @@ Same API, rendered with native `<View>`s — just import from the `/native` entr
 import { GoldenGrid, GoldenBox } from '@gifcommit/golden-grids/native'
 
 <GoldenGrid from={1} to={5} color="#7f7ec7" />
+```
+
+The spiral camera ships from the `/native` entry too, plus `toNativeTransform` — the frame as an RN `transform` array, because RN pivots about the view centre and offers no transform origin, so the web decomposition can't be reused directly:
+
+```tsx
+import { generateGoldenGridLayout, spiralCamera, toNativeTransform } from '@gifcommit/golden-grids/native'
+
+const frame = spiralCamera(layout, depth, width, height)
+// stage is the View's own size in layout units (usually layout.width/height)
+<View style={{ transform: toNativeTransform(frame, width, height, { width: layout.width, height: layout.height }) }} />
 ```
 
 ### iOS (SwiftUI)
@@ -175,7 +187,9 @@ GoldenGrid(from: 1, to: 5, color: "#7f7ec7") { ordinal in
 }
 ```
 
-A runnable example app lives in [`Examples/iOS`](Examples/iOS) — four screens built entirely with `GoldenGrid`: a swipeable featured carousel, a sky gallery, a stats dashboard, and a line-less editorial layout.
+The camera is ported to Swift — `spiralCamera`, `spiralWindow`, `spiralEye`, the trail solves, and `toAffineTransform`, which hands back a `CGAffineTransform` for a top-left-origin stage (the analogue of `toCssTransform`). All of it is asserted against the same `spiral-camera.json` golden master as the web within 1e-9.
+
+A runnable example app lives in [`Examples/iOS`](Examples/iOS) — five screens: a swipeable featured carousel, a sky gallery, a stats dashboard, a line-less editorial layout, and a **Spiral** depth dial (drag or slide to dial through fifteen squares).
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/gregoryedgerton/golden-grids/main/docs/ios/featured.gif" width="200" alt="Featured — a swipeable card carousel" />
@@ -196,7 +210,9 @@ GoldenGrid(from = 1, to = 5, color = "#7f7ec7", modifier = Modifier.fillMaxWidth
 }
 ```
 
-A runnable example app lives in [`android/example`](android/example) — the same four screens as the iOS example, rebuilt in Compose: a swipeable featured carousel, a sky gallery, a stats dashboard, and a text-first editorial layout. The renderer is verified against the same `render-model.json` golden master as every other platform. See [`android/README.md`](android/README.md) to build and run it.
+The camera is ported to Kotlin too — the same functions, plus `toGraphicsLayerTransform`, a decomposition suited to `Modifier.graphicsLayer` with a `TransformOrigin(0f, 0f)` pivot — and asserted against the shared `spiral-camera.json` golden master within 1e-9.
+
+A runnable example app lives in [`android/example`](android/example) — the same five screens as the iOS example, rebuilt in Compose, including the **Spiral** depth dial. The renderer is verified against the same `render-model.json` golden master as every other platform. See [`android/README.md`](android/README.md) to build and run it.
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/gregoryedgerton/golden-grids/main/docs/android/featured.gif" width="200" alt="Featured — a swipeable card carousel" />

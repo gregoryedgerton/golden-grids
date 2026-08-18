@@ -12,6 +12,7 @@ export {
   focusIndexAt,
   trailToRotateDeg,
   trailForRotation,
+  toNativeTransform,
 } from "./utils/spiralCamera";
 export type {
   SpiralCameraOptions,
@@ -19,4 +20,5 @@ export type {
   SpiralWindowOptions,
   SpiralWindow,
   SpiralTrail,
+  NativeTransform,
 } from "./utils/spiralCamera";

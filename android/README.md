@@ -65,10 +65,13 @@ Built and verified with Gradle 8.11.1, AGP 8.7.3, Kotlin 2.1.0, Compose BOM 2024
 
 ## Example screens
 
-`:example` mirrors `Examples/iOS` — four screens, icons-only bottom navigation, each
-built entirely with `GoldenGrid`: a swipeable **Featured** carousel, a sky **Gallery**,
+`:example` mirrors `Examples/iOS` — five screens, icons-only bottom navigation, each
+built with the library: a swipeable **Featured** carousel, a sky **Gallery**,
 a stats **Dashboard** (count-up figures, a settling plot, a dusk→night gradient, gliding
-selectors), and a text-first **Editorial** article. Each screen builds itself in on appear.
+selectors), a text-first **Editorial** article, and a **Spiral** depth dial (the
+camera over a fifteen-square layout — drag or slide to dial, one
+`toGraphicsLayerTransform` on the stage, `spiralWindow` fading the tiles). Each
+screen builds itself in on appear.
 
 <p align="center">
   <img src="../docs/android/featured.gif" width="200" alt="Featured — a swipeable card carousel" />
