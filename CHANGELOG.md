@@ -1,3 +1,10 @@
+# [4.6.0](https://github.com/gregoryedgerton/golden-grids/compare/v4.5.1...v4.6.0) (2026-08-18)
+
+
+### Features
+
+* per-tile transforms and an asymmetric window, library-side ([#30](https://github.com/gregoryedgerton/golden-grids/issues/30)) ([e683a57](https://github.com/gregoryedgerton/golden-grids/commit/e683a57a221d973b7cb39d95efb2d8f23c496ebb))
+
 ## [4.5.1](https://github.com/gregoryedgerton/golden-grids/compare/v4.5.0...v4.5.1) (2026-08-18)
 
 
