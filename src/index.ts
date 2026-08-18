@@ -10,10 +10,13 @@ export {
   spiralWindow,
   spiralEye,
   focusIndexAt,
+  trailToRotateDeg,
+  trailForRotation,
 } from "./utils/spiralCamera";
 export type {
   SpiralCameraOptions,
   SpiralCameraFrame,
   SpiralWindowOptions,
   SpiralWindow,
+  SpiralTrail,
 } from "./utils/spiralCamera";

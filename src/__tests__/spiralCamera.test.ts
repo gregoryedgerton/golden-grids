@@ -5,7 +5,10 @@ import {
   spiralEye,
   spiralWindow,
   toCssTransform,
+  trailForRotation,
+  trailToRotateDeg,
 } from '../utils/spiralCamera';
+import type { SpiralTrail } from '../utils/spiralCamera';
 
 const fib = (n: number): number[] => {
   const seq = [1, 1];
@@ -248,5 +251,91 @@ describe('spiralEye', () => {
     };
     expect(Math.abs(relA.x - relB.x)).toBeLessThan(anchorA.size);
     expect(Math.abs(relA.y - relB.y)).toBeLessThan(anchorA.size);
+  });
+});
+
+describe('trailToRotateDeg', () => {
+  const SIDES: SpiralTrail[] = ['right', 'bottom', 'left', 'top'];
+
+  /**
+   * Measure where the interior actually lands: the depth-0 frame with the
+   * focused square filling a square viewport, so anything past the focus
+   * half-size is overhang, and the largest overhang is the trail.
+   */
+  const measure = (count: number, rotate: number, clockwise: boolean): SpiralTrail => {
+    const layout = generateGoldenGridLayout(fib(count), clockwise, rotate);
+    const frame = spiralCamera(layout, 0, 1000, 1000, { fillRatio: 1, clockwise });
+    let minX = Infinity;
+    let maxX = -Infinity;
+    let minY = Infinity;
+    let maxY = -Infinity;
+    for (const square of layout.squares) {
+      for (const [cx, cy] of [
+        [square.x, square.y],
+        [square.x + square.size, square.y],
+        [square.x, square.y + square.size],
+        [square.x + square.size, square.y + square.size],
+      ]) {
+        const x = (cx - frame.centerX) * frame.scale;
+        const y = (cy - frame.centerY) * frame.scale;
+        minX = Math.min(minX, x);
+        maxX = Math.max(maxX, x);
+        minY = Math.min(minY, y);
+        maxY = Math.max(maxY, y);
+      }
+    }
+    const half = 500;
+    const overhang: Record<SpiralTrail, number> = {
+      right: maxX - half,
+      bottom: maxY - half,
+      left: -half - minX,
+      top: -half - minY,
+    };
+    return SIDES.reduce((best, side) =>
+      overhang[side] > overhang[best] ? side : best
+    );
+  };
+
+  it('trails where it says it will, for every count and both handednesses', () => {
+    for (let count = 2; count <= 20; count += 1) {
+      for (const side of SIDES) {
+        for (const clockwise of [true, false]) {
+          const rotate = trailToRotateDeg(side, clockwise, count);
+          expect([0, 90, 180, 270]).toContain(rotate);
+          expect(measure(count, rotate, clockwise)).toBe(side);
+        }
+      }
+    }
+  });
+
+  it('answers differently for different counts — the reason it exists', () => {
+    // Fifteen squares trail downward at 180; five squares at the same
+    // rotation trail upward, off the top. A filtered consumer must re-solve.
+    expect(trailForRotation(180, true, 15)).toBe('bottom');
+    expect(trailForRotation(180, true, 5)).toBe('top');
+    expect(trailToRotateDeg('bottom', true, 15)).toBe(180);
+    expect(trailToRotateDeg('bottom', true, 5)).toBe(0);
+  });
+
+  it('is the inverse of trailForRotation', () => {
+    for (let count = 2; count <= 12; count += 1) {
+      for (const rotate of [0, 90, 180, 270]) {
+        for (const clockwise of [true, false]) {
+          const side = trailForRotation(rotate, clockwise, count);
+          expect(trailToRotateDeg(side, clockwise, count)).toBe(rotate);
+        }
+      }
+    }
+  });
+
+  it('rejects an unknown side or an unusable count', () => {
+    expect(() => trailToRotateDeg('sideways' as SpiralTrail, true, 8)).toThrow(/Unknown trail side/);
+    expect(() => trailToRotateDeg('right', true, 1)).toThrow(/at least 2/);
+    expect(() => trailToRotateDeg('right', true, 4.5)).toThrow(/at least 2/);
+  });
+
+  it('rejects a rotation the layout could not have been built with', () => {
+    expect(() => trailForRotation(45, true, 8)).toThrow(/Invalid rotation/);
+    expect(() => trailForRotation(90, true, 0)).toThrow(/at least 2/);
   });
 });

@@ -60,7 +60,29 @@ const { opacity, hidden, focused } = spiralWindow(k, depth, layout.squares.lengt
 const eye = spiralEye(layout);
 ```
 
-Proven in production on [gregoryedgerton.com/timeline](https://www.gregoryedgerton.com/timeline/)
+### Which way the dial trails
+
+At depth 0 the whole spiral — everything the reader is about to dial through —
+sits to ONE side of the focused square, and which side cycles with the square
+count as well as `rotate`: fifteen squares at `rotate: 180` trail downward,
+five squares at the same rotation trail *upward*, off the top. Anything that
+filters its content is picking a direction by accident unless it solves for
+one. `trailToRotateDeg` is that solve, and `trailForRotation` reads it back.
+
+```ts
+import { trailToRotateDeg, trailForRotation } from '@gifcommit/golden-grids';
+
+// Grow into the open space: to the right of a side column, below a stacked
+// header. Which side is open is your layout's decision, like the anchor.
+const trail = innerWidth >= innerHeight ? 'right' : 'bottom';
+const rotate = trailToRotateDeg(trail, /* clockwise */ true, squares.length);
+const layout = generateGoldenGridLayout(fib, true, rotate);
+
+trailForRotation(180, true, 15); // 'bottom'
+trailForRotation(180, true, 5);  // 'top' — same rotation, different count
+```
+
+Proven in production on [gregoryedgerton.com/projects](https://www.gregoryedgerton.com/projects/)
 before being upstreamed.
 
 ## Installation
