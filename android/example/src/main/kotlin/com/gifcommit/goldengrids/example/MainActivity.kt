@@ -43,7 +43,7 @@ class MainActivity : ComponentActivity() {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun AppShell() {
-    val titles = listOf("Featured", "Galleries", "Dashboards", "Editorial", "Spiral")
+    val titles = listOf("Featured", "Galleries", "Dashboards", "Editorial", "Interactive Experiences")
     val icons = listOf(Icons.Filled.Star, Icons.Filled.PhotoLibrary, Icons.Filled.GridView, Icons.Filled.Article, Icons.Filled.Cyclone)
     var selected by rememberSaveable { mutableIntStateOf(0) }
 

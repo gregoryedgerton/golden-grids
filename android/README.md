@@ -68,10 +68,12 @@ Built and verified with Gradle 8.11.1, AGP 8.7.3, Kotlin 2.1.0, Compose BOM 2024
 `:example` mirrors `Examples/iOS` — five screens, icons-only bottom navigation, each
 built with the library: a swipeable **Featured** carousel, a sky **Gallery**,
 a stats **Dashboard** (count-up figures, a settling plot, a dusk→night gradient, gliding
-selectors), a text-first **Editorial** article, and a **Spiral** depth dial (the
-camera over a fifteen-square layout — drag or slide to dial, one
-`toGraphicsLayerTransform` on the stage, `spiralWindow` fading the tiles). Each
-screen builds itself in on appear.
+selectors), a text-first **Editorial** article, and **Interactive Experiences** — the
+depth dial over up to ninety-one squares (the Long ceiling): drag with flick
+inertia, DUO/TRIO/QUAD quick sets each laid out and trail-solved for exactly
+their count, per-tile `tileTransform` (never one matrix on a shared stage),
+labels orientation-locked via `contentTransform`, and only outward squares
+fading through `spiralWindow`. Each screen builds itself in on appear.
 
 <p align="center">
   <img src="../docs/android/featured.gif" width="200" alt="Featured — a swipeable card carousel" />
