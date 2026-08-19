@@ -72,10 +72,11 @@ own `toAffineTileTransform` (never one matrix on a shared stage — that
 rasterizes the deep squares and upscales the mush), labels stay upright via
 `contentTransform`, `spiralWindow` fades only the outward squares, and depth
 is driven by a drag with long flick inertia (0.97/frame decay — the ride is
-the demo). In the slider's old seat: segmented NUMBER FILTERS — ALL (1–91),
-ODD, EVEN, PRIME — each re-dialing the same numbers through a spiral laid out
-for exactly that count (layout and trail re-solved per count; the number is
-the tile's content, its geometry comes from its filtered position):
+the demo). In the slider's old seat: segmented SETS — ALL (1–91), DUO (1, 2),
+TRIO (1, 2, 3), QUAD (1, 2, 3, 4) — each dialing a spiral laid out for
+exactly that count (layout and trail re-solved per count: DUO/TRIO/QUAD are
+the smallest spirals that exist, ALL is the Int64 ceiling; the number is the
+tile's content, its geometry comes from its position):
 
 ```swift
 let frame = spiralCamera(layout, depth: depth, viewportWidth: w, viewportHeight: h,
@@ -85,6 +86,6 @@ tileView.transformEffect(toAffineTileTransform(frame, square: square,
 ```
 
 Screenshot hooks for this screen: `SIMCTL_CHILD_GG_DEPTH` starts the dial at
-a depth, `SIMCTL_CHILD_GG_FILTER` selects a segment (all/odd/even/prime), and
+a depth, `SIMCTL_CHILD_GG_FILTER` selects a segment (all/duo/trio/quad), and
 `SIMCTL_CHILD_GG_AUTOSPIN` dials at N squares/second (how the README gif is
 recorded).
