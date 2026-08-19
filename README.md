@@ -259,13 +259,14 @@ GoldenGrid(from = 1, to = 5, color = "#7f7ec7", modifier = Modifier.fillMaxWidth
 
 The camera is ported to Kotlin too — the same functions, plus `toGraphicsLayerTransform`, a decomposition suited to `Modifier.graphicsLayer` with a `TransformOrigin(0f, 0f)` pivot — and asserted against the shared `spiral-camera.json` golden master within 1e-9.
 
-A runnable example app lives in [`android/example`](android/example) — the same five screens as the iOS example, rebuilt in Compose, including the **Spiral** depth dial. The renderer is verified against the same `render-model.json` golden master as every other platform. See [`android/README.md`](android/README.md) to build and run it.
+A runnable example app lives in [`android/example`](android/example) — the same five screens as the iOS example, rebuilt in Compose, including the **Interactive Experiences** depth dial (91 squares, flick inertia, DUO/TRIO/QUAD quick sets — full parity with the iOS screen). The renderer is verified against the same `render-model.json` golden master as every other platform. See [`android/README.md`](android/README.md) to build and run it.
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/gregoryedgerton/golden-grids/main/docs/android/featured.gif" width="200" alt="Featured — a swipeable card carousel" />
   <img src="https://raw.githubusercontent.com/gregoryedgerton/golden-grids/main/docs/android/galleries.gif" width="200" alt="Galleries — sky gradients with sun and moon" />
   <img src="https://raw.githubusercontent.com/gregoryedgerton/golden-grids/main/docs/android/dashboards.gif" width="200" alt="Dashboards — a bento of stats" />
   <img src="https://raw.githubusercontent.com/gregoryedgerton/golden-grids/main/docs/android/editorial.gif" width="200" alt="Editorial — a text-first copy grid" />
+  <img src="https://raw.githubusercontent.com/gregoryedgerton/golden-grids/main/docs/android/spiral.gif" width="200" alt="Interactive Experiences — dialing through ninety-one squares with inertia and quick sets" />
 </p>
 
 ## Configuration
