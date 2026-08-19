@@ -1,3 +1,10 @@
+# [4.9.0](https://github.com/gregoryedgerton/golden-grids/compare/v4.8.0...v4.9.0) (2026-08-19)
+
+
+### Features
+
+* **android:** Interactive Experiences parity for the Spiral screen ([#35](https://github.com/gregoryedgerton/golden-grids/issues/35)) ([4f84acf](https://github.com/gregoryedgerton/golden-grids/commit/4f84acf818ead6306fe41528d8aeca7e10a55d10))
+
 # [4.8.0](https://github.com/gregoryedgerton/golden-grids/compare/v4.7.0...v4.8.0) (2026-08-19)
 
 
