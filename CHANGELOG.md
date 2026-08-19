@@ -1,3 +1,10 @@
+# [4.8.0](https://github.com/gregoryedgerton/golden-grids/compare/v4.7.0...v4.8.0) (2026-08-19)
+
+
+### Features
+
+* **demo:** Interactive Experiences title, DUO/TRIO/QUAD sets ([#34](https://github.com/gregoryedgerton/golden-grids/issues/34)) ([fe14e18](https://github.com/gregoryedgerton/golden-grids/commit/fe14e182d1da19a6d9782799592e78e5b0663e33)), closes [#32](https://github.com/gregoryedgerton/golden-grids/issues/32)
+
 # [4.7.0](https://github.com/gregoryedgerton/golden-grids/compare/v4.6.0...v4.7.0) (2026-08-18)
 
 
