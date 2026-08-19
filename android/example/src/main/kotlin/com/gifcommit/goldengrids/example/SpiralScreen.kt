@@ -150,7 +150,7 @@ fun SpiralScreen() {
                         var lastTime = down.uptimeMillis
                         var lastDepth = depth
                         var flick = 0f
-                        verticalDrag(down.id) { change ->
+                        val completed = verticalDrag(down.id) { change ->
                             val next = (depth + change.positionChange().y / perSquare)
                                 .coerceIn(0f, maxDepth)
                             val dt = (change.uptimeMillis - lastTime) / 1000f
@@ -160,10 +160,13 @@ fun SpiralScreen() {
                             depth = next
                             change.consume()
                         }
-                        // verticalDrag returns on lift; lastTime holds the
-                        // final sample.
+                        // Coast only after a NORMAL lift: a cancelled drag
+                        // (another detector consumed the gesture) must not
+                        // keep moving the dial. And only a lift within the
+                        // live-flick window keeps its speed — a settled
+                        // finger must not coast.
                         val live = (SystemClock.uptimeMillis() - lastTime) < 100
-                        startCoast(if (live) flick else 0f)
+                        startCoast(if (completed && live) flick else 0f)
                     }
                 },
         ) {
@@ -191,7 +194,10 @@ fun SpiralScreen() {
         Text(
             text = "depth %.2f — square %d".format(
                 shown,
-                dial.numbers[dial.count - 1 - shown.toInt().coerceIn(0, dial.count - 1)],
+                // ROUND, not floor: the focused square flips halfway through
+                // a step (spiralWindow's focused predicate), and the caption
+                // must name the tile the reader sees focused.
+                dial.numbers[dial.count - 1 - Math.round(shown).coerceIn(0, dial.count - 1)],
             ),
             style = MaterialTheme.typography.labelMedium,
             modifier = Modifier.align(Alignment.CenterHorizontally).padding(top = 8.dp),
