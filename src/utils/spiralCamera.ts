@@ -481,9 +481,12 @@ export interface SpiralWindowOptions {
    * straight line — `Math.pow(x, 1)` is `x`, so the default window is
    * unchanged to the bit.
    *
-   * Above 1 the tile holds its presence and then drops away late; below 1 it
-   * drops early and lingers near-transparent. Ignored when `fade` is false,
-   * where there is no ramp to shape.
+   * The exponent applies to the tile's REMAINING presence, which falls from 1
+   * to 0 across the ramp — so it reads like gamma, not like a CSS easing
+   * keyword. Above 1 the tile gives up its presence early and then creeps to
+   * zero: a trail that thins fast and lingers faint. Below 1 it holds near
+   * full presence and drops away only near the end: a solid trail with a late
+   * cut-off. Ignored when `fade` is false, where there is no ramp to shape.
    */
   ease?: number;
 }
@@ -533,7 +536,8 @@ function assertWindow(options: SpiralWindowOptions): Required<SpiralWindowOption
  *
  * The fade itself is a configuration detail — `{ fade: false }` keeps the cull
  * but drops the ghosting, and `ease` bends the ramp between `holdSteps` and
- * `fadeSteps` without moving either end.
+ * `fadeSteps` without moving either end (above 1 fades early, below 1 fades
+ * late — it is an exponent on the REMAINING presence).
  */
 export function spiralWindow(
   index: number,

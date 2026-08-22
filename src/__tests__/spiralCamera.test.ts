@@ -284,10 +284,27 @@ describe('spiralWindow', () => {
     // linear window reads 0.667.
     const linear = spiralWindow(12, 3.5, 15).opacity;
     expect(linear).toBeCloseTo(2 / 3, 3);
-    // Above 1: holds presence, then drops away late.
+    // The exponent applies to the REMAINING presence, which falls from 1 to
+    // 0 — so it reads like gamma, and the direction is the opposite of what
+    // a CSS easing keyword would suggest. Above 1 the tile is FAINTER than
+    // linear at the midpoint: it gave up its presence early.
     expect(spiralWindow(12, 3.5, 15, { ease: 3 }).opacity).toBeLessThan(linear);
-    // Below 1: drops early, then lingers near-transparent.
+    expect(spiralWindow(12, 3.5, 15, { ease: 3 }).opacity).toBeCloseTo((2 / 3) ** 3, 3);
+    // Below 1 it is BRIGHTER: it holds, and cuts away late.
     expect(spiralWindow(12, 3.5, 15, { ease: 0.5 }).opacity).toBeGreaterThan(linear);
+    expect(spiralWindow(12, 3.5, 15, { ease: 0.5 }).opacity).toBeCloseTo(
+      Math.sqrt(2 / 3),
+      3
+    );
+    // Monotone in the exponent across the whole ramp, not just its midpoint —
+    // the property the documented direction actually claims.
+    for (const depth of [3.2, 3.5, 3.9, 4.3]) {
+      const soft = spiralWindow(12, depth, 15, { ease: 0.5 }).opacity;
+      const even = spiralWindow(12, depth, 15).opacity;
+      const sharp = spiralWindow(12, depth, 15, { ease: 3 }).opacity;
+      expect(soft).toBeGreaterThanOrEqual(even);
+      expect(even).toBeGreaterThanOrEqual(sharp);
+    }
     // Both ends are fixed points of pow — the ease only shapes what is
     // between them, so hold and fade still mean exactly what they say.
     for (const ease of [0.5, 3]) {

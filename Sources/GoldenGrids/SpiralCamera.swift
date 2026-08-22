@@ -247,8 +247,10 @@ public struct SpiralWindowOptions: Sendable {
     /// so `holdSteps` becomes the cull distance.
     public var fade: Bool
     /// Shape of the ramp between `holdSteps` and `fadeSteps`. 1 is the
-    /// straight line; above 1 holds then drops late, below 1 drops early
-    /// and lingers. Ignored when `fade` is false.
+    /// straight line. The exponent applies to the tile's REMAINING presence,
+    /// which falls from 1 to 0 — so it reads like gamma: above 1 fades early
+    /// and lingers faint, below 1 holds and cuts away late. Ignored when
+    /// `fade` is false.
     public var ease: Double
     public init(
         holdSteps: Double = 1,

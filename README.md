@@ -100,9 +100,10 @@ for (const [k, square] of layout.squares.entries()) {
   // while tiles past the viewport still leave the paint and the tab order
   // (holdSteps becomes the cull distance — the one knob that matters with
   // the tail off). { ease } bends the ramp between holdSteps and fadeSteps
-  // without moving either end: above 1 the tile holds and then drops away
-  // late, below 1 it drops early and lingers. The default 1 is the straight
-  // line.
+  // without moving either end. It is an exponent on the tile's REMAINING
+  // presence, which falls from 1 to 0 — so it reads like gamma, not like a
+  // CSS easing keyword: above 1 the tile fades early and lingers faint,
+  // below 1 it holds and cuts away late. The default 1 is the straight line.
   const { opacity, hidden } = spiralWindow(k, depth, layout.squares.length);
   tile.style.opacity = String(opacity);
   tile.style.visibility = hidden ? 'hidden' : 'visible';
