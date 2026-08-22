@@ -1,3 +1,10 @@
+# [4.10.0](https://github.com/gregoryedgerton/golden-grids/compare/v4.9.0...v4.10.0) (2026-08-22)
+
+
+### Features
+
+* make the spiral dial's fading tail optional, with an eased ramp ([54aa81f](https://github.com/gregoryedgerton/golden-grids/commit/54aa81f916fcaaeea30980ed1450504fe9e7c1e9))
+
 # [4.9.0](https://github.com/gregoryedgerton/golden-grids/compare/v4.8.0...v4.9.0) (2026-08-19)
 
 
