@@ -1,3 +1,15 @@
+# [5.0.0](https://github.com/gregoryedgerton/golden-grids/compare/v4.11.0...v5.0.0) (2026-08-22)
+
+
+* feat!: the tail is a boolean — drop the ramp's knobs ([abbd979](https://github.com/gregoryedgerton/golden-grids/commit/abbd97971a4dcf072179b0b0f60fccd0d3e381d5))
+
+
+### BREAKING CHANGES
+
+* `SpiralWindowOptions.holdSteps`, `.fadeSteps` and `.ease`
+are removed. Consumers passing them get a type error and the fixed ramp;
+there is no equivalent, by design. `fade` is unaffected.
+
 # [4.11.0](https://github.com/gregoryedgerton/golden-grids/compare/v4.10.0...v4.11.0) (2026-08-22)
 
 
