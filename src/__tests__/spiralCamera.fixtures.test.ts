@@ -122,183 +122,42 @@ function frameCase(input: FrameCase["input"]): FrameCase {
 }
 
 interface WindowCase {
-  input: {
-    index: number;
-    depth: number;
-    count: number;
-    holdSteps: number;
-    fadeSteps: number;
-    fade: boolean;
-    ease: number;
-  };
+  input: { index: number; depth: number; count: number; fade: boolean };
   window: { opacity: number; hidden: boolean; focused: boolean };
 }
 
 const WINDOW_INPUTS: WindowCase["input"][] = [];
-for (const depth of [0, 1.5, 7, 14]) {
-  for (const index of [0, 3, 7, 10, 14]) {
-    WINDOW_INPUTS.push({
-      index,
-      depth,
-      count: 15,
-      holdSteps: 1,
-      fadeSteps: 2.5,
-      fade: true,
-      ease: 1,
-    });
+// The fading ramp across the dial, and the same positions with the tail
+// SOLID — the branch a port is most likely to get wrong, since it must keep
+// every square rather than cut at some distance.
+for (const fade of [true, false]) {
+  for (const depth of [0, 1.5, 3, 7, 14]) {
+    for (const index of [0, 3, 7, 10, 11, 12, 13, 14]) {
+      WINDOW_INPUTS.push({ index, depth, count: 15, fade });
+    }
   }
+  WINDOW_INPUTS.push({ index: 2, depth: 0, count: 8, fade });
+  WINDOW_INPUTS.push({ index: 6, depth: 6, count: 8, fade });
 }
-// A custom window shape.
-WINDOW_INPUTS.push({
-  index: 2,
-  depth: 0,
-  count: 8,
-  holdSteps: 0.5,
-  fadeSteps: 4,
-  fade: true,
-  ease: 1,
-});
-WINDOW_INPUTS.push({
-  index: 6,
-  depth: 6,
-  count: 8,
-  holdSteps: 0.5,
-  fadeSteps: 4,
-  fade: true,
-  ease: 1,
-});
 // Rounding-tie cases: raw lands exactly on a .0005 boundary, where JS
 // toFixed / Swift round half AWAY FROM ZERO but a ties-to-even port would
-// disagree (0.345 vs 0.344). Pins the tie-breaking rule cross-language.
-WINDOW_INPUTS.push({
-  index: 12,
-  depth: 0.01675,
-  count: 15,
-  holdSteps: 1,
-  fadeSteps: 2.5,
-  fade: true,
-  ease: 1,
-});
-WINDOW_INPUTS.push({
-  index: 10,
-  depth: 2.01675,
-  count: 15,
-  holdSteps: 1,
-  fadeSteps: 2.5,
-  fade: true,
-  ease: 1,
-});
-// The tail SOLID: full presence at every distance, nothing hidden. Interior,
-// focus, just past the hold and far outward — a port that kept the old cut
-// fails on the outward ones, which is where it matters.
-for (const index of [0, 7, 10, 11, 12, 14]) {
-  WINDOW_INPUTS.push({
-    index,
-    depth: 3,
-    count: 15,
-    holdSteps: 1,
-    fadeSteps: 2.5,
-    fade: false,
-    ease: 1,
-  });
-}
-// A wider hold with the tail solid: neither distance describes anything
-// without a ramp, so moving either must change nothing at all.
-WINDOW_INPUTS.push({
-  index: 13,
-  depth: 3,
-  count: 15,
-  holdSteps: 3,
-  fadeSteps: 2.5 + 3,
-  fade: false,
-  ease: 1,
-});
-// Eased ramps at partial-ramp positions. pow() is the one place the three
-// languages could disagree beyond 1e-9, so pin both directions and a
-// fractional exponent at several points along the same ramp.
-for (const ease of [0.5, 2, 3, 1.75]) {
-  for (const depth of [3, 3.4, 4.2]) {
-    WINDOW_INPUTS.push({
-      index: 12,
-      depth,
-      count: 15,
-      holdSteps: 1,
-      fadeSteps: 2.5,
-      fade: true,
-      ease,
-    });
-  }
-}
-// Ease over a long, shallow ramp — the region where a rounded 3-decimal
-// opacity is most sensitive to the exponent.
-WINDOW_INPUTS.push({
-  index: 5,
-  depth: 4,
-  count: 8,
-  holdSteps: 0.5,
-  fadeSteps: 4,
-  fade: true,
-  ease: 2.5,
-});
+// disagree. Pins the tie-breaking rule cross-language.
+WINDOW_INPUTS.push({ index: 12, depth: 1.0005, count: 15, fade: true });
+WINDOW_INPUTS.push({ index: 10, depth: 3.0005, count: 15, fade: true });
 
 interface FadeDepthCase {
-  input: {
-    index: number;
-    count: number;
-    holdSteps: number;
-    fadeSteps: number;
-    fade: boolean;
-    ease: number;
-  };
+  input: { index: number; count: number; fade: boolean };
   depth: number;
 }
 
 const FADE_DEPTH_INPUTS: FadeDepthCase["input"][] = [];
 for (const fade of [true, false]) {
-  // Index 0 solves past the end of the dial and clamps; the rest land in
-  // range — one array covers the solve and the clamp.
-  for (const index of [0, 3, 11, 12, 13, 14]) {
-    FADE_DEPTH_INPUTS.push({
-      index,
-      count: 15,
-      holdSteps: 1,
-      fadeSteps: 2.5,
-      fade,
-      ease: 1,
-    });
+  for (const index of [0, 1, 3, 11, 12, 13, 14]) {
+    FADE_DEPTH_INPUTS.push({ index, count: 15, fade });
   }
-  FADE_DEPTH_INPUTS.push({
-    index: 5,
-    count: 8,
-    holdSteps: 0.5,
-    fadeSteps: 4,
-    fade,
-    ease: 1,
-  });
+  FADE_DEPTH_INPUTS.push({ index: 5, count: 8, fade });
+  FADE_DEPTH_INPUTS.push({ index: 0, count: 2, fade });
 }
-// The boundary follows the ROUNDED opacity, so `ease` moves it — sharply, and
-// the ports have to agree on the pow that puts it there. With the tail off
-// there is no ramp to round, so ease must make no difference at all.
-for (const ease of [0.5, 2, 3, 10, 100]) {
-  for (const fade of [true, false]) {
-    FADE_DEPTH_INPUTS.push({
-      index: 12,
-      count: 15,
-      holdSteps: 1,
-      fadeSteps: 2.5,
-      fade,
-      ease,
-    });
-  }
-}
-FADE_DEPTH_INPUTS.push({
-  index: 5,
-  count: 8,
-  holdSteps: 0.5,
-  fadeSteps: 4,
-  fade: true,
-  ease: 2.5,
-});
 
 interface TrailCase {
   count: number;
@@ -457,10 +316,7 @@ function buildAll(): Fixture {
     windows: WINDOW_INPUTS.map((input) => ({
       input,
       window: spiralWindow(input.index, input.depth, input.count, {
-        holdSteps: input.holdSteps,
-        fadeSteps: input.fadeSteps,
         fade: input.fade,
-        ease: input.ease,
       }),
     })),
     fadeDepths: FADE_DEPTH_INPUTS.map((input) => ({
@@ -508,10 +364,7 @@ describe("spiral camera — golden-master fixtures", () => {
     for (const entry of committed.windows) {
       expect(
         spiralWindow(entry.input.index, entry.input.depth, entry.input.count, {
-          holdSteps: entry.input.holdSteps,
-          fadeSteps: entry.input.fadeSteps,
           fade: entry.input.fade,
-          ease: entry.input.ease,
         })
       ).toEqual(entry.window);
     }

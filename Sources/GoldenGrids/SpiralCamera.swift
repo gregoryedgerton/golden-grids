@@ -278,35 +278,20 @@ public func trailForRotation(_ rotateDeg: Int, clockwise: Bool = true, squareCou
 
 // MARK: - Legibility window
 
+/// The fading tail's shape in depth steps: full presence out to `holdSteps`,
+/// zero at `fadeSteps`. Fixed rather than configurable — mirrors HOLD_STEPS
+/// and FADE_STEPS.
+private let holdSteps = 1.0
+private let fadeSteps = 3.0
+
 public struct SpiralWindowOptions: Sendable {
-    /// Distance (in depth steps) a tile stays fully opaque.
-    public var holdSteps: Double
-    /// Distance at which opacity reaches zero — and the tile should leave
-    /// the paint and the accessibility order. Unused when `fade` is false,
-    /// but still validated, so turning the tail back on can never turn a
-    /// working window into a trap.
-    public var fadeSteps: Double
     /// Whether the outward tail FADES. False leaves the tail SOLID rather
     /// than removing it: every square keeps full presence at any distance,
     /// filling the negative space around the focus and bleeding off the page.
-    /// Nothing hides, and `holdSteps`/`fadeSteps` mean nothing without a ramp.
+    /// Nothing hides — use `tileOnScreen` to cull what has left the viewport.
     public var fade: Bool
-    /// Shape of the ramp between `holdSteps` and `fadeSteps`. 1 is the
-    /// straight line. The exponent applies to the tile's REMAINING presence,
-    /// which falls from 1 to 0 — so it reads like gamma: above 1 fades early
-    /// and lingers faint, below 1 holds and cuts away late. Ignored when
-    /// `fade` is false.
-    public var ease: Double
-    public init(
-        holdSteps: Double = 1,
-        fadeSteps: Double = 2.5,
-        fade: Bool = true,
-        ease: Double = 1
-    ) {
-        self.holdSteps = holdSteps
-        self.fadeSteps = fadeSteps
+    public init(fade: Bool = true) {
         self.fade = fade
-        self.ease = ease
     }
 }
 
@@ -320,21 +305,6 @@ public struct SpiralWindow: Equatable, Sendable {
 /// the tile leaves. Mirrors `HIDDEN_BELOW`.
 private let hiddenBelow = 0.0005
 
-/// Mirrors the TypeScript `assertWindow`: one definition of a legal window,
-/// shared by every function that reads one.
-private func assertWindow(_ options: SpiralWindowOptions) {
-    let hold = options.holdSteps
-    let fade = options.fadeSteps
-    precondition(
-        hold.isFinite && fade.isFinite && hold >= 0 && fade > hold,
-        "Legibility window needs 0 <= holdSteps (\(hold)) < fadeSteps (\(fade))."
-    )
-    precondition(
-        options.ease.isFinite && options.ease > 0,
-        "Legibility window needs a positive finite ease (\(options.ease))."
-    )
-}
-
 /// The legibility window around the focus. Mirrors `spiralWindow`: only
 /// OUTWARD squares (larger than the focus) fade and leave; the interior
 /// never fades — squares emerge from the centre small but fully present.
@@ -344,17 +314,13 @@ private func assertWindow(_ options: SpiralWindowOptions) {
 /// rather than removing it — every square keeps full presence, so NOTHING is
 /// hidden and a caller relying on this to cull will keep off-screen tiles
 /// painted and focusable. Use `tileOnScreen` for that; it is the only one of
-/// the two that can see where a square landed. `ease` bends the ramp without
-/// moving either end.
+/// the two that can see where a square landed.
 public func spiralWindow(
     _ index: Int,
     depth: Double,
     squareCount: Int,
     options: SpiralWindowOptions = SpiralWindowOptions()
 ) -> SpiralWindow {
-    assertWindow(options)
-    let hold = options.holdSteps
-    let fade = options.fadeSteps
     precondition(
         depth.isFinite && depth >= 0 && depth <= Double(squareCount - 1)
             && index >= 0 && index <= squareCount - 1,
@@ -365,10 +331,10 @@ public func spiralWindow(
     // A solid tail is full presence everywhere — the ramp is skipped, not
     // replaced by a cut.
     let raw: Double
-    if !options.fade || outward <= hold {
+    if !options.fade || outward <= holdSteps {
         raw = 1
     } else {
-        raw = pow(max(0, (fade - outward) / (fade - hold)), options.ease)
+        raw = max(0, (fadeSteps - outward) / (fadeSteps - holdSteps))
     }
     // Same rounding the TS does with Number(raw.toFixed(3)): hidden follows
     // the value the consumer will actually render.
@@ -380,19 +346,17 @@ public func spiralWindow(
 /// — where its opacity first reaches zero. Mirrors `windowFadeDepth`: the
 /// inverse of the window, and the depth a consumer freezes a departing tile
 /// at so its retained raster matches what re-entry asks for. The boundary
-/// follows the ROUNDED opacity, not the ramp's endpoint: an eased ramp
-/// rounds to zero well before it reaches `fadeSteps`, so the cutoff is
-/// `fadeSteps - hiddenBelow^(1/ease) * (fadeSteps - holdSteps)`. With
-/// `fade: false` there is no boundary at all — a solid tail never drops a
-/// square — so the answer is the dial's deepest depth. Clamped to that depth
-/// — no clamp is needed at the shallow end, since the solve cannot go below
-/// zero.
+/// follows the ROUNDED opacity, not the ramp's endpoint — they differ by a
+/// hair, and freezing at the endpoint retains a raster at a scale re-entry
+/// never asks for. With `fade: false` there is no boundary at all — a solid
+/// tail never drops a square — so the answer is the dial's deepest depth.
+/// Clamped to that depth; no clamp is needed at the shallow end, since the
+/// solve cannot go below zero.
 public func windowFadeDepth(
     _ index: Int,
     squareCount: Int,
     options: SpiralWindowOptions = SpiralWindowOptions()
 ) -> Double {
-    assertWindow(options)
     precondition(
         index >= 0 && index <= squareCount - 1,
         "Legibility window needs index (\(index)) inside [0, \(squareCount - 1)] "
@@ -400,8 +364,7 @@ public func windowFadeDepth(
     )
     // A solid tail has no boundary to solve for: no square ever leaves.
     if !options.fade { return Double(squareCount - 1) }
-    let boundary = options.fadeSteps - pow(hiddenBelow, 1 / options.ease)
-        * (options.fadeSteps - options.holdSteps)
+    let boundary = fadeSteps - hiddenBelow * (fadeSteps - holdSteps)
     let depth = boundary + Double(squareCount) - 1 - Double(index)
     return min(depth, Double(squareCount - 1))
 }

@@ -95,18 +95,17 @@ for (const [k, square] of layout.squares.entries()) {
   // centre small but fully present instead of materializing through a
   // fade-in.
   //
-  // The fade itself is a configuration detail. { fade: false } leaves the
-  // tail SOLID — it does not remove it: every square keeps full presence at
-  // any distance, so the outward ones go on filling the negative space
+  // The fade itself is the only thing to configure. { fade: false } leaves
+  // the tail SOLID — it does not remove it: every square keeps full presence
+  // at any distance, so the outward ones go on filling the negative space
   // around the focus and bleeding off the page, exactly as the geometry
   // places them. Culling one that has left the viewport is tileOnScreen's
   // job, below — a step count cannot answer it.
   //
-  // { ease } bends the ramp between holdSteps and fadeSteps without moving
-  // either end. It is an exponent on the tile's REMAINING presence, which
-  // falls from 1 to 0 — so it reads like gamma, not like a CSS easing
-  // keyword: above 1 the tile fades early and lingers faint, below 1 it
-  // holds and cuts away late. The default 1 is the straight line.
+  // The ramp itself is fixed: one straight line, full presence to one step
+  // out and zero at three. It used to take both distances and an easing
+  // exponent; the extra control bought nothing a reader could name, and
+  // every one of them was a way to describe a window that looks wrong.
   const { opacity, hidden } = spiralWindow(k, depth, layout.squares.length);
   // Is this square still using on-screen space? The spiral TILES the plane —
   // squares sit beside one another, not inside — so most of the layout is off
@@ -158,10 +157,9 @@ const eye = spiralEye(layout);
 // you keep its layer alive rather than dropping it. (Blink discards a
 // dropped layer's decoded artwork, so reversing the dial repaints white for
 // hundreds of milliseconds unless the tile stays parked with its transform
-// pinned here.) It follows the ROUNDED opacity you actually render, not the
-// ramp's endpoint — an eased ramp rounds to zero well before it reaches
-// fadeSteps — so pass the same options you gave spiralWindow and the two
-// stay inverses of each other.
+// pinned here.) It follows the ROUNDED opacity you actually render rather
+// than the ramp's theoretical end, so pass the same { fade } you gave
+// spiralWindow and the two stay inverses of each other.
 const boundary = windowFadeDepth(0, layout.squares.length);
 ```
 
