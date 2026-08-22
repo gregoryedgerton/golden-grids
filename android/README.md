@@ -73,7 +73,10 @@ depth dial over up to ninety-one squares (the Long ceiling): drag with flick
 inertia, DUO/TRIO/QUAD quick sets each laid out and trail-solved for exactly
 their count, per-tile `tileTransform` (never one matrix on a shared stage),
 labels orientation-locked via `contentTransform`, and only outward squares
-fading through `spiralWindow`. Each screen builds itself in on appear.
+fading through `spiralWindow` — with a FADE TAIL switch that flips its `fade`
+off, so the outer spiral reads solid while tiles past the viewport still
+leave the paint (the fade is a look, the cull is not). Each screen builds
+itself in on appear.
 
 <p align="center">
   <img src="../docs/android/featured.gif" width="200" alt="Featured — a swipeable card carousel" />

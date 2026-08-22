@@ -68,6 +68,7 @@ import {
   spiralWindow,
   toCssContentTransform,
   toCssTileTransform,
+  windowFadeDepth,
 } from '@gifcommit/golden-grids';
 
 const layout = generateGoldenGridLayout([1, 1, 2, 3, 5, 8, 13], true, 0);
@@ -92,6 +93,17 @@ for (const [k, square] of layout.squares.entries()) {
   // camera) fade — the interior never does, so squares emerge from the
   // centre small but fully present instead of materializing through a
   // fade-in.
+  //
+  // The fade itself is a configuration detail. { fade: false } turns off the
+  // LOOK, not the culling: a tile holds full presence out to holdSteps and
+  // then goes straight to hidden, so the spiral's outer context reads solid
+  // while tiles past the viewport still leave the paint and the tab order
+  // (holdSteps becomes the cull distance — the one knob that matters with
+  // the tail off). { ease } bends the ramp between holdSteps and fadeSteps
+  // without moving either end. It is an exponent on the tile's REMAINING
+  // presence, which falls from 1 to 0 — so it reads like gamma, not like a
+  // CSS easing keyword: above 1 the tile fades early and lingers faint,
+  // below 1 it holds and cuts away late. The default 1 is the straight line.
   const { opacity, hidden } = spiralWindow(k, depth, layout.squares.length);
   tile.style.opacity = String(opacity);
   tile.style.visibility = hidden ? 'hidden' : 'visible';
@@ -129,6 +141,17 @@ toCssTileTransform(frame, layout.squares[0], innerWidth, innerHeight, {
 // The spiral's convergence point, e.g. as a transform origin or annotation
 // anchor (centre of the smallest square; exact in the φ-limit).
 const eye = spiralEye(layout);
+
+// The depth at which a square lands on the window's outward boundary — the
+// inverse of spiralWindow, and the depth to freeze a departing tile at if
+// you keep its layer alive rather than dropping it. (Blink discards a
+// dropped layer's decoded artwork, so reversing the dial repaints white for
+// hundreds of milliseconds unless the tile stays parked with its transform
+// pinned here.) It follows the ROUNDED opacity you actually render, not the
+// ramp's endpoint — an eased ramp rounds to zero well before it reaches
+// fadeSteps — so pass the same options you gave spiralWindow and the two
+// stay inverses of each other.
+const boundary = windowFadeDepth(0, layout.squares.length);
 ```
 
 (`toCssTransform` — one matrix for a whole stage — still exists for cases

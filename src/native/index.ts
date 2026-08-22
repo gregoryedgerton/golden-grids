@@ -8,6 +8,7 @@ export {
   spiralCamera,
   toCssTransform,
   spiralWindow,
+  windowFadeDepth,
   spiralEye,
   focusIndexAt,
   trailToRotateDeg,

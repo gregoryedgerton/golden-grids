@@ -72,7 +72,10 @@ own `toAffineTileTransform` (never one matrix on a shared stage — that
 rasterizes the deep squares and upscales the mush), labels stay upright via
 `contentTransform`, `spiralWindow` fades only the outward squares, and depth
 is driven by a drag with long flick inertia (0.97/frame decay — the ride is
-the demo). In the slider's old seat: segmented SETS — ALL (1–91), DUO (1, 2),
+the demo). A **Fade tail** switch under the sets flips `spiralWindow`'s
+`fade` off: the outward squares stop ghosting and the outer spiral reads
+solid, while tiles past the viewport still leave the paint — the fade is a
+look, the cull is not. In the slider's old seat: segmented SETS — ALL (1–91), DUO (1, 2),
 TRIO (1, 2, 3), QUAD (1, 2, 3, 4) — each dialing a spiral laid out for
 exactly that count (layout and trail re-solved per count: DUO/TRIO/QUAD are
 the smallest spirals that exist, ALL is the Int64 ceiling; the number is the

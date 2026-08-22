@@ -5,10 +5,12 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.verticalDrag
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -16,6 +18,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -39,6 +42,7 @@ import androidx.compose.ui.unit.dp
 import com.gifcommit.goldengrids.GridLayout
 import com.gifcommit.goldengrids.SpiralCameraOptions
 import com.gifcommit.goldengrids.SpiralTrail
+import com.gifcommit.goldengrids.SpiralWindowOptions
 import com.gifcommit.goldengrids.contentTransform
 import com.gifcommit.goldengrids.generateGoldenGridLayout
 import com.gifcommit.goldengrids.spiralCamera
@@ -102,6 +106,11 @@ fun SpiralScreen() {
     var numberSet by remember { mutableStateOf(NumberSet.ALL) }
     var depth by remember { mutableFloatStateOf(0f) }
     var stageSize by remember { mutableStateOf(IntSize.Zero) }
+    // The legibility window the dial renders with. FADE off is the library's
+    // `fade = false` — full presence out to holdSteps, then straight to
+    // hidden, so the spiral's outer context reads solid while tiles past the
+    // viewport still leave the paint.
+    var fadeTail by remember { mutableStateOf(true) }
     val scope = rememberCoroutineScope()
     var coastJob by remember { mutableStateOf<Job?>(null) }
 
@@ -171,7 +180,7 @@ fun SpiralScreen() {
                 },
         ) {
             if (stageSize.width > 0 && stageSize.height > 0) {
-                Stage(dial = dial, depth = shown.toDouble(), size = stageSize)
+                Stage(dial = dial, depth = shown.toDouble(), size = stageSize, fadeTail = fadeTail)
             }
         }
 
@@ -191,6 +200,21 @@ fun SpiralScreen() {
                 ) { Text(option.label) }
             }
         }
+        // The fading tail is a configuration detail, not the dial's
+        // definition — flip it and watch the outward squares stop ghosting
+        // without the cull going away.
+        Row(
+            Modifier.fillMaxWidth().padding(top = 8.dp),
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text("FADE TAIL", style = MaterialTheme.typography.labelMedium)
+            Switch(
+                checked = fadeTail,
+                onCheckedChange = { fadeTail = it },
+                modifier = Modifier.padding(start = 12.dp),
+            )
+        }
         Text(
             text = "depth %.2f — square %d".format(
                 shown,
@@ -206,7 +230,7 @@ fun SpiralScreen() {
 }
 
 @Composable
-private fun Stage(dial: Dial, depth: Double, size: IntSize) {
+private fun Stage(dial: Dial, depth: Double, size: IntSize, fadeTail: Boolean) {
     val density = LocalDensity.current
     val frame = spiralCamera(
         dial.layout,
@@ -224,7 +248,12 @@ private fun Stage(dial: Dial, depth: Double, size: IntSize) {
     // answer — each tile renders into a TEXTURE_PX box at a net scale near 1.
     Box(Modifier.fillMaxSize()) {
         dial.layout.squares.forEachIndexed { index, square ->
-            val window = spiralWindow(index, depth = depth, squareCount = dial.count)
+            val window = spiralWindow(
+                index,
+                depth = depth,
+                squareCount = dial.count,
+                options = SpiralWindowOptions(fade = fadeTail),
+            )
             val tile = tileTransform(
                 frame,
                 square = square,
