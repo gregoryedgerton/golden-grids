@@ -16,6 +16,7 @@ export {
   toNativeTransform,
   tileTransform,
   toCssTileTransform,
+  tileOnScreen,
   toNativeTileTransform,
   contentTransform,
   toCssContentTransform,

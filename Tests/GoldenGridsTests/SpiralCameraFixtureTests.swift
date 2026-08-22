@@ -47,6 +47,12 @@ final class SpiralCameraFixtureTests: XCTestCase {
         let input: WindowInput
         let window: Window
     }
+    struct OnScreenCase: Decodable {
+        let frameName: String
+        let squareIndex: Int
+        let margin: Double
+        let onScreen: Bool
+    }
     struct FadeDepthInput: Decodable {
         let index: Int
         let count: Int
@@ -99,6 +105,7 @@ final class SpiralCameraFixtureTests: XCTestCase {
     }
     struct Fixture: Decodable {
         let frames: [FrameCase]
+        let onScreens: [OnScreenCase]
         let windows: [WindowCase]
         let fadeDepths: [FadeDepthCase]
         let trails: [TrailCase]
@@ -185,6 +192,36 @@ final class SpiralCameraFixtureTests: XCTestCase {
             XCTAssertEqual(window.opacity, entry.window.opacity, accuracy: tol, "window opacity")
             XCTAssertEqual(window.hidden, entry.window.hidden, "window hidden")
             XCTAssertEqual(window.focused, entry.window.focused, "window focused")
+        }
+    }
+
+    func testOnScreenCullsReproduceEveryFixture() throws {
+        let fixture = try loadFixture()
+        XCTAssertFalse(fixture.onScreens.isEmpty, "no on-screen fixtures loaded")
+
+        for entry in fixture.onScreens {
+            guard let frameCase = fixture.frames.first(where: { $0.name == entry.frameName }) else {
+                XCTFail("no frame named \(entry.frameName)"); continue
+            }
+            let input = frameCase.input
+            let layout = generateGoldenGridLayout(
+                fib(input.count), clockwise: input.clockwise, rotate: input.rotate
+            )
+            let frame = SpiralCameraFrame(
+                scale: frameCase.frame.scale,
+                rotationDeg: frameCase.frame.rotationDeg,
+                centerX: frameCase.frame.centerX,
+                centerY: frameCase.frame.centerY
+            )
+            let on = tileOnScreen(
+                frame,
+                square: layout.squares[entry.squareIndex],
+                viewportWidth: input.viewportWidth,
+                viewportHeight: input.viewportHeight,
+                anchor: CGPoint(x: input.anchor.x, y: input.anchor.y),
+                margin: entry.margin
+            )
+            XCTAssertEqual(on, entry.onScreen, "on-screen \(entry.frameName)#\(entry.squareIndex) m=\(entry.margin)")
         }
     }
 

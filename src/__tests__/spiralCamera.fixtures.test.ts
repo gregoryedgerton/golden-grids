@@ -6,6 +6,7 @@ import {
   spiralCamera,
   spiralEye,
   spiralWindow,
+  tileOnScreen,
   tileTransform,
   trailForRotation,
   trailToRotateDeg,
@@ -187,9 +188,9 @@ WINDOW_INPUTS.push({
   fade: true,
   ease: 1,
 });
-// The tail OFF: full presence out to holdSteps, then straight to hidden.
-// Interior, focus, exactly-at-hold, just past it and far outward — the whole
-// step function, since it is the branch a port is most likely to get wrong.
+// The tail SOLID: full presence at every distance, nothing hidden. Interior,
+// focus, just past the hold and far outward — a port that kept the old cut
+// fails on the outward ones, which is where it matters.
 for (const index of [0, 7, 10, 11, 12, 14]) {
   WINDOW_INPUTS.push({
     index,
@@ -201,8 +202,8 @@ for (const index of [0, 7, 10, 11, 12, 14]) {
     ease: 1,
   });
 }
-// A wider hold with the tail off: the cull distance is holdSteps, so moving
-// it must move where tiles leave — and fadeSteps must not matter.
+// A wider hold with the tail solid: neither distance describes anything
+// without a ramp, so moving either must change nothing at all.
 WINDOW_INPUTS.push({
   index: 13,
   depth: 3,
@@ -341,6 +342,13 @@ interface TileCase {
   tile: { translateX: number; translateY: number; rotationDeg: number; scale: number };
 }
 
+interface OnScreenCase {
+  frameName: string;
+  squareIndex: number;
+  margin: number;
+  onScreen: boolean;
+}
+
 interface ContentCase {
   frameName: string;
   counterRotate: boolean;
@@ -350,6 +358,7 @@ interface ContentCase {
 
 interface Fixture {
   frames: FrameCase[];
+  onScreens: OnScreenCase[];
   windows: WindowCase[];
   fadeDepths: FadeDepthCase[];
   trails: TrailCase[];
@@ -392,6 +401,35 @@ function tileCases(): TileCase[] {
   return cases;
 }
 
+function onScreenCases(): OnScreenCase[] {
+  // The geometric cull: which squares actually cover viewport at a frame. Runs
+  // every square of a few frames rather than a hand-picked few, so a port that
+  // projects a corner wrong fails on the square where it matters.
+  const cases: OnScreenCase[] = [];
+  for (const input of [FRAME_INPUTS[0], FRAME_INPUTS[3], FRAME_INPUTS[26], FRAME_INPUTS[50]]) {
+    if (!input) continue;
+    const layout = generateGoldenGridLayout(fib(input.count), input.clockwise, input.rotate);
+    const current = frameCase(input);
+    for (const squareIndex of layout.squares.keys()) {
+      for (const margin of [0, 64]) {
+        cases.push({
+          frameName: current.name,
+          squareIndex,
+          margin,
+          onScreen: tileOnScreen(
+            { ...current.frame },
+            layout.squares[squareIndex],
+            input.viewportWidth,
+            input.viewportHeight,
+            { anchor: input.anchor, margin }
+          ),
+        });
+      }
+    }
+  }
+  return cases;
+}
+
 function contentCases(): ContentCase[] {
   const cases: ContentCase[] = [];
   for (const input of [FRAME_INPUTS[0], FRAME_INPUTS[1], FRAME_INPUTS[3], FRAME_INPUTS[30]]) {
@@ -415,6 +453,7 @@ function contentCases(): ContentCase[] {
 function buildAll(): Fixture {
   return {
     frames: FRAME_INPUTS.map(frameCase),
+    onScreens: onScreenCases(),
     windows: WINDOW_INPUTS.map((input) => ({
       input,
       window: spiralWindow(input.index, input.depth, input.count, {
@@ -483,6 +522,31 @@ describe("spiral camera — golden-master fixtures", () => {
       expect(z(windowFadeDepth(entry.input.index, entry.input.count, entry.input))).toBe(
         entry.depth
       );
+    }
+  });
+
+  test("on-screen culls reproduce the committed fixture", () => {
+    expect(committed.onScreens.length).toBe(onScreenCases().length);
+    const layouts = new Map<string, ReturnType<typeof generateGoldenGridLayout>>();
+    for (const entry of committed.onScreens) {
+      const input = FRAME_INPUTS.find((i) => frameCase(i).name === entry.frameName);
+      expect(input).toBeDefined();
+      if (!layouts.has(entry.frameName)) {
+        layouts.set(
+          entry.frameName,
+          generateGoldenGridLayout(fib(input!.count), input!.clockwise, input!.rotate)
+        );
+      }
+      const layout = layouts.get(entry.frameName)!;
+      expect(
+        tileOnScreen(
+          { ...frameCase(input!).frame },
+          layout.squares[entry.squareIndex],
+          input!.viewportWidth,
+          input!.viewportHeight,
+          { anchor: input!.anchor, margin: entry.margin }
+        )
+      ).toBe(entry.onScreen);
     }
   });
 

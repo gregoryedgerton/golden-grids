@@ -73,9 +73,10 @@ struct SpiralView: View {
         for: SpiralView.dials[SpiralView.initialSet()]!.count
     )
     /// The legibility window the dial renders with. FADE off is the
-    /// library's `fade: false` — full presence out to `holdSteps`, then
-    /// straight to hidden, so the spiral's outer context reads solid while
-    /// tiles past the viewport still leave the paint.
+    /// library's `fade: false` — the tail stays, it just stops fading, so the
+    /// outward squares go on filling the negative space and bleeding off the
+    /// page. Squares that have left the viewport are culled by `tileOnScreen`
+    /// either way, which is geometry the window cannot do.
     @State private var fadeTail = true
     @State private var dragStartDepth: Double?
     /// Last two drag samples, for a live-flick velocity (depth/second) —
@@ -275,7 +276,17 @@ struct SpiralView: View {
                 // With ninety-one squares most of the interior is sub-pixel
                 // at any depth — skip tiles that would paint under half a
                 // pixel rather than composite ninety-one views per frame.
-                if !window.hidden && tileScale * Self.texturePx >= 0.5 {
+                // Two independent reasons to skip a tile: the window faded it
+                // away, or it has travelled off the page. With the tail solid
+                // only the second ever fires — which is the whole point of it
+                // being a geometric test rather than a step count.
+                let onScreen = tileOnScreen(
+                    frame,
+                    square: square,
+                    viewportWidth: Double(size.width),
+                    viewportHeight: Double(size.height)
+                )
+                if !window.hidden && onScreen && tileScale * Self.texturePx >= 0.5 {
                     tile(number: dial.numbers[index], focused: window.focused, frame: frame)
                         .opacity(window.opacity)
                         .transformEffect(
