@@ -430,6 +430,51 @@ describe('tileOnScreen', () => {
     }
   });
 
+  it('agrees with the box tileTransform actually renders', () => {
+    // The two compose the same camera mapping in different ways: tileTransform
+    // decomposes it into translate/rotate/scale for a texturePx box, while
+    // tileOnScreen projects the square's corners directly. If they ever
+    // disagree, the cull is testing a box the renderer is not drawing.
+    const texturePx = 512;
+    for (const depth of [0, 1.5, 4, 9, 13.5]) {
+      const frame = spiralCamera(layout, depth, 960, 720, { fillRatio: 1 });
+      for (const [k, square] of layout.squares.entries()) {
+        const tile = tileTransform(frame, square, 960, 720, { texturePx });
+        const rad = (tile.rotationDeg * Math.PI) / 180;
+        const cos = Math.cos(rad);
+        const sin = Math.sin(rad);
+        // The rendered box: a texturePx square at the stage origin, then
+        // translate/rotate/scale about a 0 0 origin.
+        let minX = Infinity;
+        let maxX = -Infinity;
+        let minY = Infinity;
+        let maxY = -Infinity;
+        for (const [u, v] of [
+          [0, 0],
+          [texturePx, 0],
+          [texturePx, texturePx],
+          [0, texturePx],
+        ]) {
+          const px = tile.scale * u;
+          const py = tile.scale * v;
+          const x = tile.translateX + cos * px - sin * py;
+          const y = tile.translateY + sin * px + cos * py;
+          minX = Math.min(minX, x);
+          maxX = Math.max(maxX, x);
+          minY = Math.min(minY, y);
+          maxY = Math.max(maxY, y);
+        }
+        const rendered =
+          maxX >= 0 && minX <= 960 && maxY >= 0 && minY <= 720;
+        expect({ k, depth, on: tileOnScreen(frame, square, 960, 720) }).toEqual({
+          k,
+          depth,
+          on: rendered,
+        });
+      }
+    }
+  });
+
   it('rejects a non-finite anchor or a negative margin', () => {
     const frame = spiralCamera(layout, 0, 960, 720);
     expect(() =>
