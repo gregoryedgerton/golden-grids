@@ -238,11 +238,28 @@ public struct SpiralWindowOptions: Sendable {
     /// Distance (in depth steps) a tile stays fully opaque.
     public var holdSteps: Double
     /// Distance at which opacity reaches zero — and the tile should leave
-    /// the paint and the accessibility order.
+    /// the paint and the accessibility order. Unused when `fade` is false,
+    /// but still validated, so turning the tail back on can never turn a
+    /// working window into a trap.
     public var fadeSteps: Double
-    public init(holdSteps: Double = 1, fadeSteps: Double = 2.5) {
+    /// Whether the outward tail FADES. False turns off the look, not the
+    /// culling: full presence out to `holdSteps`, then straight to hidden,
+    /// so `holdSteps` becomes the cull distance.
+    public var fade: Bool
+    /// Shape of the ramp between `holdSteps` and `fadeSteps`. 1 is the
+    /// straight line; above 1 holds then drops late, below 1 drops early
+    /// and lingers. Ignored when `fade` is false.
+    public var ease: Double
+    public init(
+        holdSteps: Double = 1,
+        fadeSteps: Double = 2.5,
+        fade: Bool = true,
+        ease: Double = 1
+    ) {
         self.holdSteps = holdSteps
         self.fadeSteps = fadeSteps
+        self.fade = fade
+        self.ease = ease
     }
 }
 
@@ -252,16 +269,9 @@ public struct SpiralWindow: Equatable, Sendable {
     public var focused: Bool
 }
 
-/// The legibility window around the focus. Mirrors `spiralWindow`: only
-/// OUTWARD squares (larger than the focus) fade and leave; the interior
-/// never fades — squares emerge from the centre small but fully present.
-/// Includes the 3-decimal rounding that `hidden` derives from.
-public func spiralWindow(
-    _ index: Int,
-    depth: Double,
-    squareCount: Int,
-    options: SpiralWindowOptions = SpiralWindowOptions()
-) -> SpiralWindow {
+/// Mirrors the TypeScript `assertWindow`: one definition of a legal window,
+/// shared by every function that reads one.
+private func assertWindow(_ options: SpiralWindowOptions) {
     let hold = options.holdSteps
     let fade = options.fadeSteps
     precondition(
@@ -269,17 +279,69 @@ public func spiralWindow(
         "Legibility window needs 0 <= holdSteps (\(hold)) < fadeSteps (\(fade))."
     )
     precondition(
+        options.ease.isFinite && options.ease > 0,
+        "Legibility window needs a positive finite ease (\(options.ease))."
+    )
+}
+
+/// The legibility window around the focus. Mirrors `spiralWindow`: only
+/// OUTWARD squares (larger than the focus) fade and leave; the interior
+/// never fades — squares emerge from the centre small but fully present.
+/// Includes the 3-decimal rounding that `hidden` derives from.
+///
+/// The fade is a configuration detail: `fade: false` keeps the cull but
+/// drops the ghosting, and `ease` bends the ramp without moving either end.
+public func spiralWindow(
+    _ index: Int,
+    depth: Double,
+    squareCount: Int,
+    options: SpiralWindowOptions = SpiralWindowOptions()
+) -> SpiralWindow {
+    assertWindow(options)
+    let hold = options.holdSteps
+    let fade = options.fadeSteps
+    precondition(
         depth.isFinite && depth >= 0 && depth <= Double(squareCount - 1)
             && index >= 0 && index <= squareCount - 1,
         "Legibility window needs depth (\(depth)) and index (\(index)) inside "
             + "[0, \(squareCount - 1)] for a finite squareCount (\(squareCount))."
     )
     let outward = Double(index) - focusIndexAt(depth, squareCount)
-    let raw = outward <= hold ? 1 : max(0, (fade - outward) / (fade - hold))
+    let raw: Double
+    if outward <= hold {
+        raw = 1
+    } else if options.fade {
+        raw = pow(max(0, (fade - outward) / (fade - hold)), options.ease)
+    } else {
+        raw = 0
+    }
     // Same rounding the TS does with Number(raw.toFixed(3)): hidden follows
     // the value the consumer will actually render.
     let opacity = (raw * 1000).rounded() / 1000
     return SpiralWindow(opacity: opacity, hidden: opacity <= 0, focused: abs(outward) < 0.5)
+}
+
+/// The depth at which `index` sits exactly on the window's outward boundary
+/// — where its opacity first reaches zero. Mirrors `windowFadeDepth`: the
+/// inverse of the window, and the depth a consumer freezes a departing tile
+/// at so its retained raster matches what re-entry asks for. The boundary is
+/// `fadeSteps` while the tail fades and `holdSteps` when it does not, and is
+/// clamped to the deepest depth the layout has — no clamp is needed at the
+/// shallow end, since the solve cannot go below zero.
+public func windowFadeDepth(
+    _ index: Int,
+    squareCount: Int,
+    options: SpiralWindowOptions = SpiralWindowOptions()
+) -> Double {
+    assertWindow(options)
+    precondition(
+        index >= 0 && index <= squareCount - 1,
+        "Legibility window needs index (\(index)) inside [0, \(squareCount - 1)] "
+            + "for a finite squareCount (\(squareCount))."
+    )
+    let boundary = options.fade ? options.fadeSteps : options.holdSteps
+    let depth = boundary + Double(squareCount) - 1 - Double(index)
+    return min(depth, Double(squareCount - 1))
 }
 
 // MARK: - Eye

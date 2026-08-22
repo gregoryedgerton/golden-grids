@@ -463,14 +463,61 @@ export interface SpiralWindowOptions {
   /** Distance at which opacity reaches zero — and the tile should leave the
    * paint and the tab order. Deliberately one number, not two: a gap between
    * "invisible" and "gone" leaves fully transparent content focusable.
-   * Default 2.5. */
+   * Default 2.5. Unused when `fade` is false, but still validated, so that
+   * turning the tail back on can never turn a working window into a throw. */
   fadeSteps?: number;
+  /**
+   * Whether the outward tail FADES. Default true.
+   *
+   * False turns off the look, not the culling: a tile holds full presence out
+   * to `holdSteps` and then goes straight to hidden, so the spiral's outer
+   * context reads solid while tiles past the viewport still leave the paint
+   * and the tab order. `holdSteps` becomes the cull distance — the one knob
+   * that matters with the tail off.
+   */
+  fade?: boolean;
+  /**
+   * Shape of the ramp between `holdSteps` and `fadeSteps`. Default 1, the
+   * straight line — `Math.pow(x, 1)` is `x`, so the default window is
+   * unchanged to the bit.
+   *
+   * Above 1 the tile holds its presence and then drops away late; below 1 it
+   * drops early and lingers near-transparent. Ignored when `fade` is false,
+   * where there is no ramp to shape.
+   */
+  ease?: number;
 }
 
 export interface SpiralWindow {
   opacity: number;
   hidden: boolean;
   focused: boolean;
+}
+
+/**
+ * A malformed window renders nonsense rather than failing visibly: an
+ * inverted one reverses the ramp (opacity above 1, growing with distance), a
+ * negative hold hides the focus itself, and a non-positive ease either
+ * collapses the ramp to a step (0) or sends it to Infinity (negative). Refuse
+ * all of them — and refuse them identically for every function that reads a
+ * window, so the window's own definition can't drift between them.
+ */
+function assertWindow(options: SpiralWindowOptions): Required<SpiralWindowOptions> {
+  const { holdSteps = 1, fadeSteps = 2.5, fade = true, ease = 1 } = options;
+  if (
+    !Number.isFinite(holdSteps) ||
+    !Number.isFinite(fadeSteps) ||
+    holdSteps < 0 ||
+    fadeSteps <= holdSteps
+  ) {
+    throw new Error(
+      `Legibility window needs 0 <= holdSteps (${holdSteps}) < fadeSteps (${fadeSteps}).`
+    );
+  }
+  if (!Number.isFinite(ease) || ease <= 0) {
+    throw new Error(`Legibility window needs a positive finite ease (${ease}).`);
+  }
+  return { holdSteps, fadeSteps, fade, ease };
 }
 
 /**
@@ -483,6 +530,10 @@ export interface SpiralWindow {
  * rather than materializing through a fade-in — and a faded interior renders
  * the centre of the spiral as a hole. Proven on the production dial, where it
  * replaced a symmetric window for exactly that reason.
+ *
+ * The fade itself is a configuration detail — `{ fade: false }` keeps the cull
+ * but drops the ghosting, and `ease` bends the ramp between `holdSteps` and
+ * `fadeSteps` without moving either end.
  */
 export function spiralWindow(
   index: number,
@@ -490,20 +541,7 @@ export function spiralWindow(
   squareCount: number,
   options: SpiralWindowOptions = {}
 ): SpiralWindow {
-  const { holdSteps = 1, fadeSteps = 2.5 } = options;
-  // A malformed window renders nonsense rather than failing visibly: an
-  // inverted one reverses the ramp (opacity above 1, growing with distance),
-  // and a negative hold hides the focus itself. Refuse both.
-  if (
-    !Number.isFinite(holdSteps) ||
-    !Number.isFinite(fadeSteps) ||
-    holdSteps < 0 ||
-    fadeSteps <= holdSteps
-  ) {
-    throw new Error(
-      `Legibility window needs 0 <= holdSteps (${holdSteps}) < fadeSteps (${fadeSteps}).`
-    );
-  }
+  const { holdSteps, fadeSteps, fade, ease } = assertWindow(options);
   // A NaN depth or index propagates to opacity NaN with hidden false —
   // stale-painted, still-focusable content. Same failure loudness as the
   // distances above.
@@ -527,7 +565,9 @@ export function spiralWindow(
   const raw =
     outward <= holdSteps
       ? 1
-      : Math.max(0, (fadeSteps - outward) / (fadeSteps - holdSteps));
+      : fade
+        ? Math.pow(Math.max(0, (fadeSteps - outward) / (fadeSteps - holdSteps)), ease)
+        : 0;
   // hidden derives from the ROUNDED value the consumer will actually render:
   // a raw opacity of 0.0004 rounds to 0, and content rendered at 0 must also
   // leave the paint and the tab order.
@@ -537,6 +577,48 @@ export function spiralWindow(
     hidden: opacity <= 0,
     focused: Math.abs(outward) < 0.5,
   };
+}
+
+/**
+ * The depth at which `index` sits exactly on the window's outward boundary —
+ * the depth its opacity first reaches zero, and the last depth at which it
+ * still has a rendered size.
+ *
+ * The inverse of `spiralWindow`, and the number a consumer needs to freeze a
+ * departing tile at the size re-entry will ask for. The production dial uses
+ * it to park hidden tiles: Blink discards a dropped layer's decoded artwork,
+ * so reversing the dial repaints white for hundreds of milliseconds unless
+ * the tile stays alive with its transform pinned HERE — at the boundary,
+ * where every parked raster is the same bounded texture rather than one that
+ * grows by φ per step.
+ *
+ * The boundary is `fadeSteps` while the tail fades and `holdSteps` when it
+ * does not, because that is where the cull actually happens in each case.
+ * Clamped to the deepest depth the layout has: the squares nearest the eye
+ * would solve past the end of the dial, and never reach that state on it.
+ * No clamp is needed at the shallow end — the boundary is non-negative and
+ * `index` never exceeds the last square, so the solve cannot go below zero.
+ */
+export function windowFadeDepth(
+  index: number,
+  squareCount: number,
+  options: SpiralWindowOptions = {}
+): number {
+  const { holdSteps, fadeSteps, fade } = assertWindow(options);
+  if (
+    !Number.isFinite(index) ||
+    !Number.isFinite(squareCount) ||
+    index < 0 ||
+    index > squareCount - 1
+  ) {
+    throw new Error(
+      `Legibility window needs index (${index}) inside [0, ${squareCount - 1}] ` +
+        `for a finite squareCount (${squareCount}).`
+    );
+  }
+  // outward = index − (squareCount − 1 − depth) = boundary  ⇒  depth solves to:
+  const depth = (fade ? fadeSteps : holdSteps) + squareCount - 1 - index;
+  return Math.min(depth, squareCount - 1);
 }
 
 /**

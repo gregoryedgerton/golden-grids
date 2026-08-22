@@ -13,6 +13,7 @@ import {
   toNativeTransform,
   trailForRotation,
   trailToRotateDeg,
+  windowFadeDepth,
 } from '../utils/spiralCamera';
 import type { SpiralTrail } from '../utils/spiralCamera';
 
@@ -238,6 +239,135 @@ describe('spiralWindow', () => {
     // …and outward 1 beyond a 0.5 fade is gone.
     const narrow = spiralWindow(10, 5, 15, { holdSteps: 0.25, fadeSteps: 0.5 });
     expect(narrow.hidden).toBe(true);
+  });
+
+  it('leaves the default window untouched — ease 1 is the straight line', () => {
+    // The whole backward-compatibility claim in one assertion: pow(x, 1) is
+    // x, so an explicit default window must equal an omitted one everywhere
+    // along the ramp, not just at its ends.
+    for (const depth of [0, 2, 4.1, 4.5, 9, 14]) {
+      expect(spiralWindow(12, depth, 15, { fade: true, ease: 1 })).toEqual(
+        spiralWindow(12, depth, 15)
+      );
+    }
+  });
+
+  it('turns the tail OFF without turning the cull off', () => {
+    const off = { fade: false };
+    // Depth 3 focuses index 11. The interior and the focus stay present…
+    expect(spiralWindow(0, 3, 15, off)).toEqual({ opacity: 1, hidden: false, focused: false });
+    expect(spiralWindow(11, 3, 15, off)).toEqual({ opacity: 1, hidden: false, focused: true });
+    // …outward 1 is exactly at holdSteps, so it is the last tile that paints…
+    expect(spiralWindow(12, 3, 15, off)).toEqual({ opacity: 1, hidden: false, focused: false });
+    // …and the very next one is gone outright rather than ghosting: with the
+    // ramp on it would still be painting at 1/3.
+    expect(spiralWindow(13, 3, 15).opacity).toBeCloseTo(1 / 3, 2);
+    expect(spiralWindow(13, 3, 15, off)).toEqual({ opacity: 0, hidden: true, focused: false });
+  });
+
+  it('moves the cull with holdSteps when the tail is off, ignoring fadeSteps', () => {
+    // holdSteps is the only distance that means anything with no ramp, so a
+    // wider hold must keep more context — and a much wider fade must not.
+    const wide = { fade: false, holdSteps: 3, fadeSteps: 5 };
+    // Depth 3 focuses index 11, so index 14 sits at outward 3 — inside the
+    // wider hold, and already culled by the default hold of 1.
+    expect(spiralWindow(14, 3, 15, wide).opacity).toBe(1);
+    expect(spiralWindow(14, 3, 15, { fade: false }).hidden).toBe(true);
+    // fadeSteps is inert with no ramp to end: moving it changes nothing.
+    expect(spiralWindow(14, 3, 15, { ...wide, fadeSteps: 12 }).opacity).toBe(1);
+    // One step further out and the wider hold culls too.
+    expect(spiralWindow(14, 4, 15, wide).hidden).toBe(true);
+  });
+
+  it('bends the ramp with ease without moving either end', () => {
+    // Depth 3.5 puts index 12 at outward 1.5 — the ramp's midpoint, where a
+    // linear window reads 0.667.
+    const linear = spiralWindow(12, 3.5, 15).opacity;
+    expect(linear).toBeCloseTo(2 / 3, 3);
+    // Above 1: holds presence, then drops away late.
+    expect(spiralWindow(12, 3.5, 15, { ease: 3 }).opacity).toBeLessThan(linear);
+    // Below 1: drops early, then lingers near-transparent.
+    expect(spiralWindow(12, 3.5, 15, { ease: 0.5 }).opacity).toBeGreaterThan(linear);
+    // Both ends are fixed points of pow — the ease only shapes what is
+    // between them, so hold and fade still mean exactly what they say.
+    for (const ease of [0.5, 3]) {
+      expect(spiralWindow(12, 3, 15, { ease }).opacity).toBe(1);
+      expect(spiralWindow(12, 4.5, 15, { ease })).toEqual({
+        opacity: 0,
+        hidden: true,
+        focused: false,
+      });
+    }
+  });
+
+  it('ignores ease when the tail is off', () => {
+    // There is no ramp to shape, so a wild exponent must change nothing.
+    expect(spiralWindow(13, 3, 15, { fade: false, ease: 3 })).toEqual(
+      spiralWindow(13, 3, 15, { fade: false })
+    );
+  });
+
+  it('rejects a non-positive ease', () => {
+    // 0 collapses the ramp to a step (pow(x, 0) is 1 for every x, so nothing
+    // outside the hold ever fades OR hides), and a negative exponent sends
+    // the boundary to Infinity. Both come from parsed config.
+    expect(() => spiralWindow(9, 0, 15, { ease: 0 })).toThrow('ease');
+    expect(() => spiralWindow(9, 0, 15, { ease: -1 })).toThrow('ease');
+    expect(() => spiralWindow(9, 0, 15, { ease: NaN })).toThrow('ease');
+    expect(() => spiralWindow(9, 0, 15, { ease: Infinity })).toThrow('ease');
+  });
+
+  it('validates hold and fade even when the tail is off', () => {
+    // fadeSteps is unused with the tail off, but flipping the switch back on
+    // must not be able to turn a working window into a throw.
+    expect(() => spiralWindow(9, 0, 15, { fade: false, holdSteps: 3, fadeSteps: 2 })).toThrow(
+      'Legibility window'
+    );
+  });
+});
+
+describe('windowFadeDepth', () => {
+  it('solves the depth at which a square lands on the fade boundary', () => {
+    // index 12 in a 15-square layout: outward reaches fadeSteps 2.5 at depth
+    // 2.5 + 14 − 12 = 4.5 — exactly where spiralWindow first hides it.
+    expect(windowFadeDepth(12, 15)).toBe(4.5);
+    expect(spiralWindow(12, 4.5, 15).hidden).toBe(true);
+    // Shy of it the tile still paints — though not right up to the boundary,
+    // since `hidden` follows the ROUNDED opacity and that reaches 0 first.
+    expect(spiralWindow(12, 4.4, 15).hidden).toBe(false);
+  });
+
+  it('uses holdSteps as the boundary when the tail is off', () => {
+    // With no ramp the cull happens the moment outward passes holdSteps, so
+    // that is the depth a consumer freezes a departing tile at.
+    expect(windowFadeDepth(12, 15, { fade: false })).toBe(3);
+    expect(spiralWindow(12, 3, 15, { fade: false }).hidden).toBe(false);
+    expect(spiralWindow(12, 3.0001, 15, { fade: false }).hidden).toBe(true);
+  });
+
+  it('clamps squares whose boundary falls past the end of the dial', () => {
+    // The outermost square crosses its boundary early, well inside the range…
+    expect(windowFadeDepth(14, 15)).toBe(2.5);
+    // …while the squares nearest the eye solve past the deepest depth the
+    // layout has, and never reach that state on this dial at all.
+    expect(windowFadeDepth(0, 15)).toBe(14);
+    expect(windowFadeDepth(1, 15)).toBe(14);
+    expect(windowFadeDepth(0, 2)).toBe(1);
+    // The solve can never go the other way: a non-negative boundary plus a
+    // non-negative (count − 1 − index) is non-negative, so there is no
+    // shallow clamp to test — the tightest case is exactly zero.
+    expect(windowFadeDepth(14, 15, { fade: false, holdSteps: 0 })).toBe(0);
+  });
+
+  it('rejects an illegal window or an out-of-range index', () => {
+    expect(() => windowFadeDepth(9, 15, { holdSteps: 3, fadeSteps: 2 })).toThrow(
+      'Legibility window'
+    );
+    expect(() => windowFadeDepth(9, 15, { ease: 0 })).toThrow('ease');
+    expect(() => windowFadeDepth(15, 15)).toThrow('inside');
+    expect(() => windowFadeDepth(-1, 15)).toThrow('inside');
+    expect(() => windowFadeDepth(NaN, 15)).toThrow('inside');
+    expect(() => windowFadeDepth(0, NaN)).toThrow('squareCount');
   });
 });
 

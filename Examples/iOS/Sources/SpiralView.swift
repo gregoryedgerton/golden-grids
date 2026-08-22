@@ -72,6 +72,11 @@ struct SpiralView: View {
     @State private var depth: Double = SpiralView.initialDepth(
         for: SpiralView.dials[SpiralView.initialSet()]!.count
     )
+    /// The legibility window the dial renders with. FADE off is the
+    /// library's `fade: false` — full presence out to `holdSteps`, then
+    /// straight to hidden, so the spiral's outer context reads solid while
+    /// tiles past the viewport still leave the paint.
+    @State private var fadeTail = true
     @State private var dragStartDepth: Double?
     /// Last two drag samples, for a live-flick velocity (depth/second) —
     /// only the final <100 ms of the gesture should decide the coast, or a
@@ -162,6 +167,12 @@ struct SpiralView: View {
                         coastTask?.cancel()
                         depth = min(depth, maxDepth)
                     }
+                    // The fading tail is a configuration detail, not the
+                    // dial's definition — flip it and watch the outward
+                    // squares stop ghosting without the cull going away.
+                    Toggle("Fade tail", isOn: $fadeTail)
+                        .font(.caption)
+                        .toggleStyle(.switch)
                     // Clamp BEFORE indexing: on a set switch SwiftUI
                     // renders this body with the new dial before onChange
                     // has re-clamped the state, and an unclamped depth would
@@ -254,7 +265,12 @@ struct SpiralView: View {
         return ZStack(alignment: .topLeading) {
             ForEach(dial.layout.squares.indices, id: \.self) { index in
                 let square = dial.layout.squares[index]
-                let window = spiralWindow(index, depth: min(depth, maxDepth), squareCount: dial.count)
+                let window = spiralWindow(
+                    index,
+                    depth: min(depth, maxDepth),
+                    squareCount: dial.count,
+                    options: SpiralWindowOptions(fade: fadeTail)
+                )
                 let tileScale = frame.scale * Double(square.size) / Self.texturePx
                 // With ninety-one squares most of the interior is sub-pixel
                 // at any depth — skip tiles that would paint under half a

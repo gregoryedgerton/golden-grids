@@ -1718,7 +1718,9 @@
         "depth": 0,
         "count": 15,
         "holdSteps": 1,
-        "fadeSteps": 2.5
+        "fadeSteps": 2.5,
+        "fade": true,
+        "ease": 1
       },
       "window": {
         "opacity": 1,
@@ -1732,7 +1734,9 @@
         "depth": 0,
         "count": 15,
         "holdSteps": 1,
-        "fadeSteps": 2.5
+        "fadeSteps": 2.5,
+        "fade": true,
+        "ease": 1
       },
       "window": {
         "opacity": 1,
@@ -1746,7 +1750,9 @@
         "depth": 0,
         "count": 15,
         "holdSteps": 1,
-        "fadeSteps": 2.5
+        "fadeSteps": 2.5,
+        "fade": true,
+        "ease": 1
       },
       "window": {
         "opacity": 1,
@@ -1760,7 +1766,9 @@
         "depth": 0,
         "count": 15,
         "holdSteps": 1,
-        "fadeSteps": 2.5
+        "fadeSteps": 2.5,
+        "fade": true,
+        "ease": 1
       },
       "window": {
         "opacity": 1,
@@ -1774,7 +1782,9 @@
         "depth": 0,
         "count": 15,
         "holdSteps": 1,
-        "fadeSteps": 2.5
+        "fadeSteps": 2.5,
+        "fade": true,
+        "ease": 1
       },
       "window": {
         "opacity": 1,
@@ -1788,7 +1798,9 @@
         "depth": 1.5,
         "count": 15,
         "holdSteps": 1,
-        "fadeSteps": 2.5
+        "fadeSteps": 2.5,
+        "fade": true,
+        "ease": 1
       },
       "window": {
         "opacity": 1,
@@ -1802,7 +1814,9 @@
         "depth": 1.5,
         "count": 15,
         "holdSteps": 1,
-        "fadeSteps": 2.5
+        "fadeSteps": 2.5,
+        "fade": true,
+        "ease": 1
       },
       "window": {
         "opacity": 1,
@@ -1816,7 +1830,9 @@
         "depth": 1.5,
         "count": 15,
         "holdSteps": 1,
-        "fadeSteps": 2.5
+        "fadeSteps": 2.5,
+        "fade": true,
+        "ease": 1
       },
       "window": {
         "opacity": 1,
@@ -1830,7 +1846,9 @@
         "depth": 1.5,
         "count": 15,
         "holdSteps": 1,
-        "fadeSteps": 2.5
+        "fadeSteps": 2.5,
+        "fade": true,
+        "ease": 1
       },
       "window": {
         "opacity": 1,
@@ -1844,7 +1862,9 @@
         "depth": 1.5,
         "count": 15,
         "holdSteps": 1,
-        "fadeSteps": 2.5
+        "fadeSteps": 2.5,
+        "fade": true,
+        "ease": 1
       },
       "window": {
         "opacity": 0.667,
@@ -1858,7 +1878,9 @@
         "depth": 7,
         "count": 15,
         "holdSteps": 1,
-        "fadeSteps": 2.5
+        "fadeSteps": 2.5,
+        "fade": true,
+        "ease": 1
       },
       "window": {
         "opacity": 1,
@@ -1872,7 +1894,9 @@
         "depth": 7,
         "count": 15,
         "holdSteps": 1,
-        "fadeSteps": 2.5
+        "fadeSteps": 2.5,
+        "fade": true,
+        "ease": 1
       },
       "window": {
         "opacity": 1,
@@ -1886,7 +1910,9 @@
         "depth": 7,
         "count": 15,
         "holdSteps": 1,
-        "fadeSteps": 2.5
+        "fadeSteps": 2.5,
+        "fade": true,
+        "ease": 1
       },
       "window": {
         "opacity": 1,
@@ -1900,7 +1926,9 @@
         "depth": 7,
         "count": 15,
         "holdSteps": 1,
-        "fadeSteps": 2.5
+        "fadeSteps": 2.5,
+        "fade": true,
+        "ease": 1
       },
       "window": {
         "opacity": 0,
@@ -1914,7 +1942,9 @@
         "depth": 7,
         "count": 15,
         "holdSteps": 1,
-        "fadeSteps": 2.5
+        "fadeSteps": 2.5,
+        "fade": true,
+        "ease": 1
       },
       "window": {
         "opacity": 0,
@@ -1928,7 +1958,9 @@
         "depth": 14,
         "count": 15,
         "holdSteps": 1,
-        "fadeSteps": 2.5
+        "fadeSteps": 2.5,
+        "fade": true,
+        "ease": 1
       },
       "window": {
         "opacity": 1,
@@ -1942,7 +1974,9 @@
         "depth": 14,
         "count": 15,
         "holdSteps": 1,
-        "fadeSteps": 2.5
+        "fadeSteps": 2.5,
+        "fade": true,
+        "ease": 1
       },
       "window": {
         "opacity": 0,
@@ -1956,7 +1990,9 @@
         "depth": 14,
         "count": 15,
         "holdSteps": 1,
-        "fadeSteps": 2.5
+        "fadeSteps": 2.5,
+        "fade": true,
+        "ease": 1
       },
       "window": {
         "opacity": 0,
@@ -1970,7 +2006,9 @@
         "depth": 14,
         "count": 15,
         "holdSteps": 1,
-        "fadeSteps": 2.5
+        "fadeSteps": 2.5,
+        "fade": true,
+        "ease": 1
       },
       "window": {
         "opacity": 0,
@@ -1984,7 +2022,9 @@
         "depth": 14,
         "count": 15,
         "holdSteps": 1,
-        "fadeSteps": 2.5
+        "fadeSteps": 2.5,
+        "fade": true,
+        "ease": 1
       },
       "window": {
         "opacity": 0,
@@ -1998,7 +2038,9 @@
         "depth": 0,
         "count": 8,
         "holdSteps": 0.5,
-        "fadeSteps": 4
+        "fadeSteps": 4,
+        "fade": true,
+        "ease": 1
       },
       "window": {
         "opacity": 1,
@@ -2012,7 +2054,9 @@
         "depth": 6,
         "count": 8,
         "holdSteps": 0.5,
-        "fadeSteps": 4
+        "fadeSteps": 4,
+        "fade": true,
+        "ease": 1
       },
       "window": {
         "opacity": 0,
@@ -2026,7 +2070,9 @@
         "depth": 0.01675,
         "count": 15,
         "holdSteps": 1,
-        "fadeSteps": 2.5
+        "fadeSteps": 2.5,
+        "fade": true,
+        "ease": 1
       },
       "window": {
         "opacity": 1,
@@ -2040,13 +2086,477 @@
         "depth": 2.01675,
         "count": 15,
         "holdSteps": 1,
-        "fadeSteps": 2.5
+        "fadeSteps": 2.5,
+        "fade": true,
+        "ease": 1
       },
       "window": {
         "opacity": 1,
         "hidden": false,
         "focused": false
       }
+    },
+    {
+      "input": {
+        "index": 0,
+        "depth": 3,
+        "count": 15,
+        "holdSteps": 1,
+        "fadeSteps": 2.5,
+        "fade": false,
+        "ease": 1
+      },
+      "window": {
+        "opacity": 1,
+        "hidden": false,
+        "focused": false
+      }
+    },
+    {
+      "input": {
+        "index": 7,
+        "depth": 3,
+        "count": 15,
+        "holdSteps": 1,
+        "fadeSteps": 2.5,
+        "fade": false,
+        "ease": 1
+      },
+      "window": {
+        "opacity": 1,
+        "hidden": false,
+        "focused": false
+      }
+    },
+    {
+      "input": {
+        "index": 10,
+        "depth": 3,
+        "count": 15,
+        "holdSteps": 1,
+        "fadeSteps": 2.5,
+        "fade": false,
+        "ease": 1
+      },
+      "window": {
+        "opacity": 1,
+        "hidden": false,
+        "focused": false
+      }
+    },
+    {
+      "input": {
+        "index": 11,
+        "depth": 3,
+        "count": 15,
+        "holdSteps": 1,
+        "fadeSteps": 2.5,
+        "fade": false,
+        "ease": 1
+      },
+      "window": {
+        "opacity": 1,
+        "hidden": false,
+        "focused": true
+      }
+    },
+    {
+      "input": {
+        "index": 12,
+        "depth": 3,
+        "count": 15,
+        "holdSteps": 1,
+        "fadeSteps": 2.5,
+        "fade": false,
+        "ease": 1
+      },
+      "window": {
+        "opacity": 1,
+        "hidden": false,
+        "focused": false
+      }
+    },
+    {
+      "input": {
+        "index": 14,
+        "depth": 3,
+        "count": 15,
+        "holdSteps": 1,
+        "fadeSteps": 2.5,
+        "fade": false,
+        "ease": 1
+      },
+      "window": {
+        "opacity": 0,
+        "hidden": true,
+        "focused": false
+      }
+    },
+    {
+      "input": {
+        "index": 13,
+        "depth": 3,
+        "count": 15,
+        "holdSteps": 3,
+        "fadeSteps": 5.5,
+        "fade": false,
+        "ease": 1
+      },
+      "window": {
+        "opacity": 1,
+        "hidden": false,
+        "focused": false
+      }
+    },
+    {
+      "input": {
+        "index": 12,
+        "depth": 3,
+        "count": 15,
+        "holdSteps": 1,
+        "fadeSteps": 2.5,
+        "fade": true,
+        "ease": 0.5
+      },
+      "window": {
+        "opacity": 1,
+        "hidden": false,
+        "focused": false
+      }
+    },
+    {
+      "input": {
+        "index": 12,
+        "depth": 3.4,
+        "count": 15,
+        "holdSteps": 1,
+        "fadeSteps": 2.5,
+        "fade": true,
+        "ease": 0.5
+      },
+      "window": {
+        "opacity": 0.856,
+        "hidden": false,
+        "focused": false
+      }
+    },
+    {
+      "input": {
+        "index": 12,
+        "depth": 4.2,
+        "count": 15,
+        "holdSteps": 1,
+        "fadeSteps": 2.5,
+        "fade": true,
+        "ease": 0.5
+      },
+      "window": {
+        "opacity": 0.447,
+        "hidden": false,
+        "focused": false
+      }
+    },
+    {
+      "input": {
+        "index": 12,
+        "depth": 3,
+        "count": 15,
+        "holdSteps": 1,
+        "fadeSteps": 2.5,
+        "fade": true,
+        "ease": 2
+      },
+      "window": {
+        "opacity": 1,
+        "hidden": false,
+        "focused": false
+      }
+    },
+    {
+      "input": {
+        "index": 12,
+        "depth": 3.4,
+        "count": 15,
+        "holdSteps": 1,
+        "fadeSteps": 2.5,
+        "fade": true,
+        "ease": 2
+      },
+      "window": {
+        "opacity": 0.538,
+        "hidden": false,
+        "focused": false
+      }
+    },
+    {
+      "input": {
+        "index": 12,
+        "depth": 4.2,
+        "count": 15,
+        "holdSteps": 1,
+        "fadeSteps": 2.5,
+        "fade": true,
+        "ease": 2
+      },
+      "window": {
+        "opacity": 0.04,
+        "hidden": false,
+        "focused": false
+      }
+    },
+    {
+      "input": {
+        "index": 12,
+        "depth": 3,
+        "count": 15,
+        "holdSteps": 1,
+        "fadeSteps": 2.5,
+        "fade": true,
+        "ease": 3
+      },
+      "window": {
+        "opacity": 1,
+        "hidden": false,
+        "focused": false
+      }
+    },
+    {
+      "input": {
+        "index": 12,
+        "depth": 3.4,
+        "count": 15,
+        "holdSteps": 1,
+        "fadeSteps": 2.5,
+        "fade": true,
+        "ease": 3
+      },
+      "window": {
+        "opacity": 0.394,
+        "hidden": false,
+        "focused": false
+      }
+    },
+    {
+      "input": {
+        "index": 12,
+        "depth": 4.2,
+        "count": 15,
+        "holdSteps": 1,
+        "fadeSteps": 2.5,
+        "fade": true,
+        "ease": 3
+      },
+      "window": {
+        "opacity": 0.008,
+        "hidden": false,
+        "focused": false
+      }
+    },
+    {
+      "input": {
+        "index": 12,
+        "depth": 3,
+        "count": 15,
+        "holdSteps": 1,
+        "fadeSteps": 2.5,
+        "fade": true,
+        "ease": 1.75
+      },
+      "window": {
+        "opacity": 1,
+        "hidden": false,
+        "focused": false
+      }
+    },
+    {
+      "input": {
+        "index": 12,
+        "depth": 3.4,
+        "count": 15,
+        "holdSteps": 1,
+        "fadeSteps": 2.5,
+        "fade": true,
+        "ease": 1.75
+      },
+      "window": {
+        "opacity": 0.581,
+        "hidden": false,
+        "focused": false
+      }
+    },
+    {
+      "input": {
+        "index": 12,
+        "depth": 4.2,
+        "count": 15,
+        "holdSteps": 1,
+        "fadeSteps": 2.5,
+        "fade": true,
+        "ease": 1.75
+      },
+      "window": {
+        "opacity": 0.06,
+        "hidden": false,
+        "focused": false
+      }
+    },
+    {
+      "input": {
+        "index": 5,
+        "depth": 4,
+        "count": 8,
+        "holdSteps": 0.5,
+        "fadeSteps": 4,
+        "fade": true,
+        "ease": 2.5
+      },
+      "window": {
+        "opacity": 0.247,
+        "hidden": false,
+        "focused": false
+      }
+    }
+  ],
+  "fadeDepths": [
+    {
+      "input": {
+        "index": 0,
+        "count": 15,
+        "holdSteps": 1,
+        "fadeSteps": 2.5,
+        "fade": true
+      },
+      "depth": 14
+    },
+    {
+      "input": {
+        "index": 3,
+        "count": 15,
+        "holdSteps": 1,
+        "fadeSteps": 2.5,
+        "fade": true
+      },
+      "depth": 13.5
+    },
+    {
+      "input": {
+        "index": 11,
+        "count": 15,
+        "holdSteps": 1,
+        "fadeSteps": 2.5,
+        "fade": true
+      },
+      "depth": 5.5
+    },
+    {
+      "input": {
+        "index": 12,
+        "count": 15,
+        "holdSteps": 1,
+        "fadeSteps": 2.5,
+        "fade": true
+      },
+      "depth": 4.5
+    },
+    {
+      "input": {
+        "index": 13,
+        "count": 15,
+        "holdSteps": 1,
+        "fadeSteps": 2.5,
+        "fade": true
+      },
+      "depth": 3.5
+    },
+    {
+      "input": {
+        "index": 14,
+        "count": 15,
+        "holdSteps": 1,
+        "fadeSteps": 2.5,
+        "fade": true
+      },
+      "depth": 2.5
+    },
+    {
+      "input": {
+        "index": 5,
+        "count": 8,
+        "holdSteps": 0.5,
+        "fadeSteps": 4,
+        "fade": true
+      },
+      "depth": 6
+    },
+    {
+      "input": {
+        "index": 0,
+        "count": 15,
+        "holdSteps": 1,
+        "fadeSteps": 2.5,
+        "fade": false
+      },
+      "depth": 14
+    },
+    {
+      "input": {
+        "index": 3,
+        "count": 15,
+        "holdSteps": 1,
+        "fadeSteps": 2.5,
+        "fade": false
+      },
+      "depth": 12
+    },
+    {
+      "input": {
+        "index": 11,
+        "count": 15,
+        "holdSteps": 1,
+        "fadeSteps": 2.5,
+        "fade": false
+      },
+      "depth": 4
+    },
+    {
+      "input": {
+        "index": 12,
+        "count": 15,
+        "holdSteps": 1,
+        "fadeSteps": 2.5,
+        "fade": false
+      },
+      "depth": 3
+    },
+    {
+      "input": {
+        "index": 13,
+        "count": 15,
+        "holdSteps": 1,
+        "fadeSteps": 2.5,
+        "fade": false
+      },
+      "depth": 2
+    },
+    {
+      "input": {
+        "index": 14,
+        "count": 15,
+        "holdSteps": 1,
+        "fadeSteps": 2.5,
+        "fade": false
+      },
+      "depth": 1
+    },
+    {
+      "input": {
+        "index": 5,
+        "count": 8,
+        "holdSteps": 0.5,
+        "fadeSteps": 4,
+        "fade": false
+      },
+      "depth": 2.5
     }
   ],
   "trails": [

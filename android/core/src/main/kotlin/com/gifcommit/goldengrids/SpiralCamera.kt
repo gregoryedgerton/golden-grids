@@ -8,6 +8,7 @@ import kotlin.math.floor
 import kotlin.math.ln
 import kotlin.math.max
 import kotlin.math.min
+import kotlin.math.pow
 import kotlin.math.sin
 
 // Port of src/utils/spiralCamera.ts — the continuous depth-dial camera.
@@ -231,8 +232,18 @@ data class SpiralWindowOptions(
     /** Distance (in depth steps) a tile stays fully opaque. */
     val holdSteps: Double = 1.0,
     /** Distance at which opacity reaches zero — and the tile should leave the
-     * paint and the accessibility order. */
+     * paint and the accessibility order. Unused when [fade] is false, but
+     * still validated, so turning the tail back on can never turn a working
+     * window into a throw. */
     val fadeSteps: Double = 2.5,
+    /** Whether the outward tail FADES. False turns off the look, not the
+     * culling: full presence out to [holdSteps], then straight to hidden, so
+     * [holdSteps] becomes the cull distance. */
+    val fade: Boolean = true,
+    /** Shape of the ramp between [holdSteps] and [fadeSteps]. 1 is the
+     * straight line; above 1 holds then drops late, below 1 drops early and
+     * lingers. Ignored when [fade] is false. */
+    val ease: Double = 1.0,
 )
 
 data class SpiralWindow(
@@ -242,10 +253,29 @@ data class SpiralWindow(
 )
 
 /**
+ * Mirrors the TypeScript `assertWindow`: one definition of a legal window,
+ * shared by every function that reads one.
+ */
+private fun assertWindow(options: SpiralWindowOptions) {
+    val hold = options.holdSteps
+    val fade = options.fadeSteps
+    require(hold.isFinite() && fade.isFinite() && hold >= 0 && fade > hold) {
+        "Legibility window needs 0 <= holdSteps ($hold) < fadeSteps ($fade)."
+    }
+    require(options.ease.isFinite() && options.ease > 0) {
+        "Legibility window needs a positive finite ease (${options.ease})."
+    }
+}
+
+/**
  * The legibility window around the focus. Mirrors `spiralWindow`: only
  * OUTWARD squares (larger than the focus) fade and leave; the interior never
  * fades — squares emerge from the centre small but fully present. Includes
  * the 3-decimal rounding that `hidden` derives from.
+ *
+ * The fade is a configuration detail: `fade = false` keeps the cull but drops
+ * the ghosting, and [SpiralWindowOptions.ease] bends the ramp without moving
+ * either end.
  */
 fun spiralWindow(
     index: Int,
@@ -253,11 +283,9 @@ fun spiralWindow(
     squareCount: Int,
     options: SpiralWindowOptions = SpiralWindowOptions(),
 ): SpiralWindow {
+    assertWindow(options)
     val hold = options.holdSteps
     val fade = options.fadeSteps
-    require(hold.isFinite() && fade.isFinite() && hold >= 0 && fade > hold) {
-        "Legibility window needs 0 <= holdSteps ($hold) < fadeSteps ($fade)."
-    }
     require(
         depth.isFinite() && depth >= 0 && depth <= (squareCount - 1).toDouble() &&
             index >= 0 && index <= squareCount - 1
@@ -266,13 +294,42 @@ fun spiralWindow(
             "[0, ${squareCount - 1}] for a finite squareCount ($squareCount)."
     }
     val outward = index - focusIndexAt(depth, squareCount)
-    val raw = if (outward <= hold) 1.0 else max(0.0, (fade - outward) / (fade - hold))
+    val raw = when {
+        outward <= hold -> 1.0
+        options.fade -> max(0.0, (fade - outward) / (fade - hold)).pow(options.ease)
+        else -> 0.0
+    }
     // Same rounding the TS does with Number(raw.toFixed(3)) — HALF AWAY FROM
     // ZERO on a midpoint (raw is never negative here, so floor(x + 0.5)).
     // Kotlin's round() ties to even, which disagrees with JS and Swift at
     // exact .0005 boundaries.
     val opacity = floor(raw * 1000 + 0.5) / 1000
     return SpiralWindow(opacity = opacity, hidden = opacity <= 0, focused = abs(outward) < 0.5)
+}
+
+/**
+ * The depth at which [index] sits exactly on the window's outward boundary —
+ * where its opacity first reaches zero. Mirrors `windowFadeDepth`: the
+ * inverse of the window, and the depth a consumer freezes a departing tile at
+ * so its retained raster matches what re-entry asks for. The boundary is
+ * [SpiralWindowOptions.fadeSteps] while the tail fades and
+ * [SpiralWindowOptions.holdSteps] when it does not, and is clamped to the
+ * deepest depth the layout has — no clamp is needed at the shallow end, since
+ * the solve cannot go below zero.
+ */
+fun windowFadeDepth(
+    index: Int,
+    squareCount: Int,
+    options: SpiralWindowOptions = SpiralWindowOptions(),
+): Double {
+    assertWindow(options)
+    require(index >= 0 && index <= squareCount - 1) {
+        "Legibility window needs index ($index) inside [0, ${squareCount - 1}] " +
+            "for a finite squareCount ($squareCount)."
+    }
+    val boundary = if (options.fade) options.fadeSteps else options.holdSteps
+    val depth = boundary + squareCount - 1 - index
+    return min(depth, (squareCount - 1).toDouble())
 }
 
 // ---- eye ----

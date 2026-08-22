@@ -35,6 +35,8 @@ final class SpiralCameraFixtureTests: XCTestCase {
         let count: Int
         let holdSteps: Double
         let fadeSteps: Double
+        let fade: Bool
+        let ease: Double
     }
     struct Window: Decodable {
         let opacity: Double
@@ -44,6 +46,17 @@ final class SpiralCameraFixtureTests: XCTestCase {
     struct WindowCase: Decodable {
         let input: WindowInput
         let window: Window
+    }
+    struct FadeDepthInput: Decodable {
+        let index: Int
+        let count: Int
+        let holdSteps: Double
+        let fadeSteps: Double
+        let fade: Bool
+    }
+    struct FadeDepthCase: Decodable {
+        let input: FadeDepthInput
+        let depth: Double
     }
     struct TrailCase: Decodable {
         let count: Int
@@ -86,6 +99,7 @@ final class SpiralCameraFixtureTests: XCTestCase {
     struct Fixture: Decodable {
         let frames: [FrameCase]
         let windows: [WindowCase]
+        let fadeDepths: [FadeDepthCase]
         let trails: [TrailCase]
         let eyes: [EyeCase]
         let tiles: [TileCase]
@@ -162,12 +176,32 @@ final class SpiralCameraFixtureTests: XCTestCase {
                 squareCount: entry.input.count,
                 options: SpiralWindowOptions(
                     holdSteps: entry.input.holdSteps,
-                    fadeSteps: entry.input.fadeSteps
+                    fadeSteps: entry.input.fadeSteps,
+                    fade: entry.input.fade,
+                    ease: entry.input.ease
                 )
             )
             XCTAssertEqual(window.opacity, entry.window.opacity, accuracy: tol, "window opacity")
             XCTAssertEqual(window.hidden, entry.window.hidden, "window hidden")
             XCTAssertEqual(window.focused, entry.window.focused, "window focused")
+        }
+    }
+
+    func testFadeDepthsReproduceEveryFixture() throws {
+        let fixture = try loadFixture()
+        XCTAssertFalse(fixture.fadeDepths.isEmpty, "no fade-depth fixtures loaded")
+
+        for entry in fixture.fadeDepths {
+            let depth = windowFadeDepth(
+                entry.input.index,
+                squareCount: entry.input.count,
+                options: SpiralWindowOptions(
+                    holdSteps: entry.input.holdSteps,
+                    fadeSteps: entry.input.fadeSteps,
+                    fade: entry.input.fade
+                )
+            )
+            XCTAssertEqual(depth, entry.depth, accuracy: tol, "fade depth")
         }
     }
 

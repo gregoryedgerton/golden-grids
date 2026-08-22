@@ -68,6 +68,7 @@ import {
   spiralWindow,
   toCssContentTransform,
   toCssTileTransform,
+  windowFadeDepth,
 } from '@gifcommit/golden-grids';
 
 const layout = generateGoldenGridLayout([1, 1, 2, 3, 5, 8, 13], true, 0);
@@ -92,6 +93,16 @@ for (const [k, square] of layout.squares.entries()) {
   // camera) fade — the interior never does, so squares emerge from the
   // centre small but fully present instead of materializing through a
   // fade-in.
+  //
+  // The fade itself is a configuration detail. { fade: false } turns off the
+  // LOOK, not the culling: a tile holds full presence out to holdSteps and
+  // then goes straight to hidden, so the spiral's outer context reads solid
+  // while tiles past the viewport still leave the paint and the tab order
+  // (holdSteps becomes the cull distance — the one knob that matters with
+  // the tail off). { ease } bends the ramp between holdSteps and fadeSteps
+  // without moving either end: above 1 the tile holds and then drops away
+  // late, below 1 it drops early and lingers. The default 1 is the straight
+  // line.
   const { opacity, hidden } = spiralWindow(k, depth, layout.squares.length);
   tile.style.opacity = String(opacity);
   tile.style.visibility = hidden ? 'hidden' : 'visible';
@@ -129,6 +140,14 @@ toCssTileTransform(frame, layout.squares[0], innerWidth, innerHeight, {
 // The spiral's convergence point, e.g. as a transform origin or annotation
 // anchor (centre of the smallest square; exact in the φ-limit).
 const eye = spiralEye(layout);
+
+// The depth at which a square lands on the window's outward boundary — the
+// inverse of spiralWindow, and the depth to freeze a departing tile at if
+// you keep its layer alive rather than dropping it. (Blink discards a
+// dropped layer's decoded artwork, so reversing the dial repaints white for
+// hundreds of milliseconds unless the tile stays parked with its transform
+// pinned here.) Follows the same options, so it moves with the fade switch.
+const boundary = windowFadeDepth(0, layout.squares.length);
 ```
 
 (`toCssTransform` — one matrix for a whole stage — still exists for cases
