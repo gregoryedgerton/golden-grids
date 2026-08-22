@@ -340,8 +340,12 @@ private func assertWindow(_ options: SpiralWindowOptions) {
 /// never fades — squares emerge from the centre small but fully present.
 /// Includes the 3-decimal rounding that `hidden` derives from.
 ///
-/// The fade is a configuration detail: `fade: false` keeps the cull but
-/// drops the ghosting, and `ease` bends the ramp without moving either end.
+/// The fade is a configuration detail: `fade: false` leaves the tail SOLID
+/// rather than removing it — every square keeps full presence, so NOTHING is
+/// hidden and a caller relying on this to cull will keep off-screen tiles
+/// painted and focusable. Use `tileOnScreen` for that; it is the only one of
+/// the two that can see where a square landed. `ease` bends the ramp without
+/// moving either end.
 public func spiralWindow(
     _ index: Int,
     depth: Double,

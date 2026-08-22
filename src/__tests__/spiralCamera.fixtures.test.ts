@@ -188,9 +188,9 @@ WINDOW_INPUTS.push({
   fade: true,
   ease: 1,
 });
-// The tail OFF: full presence out to holdSteps, then straight to hidden.
-// Interior, focus, exactly-at-hold, just past it and far outward — the whole
-// step function, since it is the branch a port is most likely to get wrong.
+// The tail SOLID: full presence at every distance, nothing hidden. Interior,
+// focus, just past the hold and far outward — a port that kept the old cut
+// fails on the outward ones, which is where it matters.
 for (const index of [0, 7, 10, 11, 12, 14]) {
   WINDOW_INPUTS.push({
     index,
@@ -202,8 +202,8 @@ for (const index of [0, 7, 10, 11, 12, 14]) {
     ease: 1,
   });
 }
-// A wider hold with the tail off: the cull distance is holdSteps, so moving
-// it must move where tiles leave — and fadeSteps must not matter.
+// A wider hold with the tail solid: neither distance describes anything
+// without a ramp, so moving either must change nothing at all.
 WINDOW_INPUTS.push({
   index: 13,
   depth: 3,
