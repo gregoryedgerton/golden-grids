@@ -104,12 +104,7 @@ class SpiralCameraFixtureTest {
                 index = input.getValue("index").jsonPrimitive.int,
                 depth = input.getValue("depth").jsonPrimitive.double,
                 squareCount = input.getValue("count").jsonPrimitive.int,
-                options = SpiralWindowOptions(
-                    holdSteps = input.getValue("holdSteps").jsonPrimitive.double,
-                    fadeSteps = input.getValue("fadeSteps").jsonPrimitive.double,
-                    fade = input.getValue("fade").jsonPrimitive.boolean,
-                    ease = input.getValue("ease").jsonPrimitive.double,
-                ),
+                options = SpiralWindowOptions(fade = input.getValue("fade").jsonPrimitive.boolean),
             )
             assertClose(expected.getValue("opacity").jsonPrimitive.double, window.opacity, "window opacity")
             assertEquals(expected.getValue("hidden").jsonPrimitive.boolean, window.hidden, "window hidden")
@@ -167,12 +162,7 @@ class SpiralCameraFixtureTest {
             val depth = windowFadeDepth(
                 index = input.getValue("index").jsonPrimitive.int,
                 squareCount = input.getValue("count").jsonPrimitive.int,
-                options = SpiralWindowOptions(
-                    holdSteps = input.getValue("holdSteps").jsonPrimitive.double,
-                    fadeSteps = input.getValue("fadeSteps").jsonPrimitive.double,
-                    fade = input.getValue("fade").jsonPrimitive.boolean,
-                    ease = input.getValue("ease").jsonPrimitive.double,
-                ),
+                options = SpiralWindowOptions(fade = input.getValue("fade").jsonPrimitive.boolean),
             )
             assertClose(entry.getValue("depth").jsonPrimitive.double, depth, "fade depth")
         }

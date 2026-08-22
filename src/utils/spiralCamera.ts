@@ -227,8 +227,8 @@ export function tileTransform(
  * a stand-in either — how far a square travels before it clears the viewport
  * depends on `fillRatio`, the anchor, and the viewport's aspect.
  *
- * Useful with a fading tail too: a tile can be well past `holdSteps` and
- * still be the thing filling the negative space beside the focus.
+ * Useful with a fading tail too: a tile can be well down the ramp and still
+ * be the thing filling the negative space beside the focus.
  *
  * Conservative by construction. The square's four corners are projected
  * through the camera and tested as an axis-aligned box, which at whole depths
@@ -526,15 +526,23 @@ export function toNativeTransform(
   ];
 }
 
+/**
+ * How far outward a square keeps full presence, and how far out its opacity
+ * reaches zero — the shape of the fading tail, in depth steps.
+ *
+ * Fixed rather than configurable, and deliberately so. The ramp had knobs for
+ * both distances and an easing exponent; the extra control bought nothing a
+ * reader could name, and every one of them was a way to describe a window
+ * that looks wrong. One straight line from one step out to three is the dial
+ * this library is for.
+ *
+ * The far end is one number rather than two — a gap between "invisible" and
+ * "gone" leaves fully transparent content focusable.
+ */
+const HOLD_STEPS = 1;
+const FADE_STEPS = 3;
+
 export interface SpiralWindowOptions {
-  /** Distance (in depth steps) a tile stays fully opaque. Default 1. */
-  holdSteps?: number;
-  /** Distance at which opacity reaches zero — and the tile should leave the
-   * paint and the tab order. Deliberately one number, not two: a gap between
-   * "invisible" and "gone" leaves fully transparent content focusable.
-   * Default 2.5. Unused when `fade` is false, but still validated, so that
-   * turning the tail back on can never turn a working window into a throw. */
-  fadeSteps?: number;
   /**
    * Whether the outward tail FADES. Default true.
    *
@@ -544,25 +552,11 @@ export interface SpiralWindowOptions {
    * exactly as the geometry places them. Nothing is hidden, so nothing leaves
    * the paint or the tab order.
    *
-   * `holdSteps` and `fadeSteps` describe a ramp, so neither means anything
-   * here — a solid tail has no ramp to start or finish. Culling a square that
-   * has travelled off the viewport is a decision only the consumer can make:
-   * it needs the layout and the viewport box, and this window has neither.
+   * Culling a square that has travelled off the viewport is a decision only
+   * the consumer can make: it needs the layout and the viewport box, and this
+   * window has neither. `tileOnScreen` is that answer.
    */
   fade?: boolean;
-  /**
-   * Shape of the ramp between `holdSteps` and `fadeSteps`. Default 1, the
-   * straight line — `Math.pow(x, 1)` is `x`, so the default window is
-   * unchanged to the bit.
-   *
-   * The exponent applies to the tile's REMAINING presence, which falls from 1
-   * to 0 across the ramp — so it reads like gamma, not like a CSS easing
-   * keyword. Above 1 the tile gives up its presence early and then creeps to
-   * zero: a trail that thins fast and lingers faint. Below 1 it holds near
-   * full presence and drops away only near the end: a solid trail with a late
-   * cut-off. Ignored when `fade` is false, where there is no ramp to shape.
-   */
-  ease?: number;
 }
 
 export interface SpiralWindow {
@@ -580,32 +574,6 @@ export interface SpiralWindow {
 const HIDDEN_BELOW = 0.0005;
 
 /**
- * A malformed window renders nonsense rather than failing visibly: an
- * inverted one reverses the ramp (opacity above 1, growing with distance), a
- * negative hold hides the focus itself, and a non-positive ease either
- * collapses the ramp to a step (0) or sends it to Infinity (negative). Refuse
- * all of them — and refuse them identically for every function that reads a
- * window, so the window's own definition can't drift between them.
- */
-function assertWindow(options: SpiralWindowOptions): Required<SpiralWindowOptions> {
-  const { holdSteps = 1, fadeSteps = 2.5, fade = true, ease = 1 } = options;
-  if (
-    !Number.isFinite(holdSteps) ||
-    !Number.isFinite(fadeSteps) ||
-    holdSteps < 0 ||
-    fadeSteps <= holdSteps
-  ) {
-    throw new Error(
-      `Legibility window needs 0 <= holdSteps (${holdSteps}) < fadeSteps (${fadeSteps}).`
-    );
-  }
-  if (!Number.isFinite(ease) || ease <= 0) {
-    throw new Error(`Legibility window needs a positive finite ease (${ease}).`);
-  }
-  return { holdSteps, fadeSteps, fade, ease };
-}
-
-/**
  * The legibility window around the focus: how present square `index` is at
  * `depth`. One ramp gives you "a few tiles at a time" and the crossfade.
  *
@@ -617,9 +585,8 @@ function assertWindow(options: SpiralWindowOptions): Required<SpiralWindowOption
  * replaced a symmetric window for exactly that reason.
  *
  * The fade itself is a configuration detail — `{ fade: false }` leaves the
- * tail solid rather than removing it, and `ease` bends the ramp between
- * `holdSteps` and `fadeSteps` without moving either end (above 1 fades early,
- * below 1 fades late — it is an exponent on the REMAINING presence).
+ * tail solid rather than removing it. There is nothing else to configure: the
+ * ramp is one straight line between fixed distances.
  */
 export function spiralWindow(
   index: number,
@@ -627,7 +594,7 @@ export function spiralWindow(
   squareCount: number,
   options: SpiralWindowOptions = {}
 ): SpiralWindow {
-  const { holdSteps, fadeSteps, fade, ease } = assertWindow(options);
+  const { fade = true } = options;
   // A NaN depth or index propagates to opacity NaN with hidden false —
   // stale-painted, still-focusable content. Same failure loudness as the
   // distances above.
@@ -652,9 +619,9 @@ export function spiralWindow(
   // replaced by a cut. The outward squares stay exactly where the spiral puts
   // them, filling the negative space and running off the page.
   const raw =
-    !fade || outward <= holdSteps
+    !fade || outward <= HOLD_STEPS
       ? 1
-      : Math.pow(Math.max(0, (fadeSteps - outward) / (fadeSteps - holdSteps)), ease);
+      : Math.max(0, (FADE_STEPS - outward) / (FADE_STEPS - HOLD_STEPS));
   // hidden derives from the ROUNDED value the consumer will actually render:
   // a raw opacity of 0.0004 rounds to 0, and content rendered at 0 must also
   // leave the paint and the tab order.
@@ -680,15 +647,12 @@ export function spiralWindow(
  * grows by φ per step.
  *
  * The boundary follows the ROUNDED opacity a consumer actually renders, not
- * the ramp's theoretical endpoint — the two part company as soon as `ease`
- * leaves 1. An eased ramp reaches a value that rounds to zero well before it
- * reaches `fadeSteps` (at ease 3 the default window hides a tile 0.119 steps
- * early; at ease 100, 1.39 steps early), and a tile frozen at the endpoint
- * would retain a raster at a scale re-entry never asks for — the exact
- * failure parking exists to prevent. Solving `pow(x, ease) < HIDDEN_BELOW`
- * for the ramp position puts the cutoff at
- * `fadeSteps - HIDDEN_BELOW^(1/ease) * (fadeSteps - holdSteps)`, which is
- * `fadeSteps` in the ease-0 limit and `holdSteps` in the ease-infinity one.
+ * the ramp's theoretical endpoint. The two differ by a hair — the ramp
+ * reaches a value that rounds to zero a thousandth of a step before it
+ * reaches its end — and a tile frozen at the endpoint would retain a raster
+ * at a scale re-entry never asks for, which is the exact failure parking
+ * exists to prevent. Solving the ramp for `< HIDDEN_BELOW` puts the cutoff a
+ * shade inside the far end.
  *
  * With `fade: false` there is no boundary at all — a solid tail never drops a
  * square — so the answer is the dial's deepest depth: "not on this dial".
@@ -705,7 +669,7 @@ export function windowFadeDepth(
   squareCount: number,
   options: SpiralWindowOptions = {}
 ): number {
-  const { holdSteps, fadeSteps, fade, ease } = assertWindow(options);
+  const { fade = true } = options;
   if (
     !Number.isFinite(index) ||
     !Number.isFinite(squareCount) ||
@@ -719,7 +683,7 @@ export function windowFadeDepth(
   }
   // A solid tail has no boundary to solve for: no square ever leaves.
   if (!fade) return squareCount - 1;
-  const boundary = fadeSteps - Math.pow(HIDDEN_BELOW, 1 / ease) * (fadeSteps - holdSteps);
+  const boundary = FADE_STEPS - HIDDEN_BELOW * (FADE_STEPS - HOLD_STEPS);
   // outward = index − (squareCount − 1 − depth) = boundary  ⇒  depth solves to:
   const depth = boundary + squareCount - 1 - index;
   return Math.min(depth, squareCount - 1);
