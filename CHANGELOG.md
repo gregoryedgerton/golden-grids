@@ -1,3 +1,10 @@
+# [4.11.0](https://github.com/gregoryedgerton/golden-grids/compare/v4.10.0...v4.11.0) (2026-08-22)
+
+
+### Features
+
+* add tileOnScreen, and let a solid tail keep its squares ([6b840fd](https://github.com/gregoryedgerton/golden-grids/commit/6b840fddec7a9d6fb37f522c8663f4eec4d790c1))
+
 # [4.10.0](https://github.com/gregoryedgerton/golden-grids/compare/v4.9.0...v4.10.0) (2026-08-22)
 
 
