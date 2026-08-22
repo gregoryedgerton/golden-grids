@@ -217,6 +217,75 @@ export function tileTransform(
 }
 
 /**
+ * Whether a square still covers any of the viewport at this frame — the
+ * geometric answer to "is this tile using on-screen space, or has it
+ * travelled off the page".
+ *
+ * This is the cull a solid tail needs. `spiralWindow` cannot answer it: it
+ * knows an index, a depth and a count, and whether a square is on screen
+ * depends on the layout and the viewport box. Distance in depth steps is not
+ * a stand-in either — how far a square travels before it clears the viewport
+ * depends on `fillRatio`, the anchor, and the viewport's aspect.
+ *
+ * Useful with a fading tail too: a tile can be well past `holdSteps` and
+ * still be the thing filling the negative space beside the focus.
+ *
+ * Conservative by construction. The square's four corners are projected
+ * through the camera and tested as an axis-aligned box, which at whole depths
+ * (rotation a multiple of 90°) is the square exactly, and mid-turn is slightly
+ * larger than the rotated quad. So it can answer "yes" for a square that has
+ * just cleared the corner — it never answers "no" for one that is visible,
+ * which is the direction that matters when the answer drives a cull.
+ *
+ * `margin` (default 0) widens the test box in viewport pixels: keep tiles
+ * alive slightly off-screen to avoid pop-in at the edges.
+ */
+export function tileOnScreen(
+  frame: SpiralCameraFrame,
+  square: { x: number; y: number; size: number },
+  viewportWidth: number,
+  viewportHeight: number,
+  options: { anchor?: { x: number; y: number }; margin?: number } = {}
+): boolean {
+  const anchor = options.anchor ?? { x: viewportWidth / 2, y: viewportHeight / 2 };
+  const margin = options.margin ?? 0;
+  if (!Number.isFinite(anchor.x) || !Number.isFinite(anchor.y)) {
+    throw new Error(`Anchor (${anchor.x}, ${anchor.y}) must be finite.`);
+  }
+  if (!Number.isFinite(margin) || margin < 0) {
+    throw new Error(`margin (${margin}) must be a non-negative finite number.`);
+  }
+  const radians = (frame.rotationDeg * Math.PI) / 180;
+  const cos = Math.cos(radians);
+  const sin = Math.sin(radians);
+  let minX = Infinity;
+  let maxX = -Infinity;
+  let minY = Infinity;
+  let maxY = -Infinity;
+  for (const [px, py] of [
+    [square.x, square.y],
+    [square.x + square.size, square.y],
+    [square.x + square.size, square.y + square.size],
+    [square.x, square.y + square.size],
+  ]) {
+    const dx = px - frame.centerX;
+    const dy = py - frame.centerY;
+    const x = anchor.x + frame.scale * (cos * dx - sin * dy);
+    const y = anchor.y + frame.scale * (sin * dx + cos * dy);
+    if (x < minX) minX = x;
+    if (x > maxX) maxX = x;
+    if (y < minY) minY = y;
+    if (y > maxY) maxY = y;
+  }
+  return (
+    maxX >= -margin &&
+    minX <= viewportWidth + margin &&
+    maxY >= -margin &&
+    minY <= viewportHeight + margin
+  );
+}
+
+/**
  * The tile transform as a CSS string for a tile box of `texturePx` square
  * positioned at the stage origin with `transform-origin: 0 0`.
  */
@@ -469,11 +538,16 @@ export interface SpiralWindowOptions {
   /**
    * Whether the outward tail FADES. Default true.
    *
-   * False turns off the look, not the culling: a tile holds full presence out
-   * to `holdSteps` and then goes straight to hidden, so the spiral's outer
-   * context reads solid while tiles past the viewport still leave the paint
-   * and the tab order. `holdSteps` becomes the cull distance — the one knob
-   * that matters with the tail off.
+   * False leaves the tail SOLID — it does not remove it. Every square keeps
+   * full presence at any distance, so the spiral's outward squares go on
+   * filling the negative space around the focus and bleeding off the page,
+   * exactly as the geometry places them. Nothing is hidden, so nothing leaves
+   * the paint or the tab order.
+   *
+   * `holdSteps` and `fadeSteps` describe a ramp, so neither means anything
+   * here — a solid tail has no ramp to start or finish. Culling a square that
+   * has travelled off the viewport is a decision only the consumer can make:
+   * it needs the layout and the viewport box, and this window has neither.
    */
   fade?: boolean;
   /**
@@ -542,10 +616,10 @@ function assertWindow(options: SpiralWindowOptions): Required<SpiralWindowOption
  * the centre of the spiral as a hole. Proven on the production dial, where it
  * replaced a symmetric window for exactly that reason.
  *
- * The fade itself is a configuration detail — `{ fade: false }` keeps the cull
- * but drops the ghosting, and `ease` bends the ramp between `holdSteps` and
- * `fadeSteps` without moving either end (above 1 fades early, below 1 fades
- * late — it is an exponent on the REMAINING presence).
+ * The fade itself is a configuration detail — `{ fade: false }` leaves the
+ * tail solid rather than removing it, and `ease` bends the ramp between
+ * `holdSteps` and `fadeSteps` without moving either end (above 1 fades early,
+ * below 1 fades late — it is an exponent on the REMAINING presence).
  */
 export function spiralWindow(
   index: number,
@@ -574,12 +648,13 @@ export function spiralWindow(
   // Signed: positive = outward (larger squares, behind the camera). Only
   // that side fades; the interior holds full presence at any distance.
   const outward = index - focusIndexAt(depth, squareCount);
+  // A solid tail is full presence everywhere — the ramp is skipped, not
+  // replaced by a cut. The outward squares stay exactly where the spiral puts
+  // them, filling the negative space and running off the page.
   const raw =
-    outward <= holdSteps
+    !fade || outward <= holdSteps
       ? 1
-      : fade
-        ? Math.pow(Math.max(0, (fadeSteps - outward) / (fadeSteps - holdSteps)), ease)
-        : 0;
+      : Math.pow(Math.max(0, (fadeSteps - outward) / (fadeSteps - holdSteps)), ease);
   // hidden derives from the ROUNDED value the consumer will actually render:
   // a raw opacity of 0.0004 rounds to 0, and content rendered at 0 must also
   // leave the paint and the tab order.
@@ -614,8 +689,11 @@ export function spiralWindow(
  * for the ramp position puts the cutoff at
  * `fadeSteps - HIDDEN_BELOW^(1/ease) * (fadeSteps - holdSteps)`, which is
  * `fadeSteps` in the ease-0 limit and `holdSteps` in the ease-infinity one.
- * With the tail off there is no ramp to round, so the boundary is
- * `holdSteps` exactly.
+ *
+ * With `fade: false` there is no boundary at all — a solid tail never drops a
+ * square — so the answer is the dial's deepest depth: "not on this dial".
+ * Nothing hides, so nothing needs freezing either; a consumer's parking
+ * simply never engages.
  *
  * Clamped to the deepest depth the layout has: the squares nearest the eye
  * would solve past the end of the dial, and never reach that state on it.
@@ -639,9 +717,9 @@ export function windowFadeDepth(
         `for a finite squareCount (${squareCount}).`
     );
   }
-  const boundary = fade
-    ? fadeSteps - Math.pow(HIDDEN_BELOW, 1 / ease) * (fadeSteps - holdSteps)
-    : holdSteps;
+  // A solid tail has no boundary to solve for: no square ever leaves.
+  if (!fade) return squareCount - 1;
+  const boundary = fadeSteps - Math.pow(HIDDEN_BELOW, 1 / ease) * (fadeSteps - holdSteps);
   // outward = index − (squareCount − 1 − depth) = boundary  ⇒  depth solves to:
   const depth = boundary + squareCount - 1 - index;
   return Math.min(depth, squareCount - 1);

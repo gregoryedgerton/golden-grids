@@ -152,6 +152,50 @@ public func tileTransform(
     )
 }
 
+/// Whether a square still covers any of the viewport at this frame — the
+/// geometric cull a solid tail needs. Mirrors `tileOnScreen`.
+///
+/// Conservative: the four corners are projected and tested as an axis-aligned
+/// box, exact at whole depths and slightly generous mid-turn, so it never
+/// reports "off screen" for a square that is visible.
+public func tileOnScreen(
+    _ frame: SpiralCameraFrame,
+    square: Square,
+    viewportWidth: Double,
+    viewportHeight: Double,
+    anchor: CGPoint? = nil,
+    margin: Double = 0
+) -> Bool {
+    let a = anchor ?? CGPoint(x: viewportWidth / 2, y: viewportHeight / 2)
+    precondition(a.x.isFinite && a.y.isFinite, "Anchor (\(a.x), \(a.y)) must be finite.")
+    precondition(
+        margin.isFinite && margin >= 0,
+        "margin (\(margin)) must be a non-negative finite number."
+    )
+    let radians = frame.rotationDeg * .pi / 180
+    let cosR = cos(radians)
+    let sinR = sin(radians)
+    let sz = Double(square.size)
+    let corners: [(Double, Double)] = [
+        (Double(square.x), Double(square.y)),
+        (Double(square.x) + sz, Double(square.y)),
+        (Double(square.x) + sz, Double(square.y) + sz),
+        (Double(square.x), Double(square.y) + sz),
+    ]
+    var minX = Double.infinity, maxX = -Double.infinity
+    var minY = Double.infinity, maxY = -Double.infinity
+    for (px, py) in corners {
+        let dx = px - frame.centerX
+        let dy = py - frame.centerY
+        let x = Double(a.x) + frame.scale * (cosR * dx - sinR * dy)
+        let y = Double(a.y) + frame.scale * (sinR * dx + cosR * dy)
+        minX = min(minX, x); maxX = max(maxX, x)
+        minY = min(minY, y); maxY = max(maxY, y)
+    }
+    return maxX >= -margin && minX <= viewportWidth + margin
+        && maxY >= -margin && minY <= viewportHeight + margin
+}
+
 #if canImport(CoreGraphics)
 /// The tile transform as a `CGAffineTransform` for a tile view of
 /// `texturePx` square positioned at the stage origin (0 0 transform origin).
@@ -242,9 +286,10 @@ public struct SpiralWindowOptions: Sendable {
     /// but still validated, so turning the tail back on can never turn a
     /// working window into a trap.
     public var fadeSteps: Double
-    /// Whether the outward tail FADES. False turns off the look, not the
-    /// culling: full presence out to `holdSteps`, then straight to hidden,
-    /// so `holdSteps` becomes the cull distance.
+    /// Whether the outward tail FADES. False leaves the tail SOLID rather
+    /// than removing it: every square keeps full presence at any distance,
+    /// filling the negative space around the focus and bleeding off the page.
+    /// Nothing hides, and `holdSteps`/`fadeSteps` mean nothing without a ramp.
     public var fade: Bool
     /// Shape of the ramp between `holdSteps` and `fadeSteps`. 1 is the
     /// straight line. The exponent applies to the tile's REMAINING presence,
@@ -313,13 +358,13 @@ public func spiralWindow(
             + "[0, \(squareCount - 1)] for a finite squareCount (\(squareCount))."
     )
     let outward = Double(index) - focusIndexAt(depth, squareCount)
+    // A solid tail is full presence everywhere — the ramp is skipped, not
+    // replaced by a cut.
     let raw: Double
-    if outward <= hold {
+    if !options.fade || outward <= hold {
         raw = 1
-    } else if options.fade {
-        raw = pow(max(0, (fade - outward) / (fade - hold)), options.ease)
     } else {
-        raw = 0
+        raw = pow(max(0, (fade - outward) / (fade - hold)), options.ease)
     }
     // Same rounding the TS does with Number(raw.toFixed(3)): hidden follows
     // the value the consumer will actually render.
@@ -333,10 +378,11 @@ public func spiralWindow(
 /// at so its retained raster matches what re-entry asks for. The boundary
 /// follows the ROUNDED opacity, not the ramp's endpoint: an eased ramp
 /// rounds to zero well before it reaches `fadeSteps`, so the cutoff is
-/// `fadeSteps - hiddenBelow^(1/ease) * (fadeSteps - holdSteps)` while the
-/// tail fades, and `holdSteps` when it does not. Clamped to the deepest
-/// depth the layout has — no clamp is needed at the shallow end, since the
-/// solve cannot go below zero.
+/// `fadeSteps - hiddenBelow^(1/ease) * (fadeSteps - holdSteps)`. With
+/// `fade: false` there is no boundary at all — a solid tail never drops a
+/// square — so the answer is the dial's deepest depth. Clamped to that depth
+/// — no clamp is needed at the shallow end, since the solve cannot go below
+/// zero.
 public func windowFadeDepth(
     _ index: Int,
     squareCount: Int,
@@ -348,10 +394,10 @@ public func windowFadeDepth(
         "Legibility window needs index (\(index)) inside [0, \(squareCount - 1)] "
             + "for a finite squareCount (\(squareCount))."
     )
-    let boundary = options.fade
-        ? options.fadeSteps - pow(hiddenBelow, 1 / options.ease)
-            * (options.fadeSteps - options.holdSteps)
-        : options.holdSteps
+    // A solid tail has no boundary to solve for: no square ever leaves.
+    if !options.fade { return Double(squareCount - 1) }
+    let boundary = options.fadeSteps - pow(hiddenBelow, 1 / options.ease)
+        * (options.fadeSteps - options.holdSteps)
     let depth = boundary + Double(squareCount) - 1 - Double(index)
     return min(depth, Double(squareCount - 1))
 }

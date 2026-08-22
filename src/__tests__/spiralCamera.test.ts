@@ -5,6 +5,7 @@ import {
   spiralCamera,
   spiralEye,
   spiralWindow,
+  tileOnScreen,
   tileTransform,
   toCssContentTransform,
   toCssTileTransform,
@@ -252,31 +253,42 @@ describe('spiralWindow', () => {
     }
   });
 
-  it('turns the tail OFF without turning the cull off', () => {
+  it('leaves the tail SOLID when fade is off — it does not remove it', () => {
+    // The whole point of the switch: "fade tail off" means the tail stops
+    // FADING, not that the tail stops existing. Every square keeps full
+    // presence at any distance, so the outward ones go on filling the
+    // negative space around the focus and bleeding off the page.
     const off = { fade: false };
-    // Depth 3 focuses index 11. The interior and the focus stay present…
-    expect(spiralWindow(0, 3, 15, off)).toEqual({ opacity: 1, hidden: false, focused: false });
-    expect(spiralWindow(11, 3, 15, off)).toEqual({ opacity: 1, hidden: false, focused: true });
-    // …outward 1 is exactly at holdSteps, so it is the last tile that paints…
-    expect(spiralWindow(12, 3, 15, off)).toEqual({ opacity: 1, hidden: false, focused: false });
-    // …and the very next one is gone outright rather than ghosting: with the
-    // ramp on it would still be painting at 1/3.
+    for (const depth of [0, 3, 7.5, 14]) {
+      for (let index = 0; index < 15; index += 1) {
+        const w = spiralWindow(index, depth, 15, off);
+        expect(w.opacity).toBe(1);
+        expect(w.hidden).toBe(false);
+      }
+    }
+    // Where the fading window would already have dropped it, the solid one
+    // still paints it in full.
     expect(spiralWindow(13, 3, 15).opacity).toBeCloseTo(1 / 3, 2);
-    expect(spiralWindow(13, 3, 15, off)).toEqual({ opacity: 0, hidden: true, focused: false });
+    expect(spiralWindow(14, 3, 15).hidden).toBe(true);
+    expect(spiralWindow(14, 3, 15, off)).toEqual({
+      opacity: 1,
+      hidden: false,
+      focused: false,
+    });
   });
 
-  it('moves the cull with holdSteps when the tail is off, ignoring fadeSteps', () => {
-    // holdSteps is the only distance that means anything with no ramp, so a
-    // wider hold must keep more context — and a much wider fade must not.
-    const wide = { fade: false, holdSteps: 3, fadeSteps: 5 };
-    // Depth 3 focuses index 11, so index 14 sits at outward 3 — inside the
-    // wider hold, and already culled by the default hold of 1.
-    expect(spiralWindow(14, 3, 15, wide).opacity).toBe(1);
-    expect(spiralWindow(14, 3, 15, { fade: false }).hidden).toBe(true);
-    // fadeSteps is inert with no ramp to end: moving it changes nothing.
-    expect(spiralWindow(14, 3, 15, { ...wide, fadeSteps: 12 }).opacity).toBe(1);
-    // One step further out and the wider hold culls too.
-    expect(spiralWindow(14, 4, 15, wide).hidden).toBe(true);
+  it('ignores hold and fade distances entirely when the tail is solid', () => {
+    // They describe a ramp, and a solid tail has no ramp to start or finish.
+    // Culling a square that has left the viewport is a geometric question —
+    // see tileOnScreen — not one a step count can answer.
+    for (const options of [
+      { fade: false, holdSteps: 3, fadeSteps: 5 },
+      { fade: false, holdSteps: 0, fadeSteps: 12 },
+      { fade: false },
+    ]) {
+      expect(spiralWindow(14, 3, 15, options).opacity).toBe(1);
+      expect(spiralWindow(14, 13, 15, options).hidden).toBe(false);
+    }
   });
 
   it('bends the ramp with ease without moving either end', () => {
@@ -343,6 +355,95 @@ describe('spiralWindow', () => {
   });
 });
 
+describe('tileOnScreen', () => {
+  const layout = generateGoldenGridLayout(fib(15), true, 0);
+
+  it('always keeps the focus, at every depth', () => {
+    // The focus fills fillRatio of the viewport by construction and is pinned
+    // at the anchor, so it is on screen at every depth. If this ever fails the
+    // projection is wrong, not the geometry.
+    for (let depth = 0; depth <= 14; depth += 0.25) {
+      const frame = spiralCamera(layout, depth, 960, 720, { fillRatio: 1 });
+      const focus = Math.round(focusIndexAt(depth, 15));
+      expect(tileOnScreen(frame, layout.squares[focus], 960, 720)).toBe(true);
+    }
+  });
+
+  it('drops squares that have travelled off the page', () => {
+    // The spiral TILES the plane — a square sits beside its neighbours, not
+    // inside them — so most of the layout is off-page at any one depth. At
+    // depth 0 the largest square is the focus and the deep interior is far
+    // off to one side; by depth 10 the largest has travelled off instead.
+    const shallow = spiralCamera(layout, 0, 960, 720, { fillRatio: 1 });
+    expect(tileOnScreen(shallow, layout.squares[14], 960, 720)).toBe(true);
+    expect(tileOnScreen(shallow, layout.squares[0], 960, 720)).toBe(false);
+    const deep = spiralCamera(layout, 10, 960, 720, { fillRatio: 1 });
+    expect(tileOnScreen(deep, layout.squares[4], 960, 720)).toBe(true);
+    expect(tileOnScreen(deep, layout.squares[14], 960, 720)).toBe(false);
+  });
+
+  it('is the cull a SOLID tail needs — the window itself hides nothing', () => {
+    // spiralWindow keeps every square when the tail is solid, by design: it
+    // knows an index and a depth, not where the square landed on screen. This
+    // is the function that knows, and the two disagree exactly where they
+    // should.
+    const frame = spiralCamera(layout, 0, 960, 720, { fillRatio: 1 });
+    expect(spiralWindow(0, 0, 15, { fade: false })).toEqual({
+      opacity: 1,
+      hidden: false,
+      focused: false,
+    });
+    expect(tileOnScreen(frame, layout.squares[0], 960, 720)).toBe(false);
+  });
+
+  it('answers independently of the fade — a faded tile can still be on screen', () => {
+    // Depth 1.5 has index 14 half-way down the ramp at 0.667, and it is still
+    // the square filling the space beside the focus. A step-count cull would
+    // have to choose between dropping something visible and keeping something
+    // that has left; geometry does not.
+    const frame = spiralCamera(layout, 1.5, 960, 720, { fillRatio: 1 });
+    expect(spiralWindow(14, 1.5, 15).opacity).toBeCloseTo(2 / 3, 3);
+    expect(spiralWindow(14, 1.5, 15).hidden).toBe(false);
+    expect(tileOnScreen(frame, layout.squares[14], 960, 720)).toBe(true);
+  });
+
+  it('honours the anchor — the same square, a different corner of the page', () => {
+    const frame = spiralCamera(layout, 6, 960, 720, { fillRatio: 1 });
+    const square = layout.squares[11];
+    const centred = tileOnScreen(frame, square, 960, 720);
+    const shifted = tileOnScreen(frame, square, 960, 720, {
+      anchor: { x: -4000, y: -4000 },
+    });
+    // Dragging the anchor far off the page must be able to change the answer,
+    // or the anchor is not reaching the projection at all.
+    expect(centred).not.toBe(shifted);
+  });
+
+  it('widens the test box by the margin, and never narrows it', () => {
+    const frame = spiralCamera(layout, 8, 960, 720, { fillRatio: 1 });
+    for (const square of layout.squares) {
+      const tight = tileOnScreen(frame, square, 960, 720);
+      const loose = tileOnScreen(frame, square, 960, 720, { margin: 100000 });
+      // A margin can only ever add squares, never remove them.
+      if (tight) expect(loose).toBe(true);
+      expect(loose).toBe(true);
+    }
+  });
+
+  it('rejects a non-finite anchor or a negative margin', () => {
+    const frame = spiralCamera(layout, 0, 960, 720);
+    expect(() =>
+      tileOnScreen(frame, layout.squares[0], 960, 720, { anchor: { x: NaN, y: 0 } })
+    ).toThrow('finite');
+    expect(() =>
+      tileOnScreen(frame, layout.squares[0], 960, 720, { margin: -1 })
+    ).toThrow('margin');
+    expect(() =>
+      tileOnScreen(frame, layout.squares[0], 960, 720, { margin: NaN })
+    ).toThrow('margin');
+  });
+});
+
 describe('windowFadeDepth', () => {
   it('solves the depth at which a square lands on the fade boundary', () => {
     // index 12 in a 15-square layout. The boundary follows the ROUNDED
@@ -352,16 +453,17 @@ describe('windowFadeDepth', () => {
     expect(spiralWindow(12, 4.5, 15).hidden).toBe(true);
   });
 
-  it('uses holdSteps as the boundary when the tail is off', () => {
-    // With no ramp the cull happens the moment outward passes holdSteps, so
-    // that is the depth a consumer freezes a departing tile at — and there is
-    // no rounding involved, so it is exact.
-    expect(windowFadeDepth(12, 15, { fade: false })).toBe(3);
-    expect(spiralWindow(12, 3, 15, { fade: false }).hidden).toBe(false);
-    expect(spiralWindow(12, 3.0001, 15, { fade: false }).hidden).toBe(true);
-    // No ramp to round means the exponent cannot move it.
+  it('reports "not on this dial" when the tail is solid', () => {
+    // A solid tail never drops a square, so there is no boundary to solve
+    // for: the honest answer is the dial's deepest depth. Nothing hides, so a
+    // consumer's parking never engages and never needs the number.
+    for (const index of [0, 7, 12, 14]) {
+      expect(windowFadeDepth(index, 15, { fade: false })).toBe(14);
+      expect(spiralWindow(index, 14, 15, { fade: false }).hidden).toBe(false);
+    }
+    // Neither the ramp's distances nor its exponent can move it.
     for (const ease of [0.5, 3, 100]) {
-      expect(windowFadeDepth(12, 15, { fade: false, ease })).toBe(3);
+      expect(windowFadeDepth(12, 15, { fade: false, ease, holdSteps: 0.25 })).toBe(14);
     }
   });
 
@@ -390,12 +492,10 @@ describe('windowFadeDepth', () => {
     for (let k = 1; k < depths.length; k += 1) {
       expect(depths[k]).toBeLessThan(depths[k - 1]);
     }
-    // Bounded by the ramp's own ends in both limits: never past fadeSteps,
-    // and never inside holdSteps.
+    // Bounded by the ramp's own start and end: never past fadeSteps, and
+    // never inside holdSteps.
     expect(depths[0]).toBeLessThanOrEqual(4.5);
-    expect(depths[depths.length - 1]).toBeGreaterThan(
-      windowFadeDepth(12, 15, { fade: false })
-    );
+    expect(depths[depths.length - 1]).toBeGreaterThan(1 + 15 - 1 - 12);
   });
 
   it('clamps squares whose boundary falls past the end of the dial', () => {
@@ -408,8 +508,11 @@ describe('windowFadeDepth', () => {
     expect(windowFadeDepth(0, 2)).toBe(1);
     // The solve can never go the other way: a non-negative boundary plus a
     // non-negative (count − 1 − index) is non-negative, so there is no
-    // shallow clamp to test — the tightest case is exactly zero.
-    expect(windowFadeDepth(14, 15, { fade: false, holdSteps: 0 })).toBe(0);
+    // shallow clamp to test — the tightest case is the outermost square on a
+    // ramp that starts and ends almost immediately.
+    expect(
+      windowFadeDepth(14, 15, { holdSteps: 0.0001, fadeSteps: 0.001 })
+    ).toBeLessThan(0.001);
   });
 
   it('rejects an illegal window or an out-of-range index', () => {

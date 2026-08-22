@@ -118,6 +118,44 @@ class SpiralCameraFixtureTest {
     }
 
     @Test
+    fun onScreenCullsMatchGoldenMaster() {
+        val root = Json.parseToJsonElement(locateFixture().readText()).jsonObject
+        val onScreens = root.getValue("onScreens").jsonArray
+        assertTrue(onScreens.isNotEmpty(), "no on-screen fixtures loaded")
+        val frames = root.getValue("frames").jsonArray
+
+        for (element in onScreens) {
+            val entry = element.jsonObject
+            val name = entry.getValue("frameName").jsonPrimitive.content
+            val frameCase = frames.first { it.jsonObject.getValue("name").jsonPrimitive.content == name }.jsonObject
+            val input = frameCase.getValue("input").jsonObject
+            val f = frameCase.getValue("frame").jsonObject
+            val count = input.getValue("count").jsonPrimitive.int
+            val layout = generateGoldenGridLayout(
+                fib(count),
+                clockwise = input.getValue("clockwise").jsonPrimitive.boolean,
+                rotate = input.getValue("rotate").jsonPrimitive.int,
+            )
+            val anchor = input.getValue("anchor").jsonObject
+            val on = tileOnScreen(
+                SpiralCameraFrame(
+                    scale = f.getValue("scale").jsonPrimitive.double,
+                    rotationDeg = f.getValue("rotationDeg").jsonPrimitive.double,
+                    centerX = f.getValue("centerX").jsonPrimitive.double,
+                    centerY = f.getValue("centerY").jsonPrimitive.double,
+                ),
+                square = layout.squares[entry.getValue("squareIndex").jsonPrimitive.int],
+                viewportWidth = input.getValue("viewportWidth").jsonPrimitive.double,
+                viewportHeight = input.getValue("viewportHeight").jsonPrimitive.double,
+                anchorX = anchor.getValue("x").jsonPrimitive.double,
+                anchorY = anchor.getValue("y").jsonPrimitive.double,
+                margin = entry.getValue("margin").jsonPrimitive.double,
+            )
+            assertEquals(entry.getValue("onScreen").jsonPrimitive.boolean, on, "on-screen $name")
+        }
+    }
+
+    @Test
     fun fadeDepthsMatchGoldenMaster() {
         val root = Json.parseToJsonElement(locateFixture().readText()).jsonObject
         val fadeDepths = root.getValue("fadeDepths").jsonArray

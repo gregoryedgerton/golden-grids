@@ -74,9 +74,10 @@ inertia, DUO/TRIO/QUAD quick sets each laid out and trail-solved for exactly
 their count, per-tile `tileTransform` (never one matrix on a shared stage),
 labels orientation-locked via `contentTransform`, and only outward squares
 fading through `spiralWindow` — with a FADE TAIL switch that flips its `fade`
-off, so the outer spiral reads solid while tiles past the viewport still
-leave the paint (the fade is a look, the cull is not). Each screen builds
-itself in on appear.
+off, so the tail stays but stops fading, filling the negative space and
+bleeding off the page. Squares that have left the viewport are culled by
+`tileOnScreen` in either mode (the fade is a look, the cull is geometry).
+Each screen builds itself in on appear.
 
 <p align="center">
   <img src="../docs/android/featured.gif" width="200" alt="Featured — a swipeable card carousel" />

@@ -47,6 +47,7 @@ import com.gifcommit.goldengrids.contentTransform
 import com.gifcommit.goldengrids.generateGoldenGridLayout
 import com.gifcommit.goldengrids.spiralCamera
 import com.gifcommit.goldengrids.spiralWindow
+import com.gifcommit.goldengrids.tileOnScreen
 import com.gifcommit.goldengrids.tileTransform
 import com.gifcommit.goldengrids.trailToRotateDeg
 import kotlinx.coroutines.Job
@@ -107,9 +108,10 @@ fun SpiralScreen() {
     var depth by remember { mutableFloatStateOf(0f) }
     var stageSize by remember { mutableStateOf(IntSize.Zero) }
     // The legibility window the dial renders with. FADE off is the library's
-    // `fade = false` — full presence out to holdSteps, then straight to
-    // hidden, so the spiral's outer context reads solid while tiles past the
-    // viewport still leave the paint.
+    // `fade = false` — the tail stays, it just stops fading, so the outward
+    // squares go on filling the negative space and bleeding off the page.
+    // Squares that have left the viewport are culled by `tileOnScreen` either
+    // way, which is geometry the window cannot do.
     var fadeTail by remember { mutableStateOf(true) }
     val scope = rememberCoroutineScope()
     var coastJob by remember { mutableStateOf<Job?>(null) }
@@ -264,7 +266,16 @@ private fun Stage(dial: Dial, depth: Double, size: IntSize, fadeTail: Boolean) {
             // With up to ninety-one squares most of the interior is
             // sub-pixel at any depth — skip tiles that would paint under
             // half a pixel rather than composite ninety-one nodes.
-            if (!window.hidden && tile.scale * TEXTURE_PX >= 0.5) {
+            // Two independent reasons to skip a tile: the window faded it
+            // away, or it has travelled off the page. With the tail solid only
+            // the second ever fires.
+            val onScreen = tileOnScreen(
+                frame,
+                square = square,
+                viewportWidth = size.width.toDouble(),
+                viewportHeight = size.height.toDouble(),
+            )
+            if (!window.hidden && onScreen && tile.scale * TEXTURE_PX >= 0.5) {
                 val number = dial.numbers[index]
                 // Hue keyed to the NUMBER, not the position: a tile keeps
                 // its colour in every set it appears in.

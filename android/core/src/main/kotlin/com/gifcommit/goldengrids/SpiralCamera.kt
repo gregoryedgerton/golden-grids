@@ -172,6 +172,51 @@ fun tileTransform(
 }
 
 /**
+ * Whether a square still covers any of the viewport at this frame — the
+ * geometric cull a solid tail needs. Mirrors `tileOnScreen`.
+ *
+ * Conservative: the four corners are projected and tested as an axis-aligned
+ * box, exact at whole depths and slightly generous mid-turn, so it never
+ * reports "off screen" for a square that is visible.
+ */
+fun tileOnScreen(
+    frame: SpiralCameraFrame,
+    square: Square,
+    viewportWidth: Double,
+    viewportHeight: Double,
+    anchorX: Double = viewportWidth / 2,
+    anchorY: Double = viewportHeight / 2,
+    margin: Double = 0.0,
+): Boolean {
+    require(anchorX.isFinite() && anchorY.isFinite()) { "Anchor ($anchorX, $anchorY) must be finite." }
+    require(margin.isFinite() && margin >= 0) {
+        "margin ($margin) must be a non-negative finite number."
+    }
+    val radians = Math.toRadians(frame.rotationDeg)
+    val cosR = cos(radians)
+    val sinR = sin(radians)
+    val sz = square.size.toDouble()
+    val corners = listOf(
+        square.x.toDouble() to square.y.toDouble(),
+        (square.x + sz) to square.y.toDouble(),
+        (square.x + sz) to (square.y + sz),
+        square.x.toDouble() to (square.y + sz),
+    )
+    var minX = Double.POSITIVE_INFINITY; var maxX = Double.NEGATIVE_INFINITY
+    var minY = Double.POSITIVE_INFINITY; var maxY = Double.NEGATIVE_INFINITY
+    for ((px, py) in corners) {
+        val dx = px - frame.centerX
+        val dy = py - frame.centerY
+        val x = anchorX + frame.scale * (cosR * dx - sinR * dy)
+        val y = anchorY + frame.scale * (sinR * dx + cosR * dy)
+        minX = min(minX, x); maxX = max(maxX, x)
+        minY = min(minY, y); maxY = max(maxY, y)
+    }
+    return maxX >= -margin && minX <= viewportWidth + margin &&
+        maxY >= -margin && minY <= viewportHeight + margin
+}
+
+/**
  * The transform that keeps a tile's CONTENT readable while the dial turns —
  * counter-rotation about the content's own centre (Compose's default pivot),
  * with the |cos|+|sin| cover swell. Mirrors `contentTransform`, including
@@ -236,9 +281,10 @@ data class SpiralWindowOptions(
      * still validated, so turning the tail back on can never turn a working
      * window into a throw. */
     val fadeSteps: Double = 2.5,
-    /** Whether the outward tail FADES. False turns off the look, not the
-     * culling: full presence out to [holdSteps], then straight to hidden, so
-     * [holdSteps] becomes the cull distance. */
+    /** Whether the outward tail FADES. False leaves the tail SOLID rather than
+     * removing it: every square keeps full presence at any distance, filling
+     * the negative space around the focus and bleeding off the page. Nothing
+     * hides, and [holdSteps]/[fadeSteps] mean nothing without a ramp. */
     val fade: Boolean = true,
     /** Shape of the ramp between [holdSteps] and [fadeSteps]. 1 is the
      * straight line. The exponent applies to the tile's REMAINING presence,
@@ -302,10 +348,12 @@ fun spiralWindow(
             "[0, ${squareCount - 1}] for a finite squareCount ($squareCount)."
     }
     val outward = index - focusIndexAt(depth, squareCount)
-    val raw = when {
-        outward <= hold -> 1.0
-        options.fade -> max(0.0, (fade - outward) / (fade - hold)).pow(options.ease)
-        else -> 0.0
+    // A solid tail is full presence everywhere — the ramp is skipped, not
+    // replaced by a cut.
+    val raw = if (!options.fade || outward <= hold) {
+        1.0
+    } else {
+        max(0.0, (fade - outward) / (fade - hold)).pow(options.ease)
     }
     // Same rounding the TS does with Number(raw.toFixed(3)) — HALF AWAY FROM
     // ZERO on a midpoint (raw is never negative here, so floor(x + 0.5)).
@@ -322,10 +370,11 @@ fun spiralWindow(
  * so its retained raster matches what re-entry asks for. The boundary follows
  * the ROUNDED opacity, not the ramp's endpoint: an eased ramp rounds to zero
  * well before it reaches [SpiralWindowOptions.fadeSteps], so the cutoff is
- * `fadeSteps - HIDDEN_BELOW^(1/ease) * (fadeSteps - holdSteps)` while the tail
- * fades, and [SpiralWindowOptions.holdSteps] when it does not. Clamped to the
- * deepest depth the layout has — no clamp is needed at the shallow end, since
- * the solve cannot go below zero.
+ * `fadeSteps - HIDDEN_BELOW^(1/ease) * (fadeSteps - holdSteps)`. With
+ * `fade = false` there is no boundary at all — a solid tail never drops a
+ * square — so the answer is the dial's deepest depth. Clamped to that depth —
+ * no clamp is needed at the shallow end, since the solve cannot go below
+ * zero.
  */
 fun windowFadeDepth(
     index: Int,
@@ -337,12 +386,10 @@ fun windowFadeDepth(
         "Legibility window needs index ($index) inside [0, ${squareCount - 1}] " +
             "for a finite squareCount ($squareCount)."
     }
-    val boundary = if (options.fade) {
-        options.fadeSteps -
-            HIDDEN_BELOW.pow(1.0 / options.ease) * (options.fadeSteps - options.holdSteps)
-    } else {
-        options.holdSteps
-    }
+    // A solid tail has no boundary to solve for: no square ever leaves.
+    if (!options.fade) return (squareCount - 1).toDouble()
+    val boundary = options.fadeSteps -
+        HIDDEN_BELOW.pow(1.0 / options.ease) * (options.fadeSteps - options.holdSteps)
     val depth = boundary + squareCount - 1 - index
     return min(depth, (squareCount - 1).toDouble())
 }

@@ -66,6 +66,7 @@ import {
   spiralCamera,
   spiralEye,
   spiralWindow,
+  tileOnScreen,
   toCssContentTransform,
   toCssTileTransform,
   windowFadeDepth,
@@ -94,19 +95,29 @@ for (const [k, square] of layout.squares.entries()) {
   // centre small but fully present instead of materializing through a
   // fade-in.
   //
-  // The fade itself is a configuration detail. { fade: false } turns off the
-  // LOOK, not the culling: a tile holds full presence out to holdSteps and
-  // then goes straight to hidden, so the spiral's outer context reads solid
-  // while tiles past the viewport still leave the paint and the tab order
-  // (holdSteps becomes the cull distance — the one knob that matters with
-  // the tail off). { ease } bends the ramp between holdSteps and fadeSteps
-  // without moving either end. It is an exponent on the tile's REMAINING
-  // presence, which falls from 1 to 0 — so it reads like gamma, not like a
-  // CSS easing keyword: above 1 the tile fades early and lingers faint,
-  // below 1 it holds and cuts away late. The default 1 is the straight line.
+  // The fade itself is a configuration detail. { fade: false } leaves the
+  // tail SOLID — it does not remove it: every square keeps full presence at
+  // any distance, so the outward ones go on filling the negative space
+  // around the focus and bleeding off the page, exactly as the geometry
+  // places them. Culling one that has left the viewport is tileOnScreen's
+  // job, below — a step count cannot answer it.
+  //
+  // { ease } bends the ramp between holdSteps and fadeSteps without moving
+  // either end. It is an exponent on the tile's REMAINING presence, which
+  // falls from 1 to 0 — so it reads like gamma, not like a CSS easing
+  // keyword: above 1 the tile fades early and lingers faint, below 1 it
+  // holds and cuts away late. The default 1 is the straight line.
   const { opacity, hidden } = spiralWindow(k, depth, layout.squares.length);
+  // Is this square still using on-screen space? The spiral TILES the plane —
+  // squares sit beside one another, not inside — so most of the layout is off
+  // the page at any one depth, and how far a square travels before it clears
+  // the viewport depends on fillRatio, the anchor and the aspect. Geometry
+  // answers that; a distance in depth steps cannot. Needed for a solid tail,
+  // and an improvement for a fading one (a faded tile can still be the thing
+  // filling the space beside the focus).
+  const onScreen = tileOnScreen(frame, square, innerWidth, innerHeight);
   tile.style.opacity = String(opacity);
-  tile.style.visibility = hidden ? 'hidden' : 'visible';
+  tile.style.visibility = hidden || !onScreen ? 'hidden' : 'visible';
 
   // Keep the CONTENT readable while the dial turns: counter-rotate the
   // tile's content element against the stage about its own centre
