@@ -53,6 +53,7 @@ final class SpiralCameraFixtureTests: XCTestCase {
         let holdSteps: Double
         let fadeSteps: Double
         let fade: Bool
+        let ease: Double
     }
     struct FadeDepthCase: Decodable {
         let input: FadeDepthInput
@@ -198,7 +199,8 @@ final class SpiralCameraFixtureTests: XCTestCase {
                 options: SpiralWindowOptions(
                     holdSteps: entry.input.holdSteps,
                     fadeSteps: entry.input.fadeSteps,
-                    fade: entry.input.fade
+                    fade: entry.input.fade,
+                    ease: entry.input.ease
                 )
             )
             XCTAssertEqual(depth, entry.depth, accuracy: tol, "fade depth")

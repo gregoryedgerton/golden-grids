@@ -247,20 +247,57 @@ interface FadeDepthCase {
     holdSteps: number;
     fadeSteps: number;
     fade: boolean;
+    ease: number;
   };
   depth: number;
 }
 
 const FADE_DEPTH_INPUTS: FadeDepthCase["input"][] = [];
 for (const fade of [true, false]) {
-  // 14 clamps low (its boundary is past the far end for a fading tail), 0
-  // clamps high, and the middle indices land in range — one array covers the
-  // solve and both clamps.
+  // Index 0 solves past the end of the dial and clamps; the rest land in
+  // range — one array covers the solve and the clamp.
   for (const index of [0, 3, 11, 12, 13, 14]) {
-    FADE_DEPTH_INPUTS.push({ index, count: 15, holdSteps: 1, fadeSteps: 2.5, fade });
+    FADE_DEPTH_INPUTS.push({
+      index,
+      count: 15,
+      holdSteps: 1,
+      fadeSteps: 2.5,
+      fade,
+      ease: 1,
+    });
   }
-  FADE_DEPTH_INPUTS.push({ index: 5, count: 8, holdSteps: 0.5, fadeSteps: 4, fade });
+  FADE_DEPTH_INPUTS.push({
+    index: 5,
+    count: 8,
+    holdSteps: 0.5,
+    fadeSteps: 4,
+    fade,
+    ease: 1,
+  });
 }
+// The boundary follows the ROUNDED opacity, so `ease` moves it — sharply, and
+// the ports have to agree on the pow that puts it there. With the tail off
+// there is no ramp to round, so ease must make no difference at all.
+for (const ease of [0.5, 2, 3, 10, 100]) {
+  for (const fade of [true, false]) {
+    FADE_DEPTH_INPUTS.push({
+      index: 12,
+      count: 15,
+      holdSteps: 1,
+      fadeSteps: 2.5,
+      fade,
+      ease,
+    });
+  }
+}
+FADE_DEPTH_INPUTS.push({
+  index: 5,
+  count: 8,
+  holdSteps: 0.5,
+  fadeSteps: 4,
+  fade: true,
+  ease: 2.5,
+});
 
 interface TrailCase {
   count: number;

@@ -498,6 +498,14 @@ export interface SpiralWindow {
 }
 
 /**
+ * The raw opacity below which the three-decimal rounding in `spiralWindow`
+ * yields zero — and the tile leaves the paint and the tab order. Exactly
+ * 0.0005 is the last value that still rounds UP to 0.001, so it is the
+ * cutoff itself rather than an approximation of one.
+ */
+const HIDDEN_BELOW = 0.0005;
+
+/**
  * A malformed window renders nonsense rather than failing visibly: an
  * inverted one reverses the ramp (opacity above 1, growing with distance), a
  * negative hold hides the focus itself, and a non-positive ease either
@@ -596,8 +604,19 @@ export function spiralWindow(
  * where every parked raster is the same bounded texture rather than one that
  * grows by φ per step.
  *
- * The boundary is `fadeSteps` while the tail fades and `holdSteps` when it
- * does not, because that is where the cull actually happens in each case.
+ * The boundary follows the ROUNDED opacity a consumer actually renders, not
+ * the ramp's theoretical endpoint — the two part company as soon as `ease`
+ * leaves 1. An eased ramp reaches a value that rounds to zero well before it
+ * reaches `fadeSteps` (at ease 3 the default window hides a tile 0.119 steps
+ * early; at ease 100, 1.39 steps early), and a tile frozen at the endpoint
+ * would retain a raster at a scale re-entry never asks for — the exact
+ * failure parking exists to prevent. Solving `pow(x, ease) < HIDDEN_BELOW`
+ * for the ramp position puts the cutoff at
+ * `fadeSteps - HIDDEN_BELOW^(1/ease) * (fadeSteps - holdSteps)`, which is
+ * `fadeSteps` in the ease-0 limit and `holdSteps` in the ease-infinity one.
+ * With the tail off there is no ramp to round, so the boundary is
+ * `holdSteps` exactly.
+ *
  * Clamped to the deepest depth the layout has: the squares nearest the eye
  * would solve past the end of the dial, and never reach that state on it.
  * No clamp is needed at the shallow end — the boundary is non-negative and
@@ -608,7 +627,7 @@ export function windowFadeDepth(
   squareCount: number,
   options: SpiralWindowOptions = {}
 ): number {
-  const { holdSteps, fadeSteps, fade } = assertWindow(options);
+  const { holdSteps, fadeSteps, fade, ease } = assertWindow(options);
   if (
     !Number.isFinite(index) ||
     !Number.isFinite(squareCount) ||
@@ -620,8 +639,11 @@ export function windowFadeDepth(
         `for a finite squareCount (${squareCount}).`
     );
   }
+  const boundary = fade
+    ? fadeSteps - Math.pow(HIDDEN_BELOW, 1 / ease) * (fadeSteps - holdSteps)
+    : holdSteps;
   // outward = index − (squareCount − 1 − depth) = boundary  ⇒  depth solves to:
-  const depth = (fade ? fadeSteps : holdSteps) + squareCount - 1 - index;
+  const depth = boundary + squareCount - 1 - index;
   return Math.min(depth, squareCount - 1);
 }
 

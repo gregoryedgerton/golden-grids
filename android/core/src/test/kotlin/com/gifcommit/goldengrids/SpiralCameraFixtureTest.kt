@@ -133,6 +133,7 @@ class SpiralCameraFixtureTest {
                     holdSteps = input.getValue("holdSteps").jsonPrimitive.double,
                     fadeSteps = input.getValue("fadeSteps").jsonPrimitive.double,
                     fade = input.getValue("fade").jsonPrimitive.boolean,
+                    ease = input.getValue("ease").jsonPrimitive.double,
                 ),
             )
             assertClose(entry.getValue("depth").jsonPrimitive.double, depth, "fade depth")

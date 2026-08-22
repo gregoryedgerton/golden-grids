@@ -2424,7 +2424,8 @@
         "count": 15,
         "holdSteps": 1,
         "fadeSteps": 2.5,
-        "fade": true
+        "fade": true,
+        "ease": 1
       },
       "depth": 14
     },
@@ -2434,9 +2435,10 @@
         "count": 15,
         "holdSteps": 1,
         "fadeSteps": 2.5,
-        "fade": true
+        "fade": true,
+        "ease": 1
       },
-      "depth": 13.5
+      "depth": 13.49925
     },
     {
       "input": {
@@ -2444,9 +2446,10 @@
         "count": 15,
         "holdSteps": 1,
         "fadeSteps": 2.5,
-        "fade": true
+        "fade": true,
+        "ease": 1
       },
-      "depth": 5.5
+      "depth": 5.49925
     },
     {
       "input": {
@@ -2454,9 +2457,10 @@
         "count": 15,
         "holdSteps": 1,
         "fadeSteps": 2.5,
-        "fade": true
+        "fade": true,
+        "ease": 1
       },
-      "depth": 4.5
+      "depth": 4.49925
     },
     {
       "input": {
@@ -2464,9 +2468,10 @@
         "count": 15,
         "holdSteps": 1,
         "fadeSteps": 2.5,
-        "fade": true
+        "fade": true,
+        "ease": 1
       },
-      "depth": 3.5
+      "depth": 3.49925
     },
     {
       "input": {
@@ -2474,9 +2479,10 @@
         "count": 15,
         "holdSteps": 1,
         "fadeSteps": 2.5,
-        "fade": true
+        "fade": true,
+        "ease": 1
       },
-      "depth": 2.5
+      "depth": 2.49925
     },
     {
       "input": {
@@ -2484,9 +2490,10 @@
         "count": 8,
         "holdSteps": 0.5,
         "fadeSteps": 4,
-        "fade": true
+        "fade": true,
+        "ease": 1
       },
-      "depth": 6
+      "depth": 5.9982500000000005
     },
     {
       "input": {
@@ -2494,7 +2501,8 @@
         "count": 15,
         "holdSteps": 1,
         "fadeSteps": 2.5,
-        "fade": false
+        "fade": false,
+        "ease": 1
       },
       "depth": 14
     },
@@ -2504,7 +2512,8 @@
         "count": 15,
         "holdSteps": 1,
         "fadeSteps": 2.5,
-        "fade": false
+        "fade": false,
+        "ease": 1
       },
       "depth": 12
     },
@@ -2514,7 +2523,8 @@
         "count": 15,
         "holdSteps": 1,
         "fadeSteps": 2.5,
-        "fade": false
+        "fade": false,
+        "ease": 1
       },
       "depth": 4
     },
@@ -2524,7 +2534,8 @@
         "count": 15,
         "holdSteps": 1,
         "fadeSteps": 2.5,
-        "fade": false
+        "fade": false,
+        "ease": 1
       },
       "depth": 3
     },
@@ -2534,7 +2545,8 @@
         "count": 15,
         "holdSteps": 1,
         "fadeSteps": 2.5,
-        "fade": false
+        "fade": false,
+        "ease": 1
       },
       "depth": 2
     },
@@ -2544,7 +2556,8 @@
         "count": 15,
         "holdSteps": 1,
         "fadeSteps": 2.5,
-        "fade": false
+        "fade": false,
+        "ease": 1
       },
       "depth": 1
     },
@@ -2554,9 +2567,131 @@
         "count": 8,
         "holdSteps": 0.5,
         "fadeSteps": 4,
-        "fade": false
+        "fade": false,
+        "ease": 1
       },
       "depth": 2.5
+    },
+    {
+      "input": {
+        "index": 12,
+        "count": 15,
+        "holdSteps": 1,
+        "fadeSteps": 2.5,
+        "fade": true,
+        "ease": 0.5
+      },
+      "depth": 4.499999625000001
+    },
+    {
+      "input": {
+        "index": 12,
+        "count": 15,
+        "holdSteps": 1,
+        "fadeSteps": 2.5,
+        "fade": false,
+        "ease": 0.5
+      },
+      "depth": 3
+    },
+    {
+      "input": {
+        "index": 12,
+        "count": 15,
+        "holdSteps": 1,
+        "fadeSteps": 2.5,
+        "fade": true,
+        "ease": 2
+      },
+      "depth": 4.466458980337503
+    },
+    {
+      "input": {
+        "index": 12,
+        "count": 15,
+        "holdSteps": 1,
+        "fadeSteps": 2.5,
+        "fade": false,
+        "ease": 2
+      },
+      "depth": 3
+    },
+    {
+      "input": {
+        "index": 12,
+        "count": 15,
+        "holdSteps": 1,
+        "fadeSteps": 2.5,
+        "fade": true,
+        "ease": 3
+      },
+      "depth": 4.380944921102383
+    },
+    {
+      "input": {
+        "index": 12,
+        "count": 15,
+        "holdSteps": 1,
+        "fadeSteps": 2.5,
+        "fade": false,
+        "ease": 3
+      },
+      "depth": 3
+    },
+    {
+      "input": {
+        "index": 12,
+        "count": 15,
+        "holdSteps": 1,
+        "fadeSteps": 2.5,
+        "fade": true,
+        "ease": 10
+      },
+      "depth": 3.7985636641330345
+    },
+    {
+      "input": {
+        "index": 12,
+        "count": 15,
+        "holdSteps": 1,
+        "fadeSteps": 2.5,
+        "fade": false,
+        "ease": 10
+      },
+      "depth": 3
+    },
+    {
+      "input": {
+        "index": 12,
+        "count": 15,
+        "holdSteps": 1,
+        "fadeSteps": 2.5,
+        "fade": true,
+        "ease": 100
+      },
+      "depth": 3.1097882363162554
+    },
+    {
+      "input": {
+        "index": 12,
+        "count": 15,
+        "holdSteps": 1,
+        "fadeSteps": 2.5,
+        "fade": false,
+        "ease": 100
+      },
+      "depth": 3
+    },
+    {
+      "input": {
+        "index": 5,
+        "count": 8,
+        "holdSteps": 0.5,
+        "fadeSteps": 4,
+        "fade": true,
+        "ease": 2.5
+      },
+      "depth": 5.832638312536744
     }
   ],
   "trails": [

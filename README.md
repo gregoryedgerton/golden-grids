@@ -147,7 +147,10 @@ const eye = spiralEye(layout);
 // you keep its layer alive rather than dropping it. (Blink discards a
 // dropped layer's decoded artwork, so reversing the dial repaints white for
 // hundreds of milliseconds unless the tile stays parked with its transform
-// pinned here.) Follows the same options, so it moves with the fade switch.
+// pinned here.) It follows the ROUNDED opacity you actually render, not the
+// ramp's endpoint — an eased ramp rounds to zero well before it reaches
+// fadeSteps — so pass the same options you gave spiralWindow and the two
+// stay inverses of each other.
 const boundary = windowFadeDepth(0, layout.squares.length);
 ```
 

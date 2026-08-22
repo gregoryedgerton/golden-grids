@@ -345,26 +345,62 @@ describe('spiralWindow', () => {
 
 describe('windowFadeDepth', () => {
   it('solves the depth at which a square lands on the fade boundary', () => {
-    // index 12 in a 15-square layout: outward reaches fadeSteps 2.5 at depth
-    // 2.5 + 14 − 12 = 4.5 — exactly where spiralWindow first hides it.
-    expect(windowFadeDepth(12, 15)).toBe(4.5);
+    // index 12 in a 15-square layout. The boundary follows the ROUNDED
+    // opacity a consumer renders, so it sits a hair inside the ramp's
+    // theoretical 4.5 endpoint — that is where the tile actually leaves.
+    expect(windowFadeDepth(12, 15)).toBeCloseTo(4.49925, 5);
     expect(spiralWindow(12, 4.5, 15).hidden).toBe(true);
-    // Shy of it the tile still paints — though not right up to the boundary,
-    // since `hidden` follows the ROUNDED opacity and that reaches 0 first.
-    expect(spiralWindow(12, 4.4, 15).hidden).toBe(false);
   });
 
   it('uses holdSteps as the boundary when the tail is off', () => {
     // With no ramp the cull happens the moment outward passes holdSteps, so
-    // that is the depth a consumer freezes a departing tile at.
+    // that is the depth a consumer freezes a departing tile at — and there is
+    // no rounding involved, so it is exact.
     expect(windowFadeDepth(12, 15, { fade: false })).toBe(3);
     expect(spiralWindow(12, 3, 15, { fade: false }).hidden).toBe(false);
     expect(spiralWindow(12, 3.0001, 15, { fade: false }).hidden).toBe(true);
+    // No ramp to round means the exponent cannot move it.
+    for (const ease of [0.5, 3, 100]) {
+      expect(windowFadeDepth(12, 15, { fade: false, ease })).toBe(3);
+    }
+  });
+
+  it('IS the inverse — the tile paints just before it and is gone just after', () => {
+    // The property the whole function claims, and the one a solve based on
+    // the ramp's endpoint quietly broke: an eased ramp rounds to zero well
+    // before it reaches fadeSteps, so freezing a parked tile at the endpoint
+    // would retain a raster at a scale re-entry never asks for.
+    for (const ease of [0.5, 1, 2, 3, 10, 100]) {
+      for (const index of [11, 12, 13]) {
+        const depth = windowFadeDepth(index, 15, { ease });
+        // Exactly AT the boundary is a floating-point knife edge (the ramp
+        // value is 0.0005 there in exact arithmetic), so straddle it.
+        expect(spiralWindow(index, depth - 0.001, 15, { ease }).hidden).toBe(false);
+        expect(spiralWindow(index, depth + 0.001, 15, { ease }).hidden).toBe(true);
+      }
+    }
+  });
+
+  it('moves the boundary earlier as ease sharpens the ramp', () => {
+    // Monotone: a sharper exponent reaches the rounding cutoff sooner, so the
+    // tile leaves sooner and its frozen scale is correspondingly smaller.
+    const depths = [0.5, 1, 2, 3, 10, 100].map((ease) =>
+      windowFadeDepth(12, 15, { ease })
+    );
+    for (let k = 1; k < depths.length; k += 1) {
+      expect(depths[k]).toBeLessThan(depths[k - 1]);
+    }
+    // Bounded by the ramp's own ends in both limits: never past fadeSteps,
+    // and never inside holdSteps.
+    expect(depths[0]).toBeLessThanOrEqual(4.5);
+    expect(depths[depths.length - 1]).toBeGreaterThan(
+      windowFadeDepth(12, 15, { fade: false })
+    );
   });
 
   it('clamps squares whose boundary falls past the end of the dial', () => {
     // The outermost square crosses its boundary early, well inside the range…
-    expect(windowFadeDepth(14, 15)).toBe(2.5);
+    expect(windowFadeDepth(14, 15)).toBeCloseTo(2.49925, 5);
     // …while the squares nearest the eye solve past the deepest depth the
     // layout has, and never reach that state on this dial at all.
     expect(windowFadeDepth(0, 15)).toBe(14);

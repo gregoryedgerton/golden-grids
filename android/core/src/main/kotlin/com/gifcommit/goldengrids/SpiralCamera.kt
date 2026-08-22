@@ -255,6 +255,12 @@ data class SpiralWindow(
 )
 
 /**
+ * The raw opacity below which the three-decimal rounding yields zero — and the
+ * tile leaves. Mirrors `HIDDEN_BELOW`.
+ */
+private const val HIDDEN_BELOW = 0.0005
+
+/**
  * Mirrors the TypeScript `assertWindow`: one definition of a legal window,
  * shared by every function that reads one.
  */
@@ -313,9 +319,11 @@ fun spiralWindow(
  * The depth at which [index] sits exactly on the window's outward boundary —
  * where its opacity first reaches zero. Mirrors `windowFadeDepth`: the
  * inverse of the window, and the depth a consumer freezes a departing tile at
- * so its retained raster matches what re-entry asks for. The boundary is
- * [SpiralWindowOptions.fadeSteps] while the tail fades and
- * [SpiralWindowOptions.holdSteps] when it does not, and is clamped to the
+ * so its retained raster matches what re-entry asks for. The boundary follows
+ * the ROUNDED opacity, not the ramp's endpoint: an eased ramp rounds to zero
+ * well before it reaches [SpiralWindowOptions.fadeSteps], so the cutoff is
+ * `fadeSteps - HIDDEN_BELOW^(1/ease) * (fadeSteps - holdSteps)` while the tail
+ * fades, and [SpiralWindowOptions.holdSteps] when it does not. Clamped to the
  * deepest depth the layout has — no clamp is needed at the shallow end, since
  * the solve cannot go below zero.
  */
@@ -329,7 +337,12 @@ fun windowFadeDepth(
         "Legibility window needs index ($index) inside [0, ${squareCount - 1}] " +
             "for a finite squareCount ($squareCount)."
     }
-    val boundary = if (options.fade) options.fadeSteps else options.holdSteps
+    val boundary = if (options.fade) {
+        options.fadeSteps -
+            HIDDEN_BELOW.pow(1.0 / options.ease) * (options.fadeSteps - options.holdSteps)
+    } else {
+        options.holdSteps
+    }
     val depth = boundary + squareCount - 1 - index
     return min(depth, (squareCount - 1).toDouble())
 }
