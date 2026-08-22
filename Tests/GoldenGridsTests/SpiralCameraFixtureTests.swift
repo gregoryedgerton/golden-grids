@@ -33,10 +33,7 @@ final class SpiralCameraFixtureTests: XCTestCase {
         let index: Int
         let depth: Double
         let count: Int
-        let holdSteps: Double
-        let fadeSteps: Double
         let fade: Bool
-        let ease: Double
     }
     struct Window: Decodable {
         let opacity: Double
@@ -56,10 +53,7 @@ final class SpiralCameraFixtureTests: XCTestCase {
     struct FadeDepthInput: Decodable {
         let index: Int
         let count: Int
-        let holdSteps: Double
-        let fadeSteps: Double
         let fade: Bool
-        let ease: Double
     }
     struct FadeDepthCase: Decodable {
         let input: FadeDepthInput
@@ -182,12 +176,7 @@ final class SpiralCameraFixtureTests: XCTestCase {
                 entry.input.index,
                 depth: entry.input.depth,
                 squareCount: entry.input.count,
-                options: SpiralWindowOptions(
-                    holdSteps: entry.input.holdSteps,
-                    fadeSteps: entry.input.fadeSteps,
-                    fade: entry.input.fade,
-                    ease: entry.input.ease
-                )
+                options: SpiralWindowOptions(fade: entry.input.fade)
             )
             XCTAssertEqual(window.opacity, entry.window.opacity, accuracy: tol, "window opacity")
             XCTAssertEqual(window.hidden, entry.window.hidden, "window hidden")
@@ -233,12 +222,7 @@ final class SpiralCameraFixtureTests: XCTestCase {
             let depth = windowFadeDepth(
                 entry.input.index,
                 squareCount: entry.input.count,
-                options: SpiralWindowOptions(
-                    holdSteps: entry.input.holdSteps,
-                    fadeSteps: entry.input.fadeSteps,
-                    fade: entry.input.fade,
-                    ease: entry.input.ease
-                )
+                options: SpiralWindowOptions(fade: entry.input.fade)
             )
             XCTAssertEqual(depth, entry.depth, accuracy: tol, "fade depth")
         }

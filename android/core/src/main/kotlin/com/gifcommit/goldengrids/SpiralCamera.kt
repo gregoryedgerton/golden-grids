@@ -8,7 +8,6 @@ import kotlin.math.floor
 import kotlin.math.ln
 import kotlin.math.max
 import kotlin.math.min
-import kotlin.math.pow
 import kotlin.math.sin
 
 // Port of src/utils/spiralCamera.ts — the continuous depth-dial camera.
@@ -273,25 +272,20 @@ fun trailForRotation(rotateDeg: Int, clockwise: Boolean = true, squareCount: Int
 
 // ---- legibility window ----
 
+/**
+ * The fading tail's shape in depth steps: full presence out to HOLD_STEPS,
+ * zero at FADE_STEPS. Fixed rather than configurable — mirrors the TypeScript
+ * constants of the same name.
+ */
+private const val HOLD_STEPS = 1.0
+private const val FADE_STEPS = 3.0
+
 data class SpiralWindowOptions(
-    /** Distance (in depth steps) a tile stays fully opaque. */
-    val holdSteps: Double = 1.0,
-    /** Distance at which opacity reaches zero — and the tile should leave the
-     * paint and the accessibility order. Unused when [fade] is false, but
-     * still validated, so turning the tail back on can never turn a working
-     * window into a throw. */
-    val fadeSteps: Double = 2.5,
     /** Whether the outward tail FADES. False leaves the tail SOLID rather than
      * removing it: every square keeps full presence at any distance, filling
      * the negative space around the focus and bleeding off the page. Nothing
-     * hides, and [holdSteps]/[fadeSteps] mean nothing without a ramp. */
+     * hides — use [tileOnScreen] to cull what has left the viewport. */
     val fade: Boolean = true,
-    /** Shape of the ramp between [holdSteps] and [fadeSteps]. 1 is the
-     * straight line. The exponent applies to the tile's REMAINING presence,
-     * which falls from 1 to 0 — so it reads like gamma: above 1 fades early
-     * and lingers faint, below 1 holds and cuts away late. Ignored when
-     * [fade] is false. */
-    val ease: Double = 1.0,
 )
 
 data class SpiralWindow(
@@ -307,21 +301,6 @@ data class SpiralWindow(
 private const val HIDDEN_BELOW = 0.0005
 
 /**
- * Mirrors the TypeScript `assertWindow`: one definition of a legal window,
- * shared by every function that reads one.
- */
-private fun assertWindow(options: SpiralWindowOptions) {
-    val hold = options.holdSteps
-    val fade = options.fadeSteps
-    require(hold.isFinite() && fade.isFinite() && hold >= 0 && fade > hold) {
-        "Legibility window needs 0 <= holdSteps ($hold) < fadeSteps ($fade)."
-    }
-    require(options.ease.isFinite() && options.ease > 0) {
-        "Legibility window needs a positive finite ease (${options.ease})."
-    }
-}
-
-/**
  * The legibility window around the focus. Mirrors `spiralWindow`: only
  * OUTWARD squares (larger than the focus) fade and leave; the interior never
  * fades — squares emerge from the centre small but fully present. Includes
@@ -331,8 +310,7 @@ private fun assertWindow(options: SpiralWindowOptions) {
  * rather than removing it — every square keeps full presence, so NOTHING is
  * hidden and a caller relying on this to cull will keep off-screen tiles
  * painted and focusable. Use [tileOnScreen] for that; it is the only one of
- * the two that can see where a square landed. [SpiralWindowOptions.ease]
- * bends the ramp without moving either end.
+ * the two that can see where a square landed.
  */
 fun spiralWindow(
     index: Int,
@@ -340,9 +318,6 @@ fun spiralWindow(
     squareCount: Int,
     options: SpiralWindowOptions = SpiralWindowOptions(),
 ): SpiralWindow {
-    assertWindow(options)
-    val hold = options.holdSteps
-    val fade = options.fadeSteps
     require(
         depth.isFinite() && depth >= 0 && depth <= (squareCount - 1).toDouble() &&
             index >= 0 && index <= squareCount - 1
@@ -353,10 +328,10 @@ fun spiralWindow(
     val outward = index - focusIndexAt(depth, squareCount)
     // A solid tail is full presence everywhere — the ramp is skipped, not
     // replaced by a cut.
-    val raw = if (!options.fade || outward <= hold) {
+    val raw = if (!options.fade || outward <= HOLD_STEPS) {
         1.0
     } else {
-        max(0.0, (fade - outward) / (fade - hold)).pow(options.ease)
+        max(0.0, (FADE_STEPS - outward) / (FADE_STEPS - HOLD_STEPS))
     }
     // Same rounding the TS does with Number(raw.toFixed(3)) — HALF AWAY FROM
     // ZERO on a midpoint (raw is never negative here, so floor(x + 0.5)).
@@ -371,28 +346,25 @@ fun spiralWindow(
  * where its opacity first reaches zero. Mirrors `windowFadeDepth`: the
  * inverse of the window, and the depth a consumer freezes a departing tile at
  * so its retained raster matches what re-entry asks for. The boundary follows
- * the ROUNDED opacity, not the ramp's endpoint: an eased ramp rounds to zero
- * well before it reaches [SpiralWindowOptions.fadeSteps], so the cutoff is
- * `fadeSteps - HIDDEN_BELOW^(1/ease) * (fadeSteps - holdSteps)`. With
- * `fade = false` there is no boundary at all — a solid tail never drops a
- * square — so the answer is the dial's deepest depth. Clamped to that depth —
- * no clamp is needed at the shallow end, since the solve cannot go below
- * zero.
+ * the ROUNDED opacity, not the ramp's endpoint — they differ by a hair, and
+ * freezing at the endpoint retains a raster at a scale re-entry never asks
+ * for. With `fade = false` there is no boundary at all — a solid tail never
+ * drops a square — so the answer is the dial's deepest depth. Clamped to that
+ * depth; no clamp is needed at the shallow end, since the solve cannot go
+ * below zero.
  */
 fun windowFadeDepth(
     index: Int,
     squareCount: Int,
     options: SpiralWindowOptions = SpiralWindowOptions(),
 ): Double {
-    assertWindow(options)
     require(index >= 0 && index <= squareCount - 1) {
         "Legibility window needs index ($index) inside [0, ${squareCount - 1}] " +
             "for a finite squareCount ($squareCount)."
     }
     // A solid tail has no boundary to solve for: no square ever leaves.
     if (!options.fade) return (squareCount - 1).toDouble()
-    val boundary = options.fadeSteps -
-        HIDDEN_BELOW.pow(1.0 / options.ease) * (options.fadeSteps - options.holdSteps)
+    val boundary = FADE_STEPS - HIDDEN_BELOW * (FADE_STEPS - HOLD_STEPS)
     val depth = boundary + squareCount - 1 - index
     return min(depth, (squareCount - 1).toDouble())
 }
