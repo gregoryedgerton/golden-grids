@@ -70,6 +70,8 @@ npm run setup        # Install Husky git hooks (run once after cloning)
 
 ## Publishing
 
+The repo publishes to three registries off one version line, all keyed to the `v*` tag semantic-release cuts: **npm** (`@gifcommit/golden-grids`), **SwiftPM** (the tag itself — `Package.swift` is at the root), and **Maven Central** (`com.gifcommit:golden-grids-core` and `com.gifcommit:golden-grids-renderer`, via `.github/workflows/publish-android.yml` on `release: published`). The Gradle build reads its version out of `package.json` rather than declaring one, so the Android artifacts cannot drift from the other two. Android publishing STAGES a deployment — releasing it is a manual click in the Central Portal, because Maven Central is immutable; switch the workflow task to `publishAndReleaseToMavenCentral` to automate it. See `android/README.md` for the four required secrets.
+
 Package is published to npm as `@gifcommit/golden-grids`. Publishing is triggered by creating a GitHub Release — see `.github/workflows/publish.yml`. Authenticates to npm via Trusted Publishing (OIDC) — no long-lived `NPM_TOKEN` is needed; the workflow's `id-token: write` permission lets the runner mint a short-lived credential that npm verifies against the configured trusted publisher. Uses semantic-release — a `feat!` commit with `BREAKING CHANGE:` footer triggers a major version bump.
 
 ## Architecture

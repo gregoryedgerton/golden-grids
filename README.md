@@ -207,7 +207,7 @@ The grid is computed from one shared, framework-agnostic model, so the same comp
 - **Web (React)** — `@gifcommit/golden-grids` (everything above)
 - **React Native** — `@gifcommit/golden-grids/native`
 - **Native iOS (SwiftUI)** — a Swift package, `import GoldenGrids`
-- **Native Android (Jetpack Compose)** — a Kotlin module, `import com.gifcommit.goldengrids.GoldenGrid`
+- **Native Android (Jetpack Compose)** — `com.gifcommit:golden-grids-renderer` on Maven Central
 
 ### Web (React)
 
@@ -278,6 +278,14 @@ A runnable example app lives in [`Examples/iOS`](Examples/iOS) — five screens:
 </p>
 
 ### Android (Jetpack Compose)
+
+Add the dependency (from Maven Central, `mavenCentral()` in your repositories):
+
+```kotlin
+implementation("com.gifcommit:golden-grids-renderer:5.0.0")
+```
+
+That brings `com.gifcommit:golden-grids-core` with it; depend on the core alone if you want the render model without Compose. The version matches npm and SwiftPM — all four renderers assert against the same committed fixtures, so the same number draws the same spiral everywhere.
 
 The same proportional model, rendered with Compose. The `GoldenGrid` composable takes the same props and fills each slot via a `slotContent` lambda keyed by child ordinal (`0` = the largest slot):
 

@@ -7,6 +7,36 @@ SwiftUI versions. The Kotlin core is verified against the shared
 spiral proportions, HSL colour progression and slot↔child ordering are identical
 across every platform.
 
+## Installation
+
+```kotlin
+// settings.gradle.kts — mavenCentral() is usually already there
+dependencyResolutionManagement {
+    repositories {
+        google()
+        mavenCentral()
+    }
+}
+```
+
+```kotlin
+// build.gradle.kts
+dependencies {
+    implementation("com.gifcommit:golden-grids-renderer:5.0.0")
+}
+```
+
+`golden-grids-renderer` brings `golden-grids-core` with it — you only need the
+second coordinate if you want the render model without Compose:
+
+```kotlin
+implementation("com.gifcommit:golden-grids-core:5.0.0")
+```
+
+The version is the same one npm and SwiftPM use, and it means the same thing:
+all four renderers assert against the same committed fixtures, so `5.0.0` on
+Gradle draws the identical spiral to `5.0.0` on npm.
+
 ## Modules
 
 | Module      | Type                  | What it is                                                                 |
@@ -85,3 +115,39 @@ Each screen builds itself in on appear.
   <img src="../docs/android/dashboards.gif" width="200" alt="Dashboards — a bento of stats" />
   <img src="../docs/android/editorial.gif" width="200" alt="Editorial — a text-first copy grid" />
 </p>
+
+## Publishing
+
+Artifacts go to Maven Central under the `com.gifcommit` namespace, published by
+[`publish-android.yml`](../.github/workflows/publish-android.yml) when a GitHub
+Release is created. The version is read from `package.json` rather than
+declared here, so it cannot drift from the npm and SwiftPM lines.
+
+Four repository secrets are required:
+
+| Secret | Where it comes from |
+| --- | --- |
+| `MAVEN_CENTRAL_USERNAME` | Central Portal → Generate User Token (username half) — *not* the portal login |
+| `MAVEN_CENTRAL_PASSWORD` | the same token's password half |
+| `SIGNING_KEY` | `gpg --export-secret-keys --armor <key-id>` — the full ASCII-armored block |
+| `SIGNING_PASSWORD` | that key's passphrase |
+
+The workflow checks all four before it builds anything, so a missing secret
+fails in seconds with its name rather than deep inside Gradle.
+
+Publishing **stages** a deployment; it does not make it public. Releasing is a
+click at [central.sonatype.com/publishing/deployments](https://central.sonatype.com/publishing/deployments).
+Maven Central is immutable — a released version can never be changed or
+withdrawn — which is why the last step is deliberately manual. Switching the
+workflow's task to `publishAndReleaseToMavenCentral` makes it automatic once
+you trust it.
+
+To try the artifacts against a real consumer before any of that:
+
+```bash
+cd android && ./gradlew publishToMavenLocal
+```
+
+That works without signing keys (signing is gated on the key being present)
+and puts both artifacts in `~/.m2`, resolvable by adding `mavenLocal()` to a
+test project.
