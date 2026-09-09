@@ -32,6 +32,14 @@ the box count low and use `placement:` to rotate the φ-rectangle into portrait
 so it fills the phone instead of leaving dead space. The fifth drives the spiral
 camera directly.
 
+<p align="center">
+  <img src="../../docs/ios/featured.gif" width="200" alt="Featured — a swipeable card carousel" />
+  <img src="../../docs/ios/galleries.gif" width="200" alt="Galleries — sky gradients with sun and moon" />
+  <img src="../../docs/ios/dashboards.gif" width="200" alt="Dashboards — a bento of stats" />
+  <img src="../../docs/ios/editorial.gif" width="200" alt="Editorial — a line-less copy grid" />
+  <img src="../../docs/ios/spiral.gif" width="200" alt="Spiral — dialing through ninety-one squares with inertia and number filters" />
+</p>
+
 **Featured** — a two-box card (headline + standfirst) with faded ghost cards bleeding off either side to suggest a swipeable carousel:
 
 ```swift
