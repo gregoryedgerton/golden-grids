@@ -16,7 +16,7 @@ npm install @gifcommit/golden-grids
 
 or visit [![npm](https://img.shields.io/npm/v/@gifcommit/golden-grids)](https://www.npmjs.com/package/@gifcommit/golden-grids) for the latest published package
 
-**Try it without installing:** [open the study template in StackBlitz](https://stackblitz.com/~/github.com/gregoryedgerton/golden-grids-study-template) — a three-band page consuming the published package, ready to edit. The [generator](https://gregoryedgerton.github.io/golden-grids/) shows what layouts look like; the sandbox lets you type into the API.
+**Try it without installing:** [open the study template in StackBlitz](https://stackblitz.com/~/github.com/gregoryedgerton/golden-grids-study-template) — a three-band page consuming the published package, ready to edit. The [generator](https://gregoryedgerton.github.io/golden-grids/) shows what layouts look like; the sandbox lets you type into the API. If that link stalls, the [classic importer](https://stackblitz.com/github/gregoryedgerton/golden-grids-study-template) opens the same repo; both need third-party cookies allowed for stackblitz.com.
 
 ## Usage
 
