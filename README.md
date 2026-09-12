@@ -1,12 +1,12 @@
 # Golden Grids
 
-### How I Learned to Stop Worrying about Rows and Columns and Love the Golden Ratio
+**One layout model, four platforms.** Golden Grids lays out Fibonacci-proportioned boxes on a golden spiral for **React, React Native, SwiftUI, and Jetpack Compose** — the same `from`/`to` range renders identically on all four, verified against one shared golden master. It ships a **spiral camera**: a dial that treats the layout as a space you zoom and rotate through rather than a page you scroll past. And there is a **[live generator](https://gregoryedgerton.github.io/golden-grids/)** — define a range, see it, export it.
 
-Try the [Golden Grid Generator](https://gregoryedgerton.github.io/golden-grids/) — Explore the sequence, define your inputs and export what you create.
+*Or: How I Learned to Stop Worrying about Rows and Columns and Love the Golden Ratio.*
 
 ## What is it?
 
-Golden Grids is a responsive layout library driven by the Fibonacci Sequence. Instead of traditional rows and columns you get proportionally aligned boxes that follow the golden ratio. What you do with those boxes is your business, but at least you won't be boring.
+A layout library driven by the Fibonacci sequence. Give it a range and it returns proportionally sized boxes arranged on a golden spiral. It lays out boxes and nothing else — what you put in them is your business, but at least you won't be boring.
 
 ## Installation
 
@@ -15,6 +15,8 @@ npm install @gifcommit/golden-grids
 ```
 
 or visit [![npm](https://img.shields.io/npm/v/@gifcommit/golden-grids)](https://www.npmjs.com/package/@gifcommit/golden-grids) for the latest published package
+
+**Try it without installing:** [open the study template in StackBlitz](https://stackblitz.com/github/gregoryedgerton/golden-grids-study-template) — a three-band page consuming the published package, ready to edit. The [generator](https://gregoryedgerton.github.io/golden-grids/) shows what layouts look like; the sandbox lets you type into the API.
 
 ## Usage
 
@@ -162,6 +164,23 @@ quick sets — full parity with the iOS screen). The renderer is verified
 against the same `render-model.json` golden master as every other platform.
 See [`android/README.md`](android/README.md) to build and run it, with
 screenshots.
+
+## Showcase
+
+Layout studies rebuild specific, well-known pages with stacked golden grids — a
+short vertical stack of small-range bands, each with one editorial job. Each
+study is a standalone repo with a live deploy and a written structural argument.
+They start from the [study template](https://github.com/gregoryedgerton/golden-grids-study-template).
+
+| Study | Live | Repo | Demonstrates |
+| --- | --- | --- | --- |
+| 01 — Airbnb listing page | _in progress_ | _in progress_ | Production viability: a listing's hierarchy is already golden; the twelve-column grid flattens it below the fold. |
+| 02 — Spotify on the spiral dial | _in progress_ | _in progress_ | A collection of squares is the case a grid handles worst and the spiral handles natively. |
+| 03 — Netflix, hybrid | _in progress_ | _in progress_ | Bands for browse, the dial for one title's frames — both capabilities on one page. |
+
+The studies name the sites they rebuild and are unaffiliated with them. Their
+imagery and copy are entirely original; nothing from a reference site is
+reproduced. Built one? Open a PR adding a row.
 
 ## Configuration
 

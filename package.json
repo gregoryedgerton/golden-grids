@@ -1,7 +1,7 @@
 {
   "name": "@gifcommit/golden-grids",
   "version": "5.0.0",
-  "description": "A React library for generating golden ratio grid layouts.",
+  "description": "Golden-ratio layout from one model, four platforms: React, React Native, SwiftUI, and Jetpack Compose. Fibonacci-proportioned boxes on a spiral, plus a spiral camera that dials through the layout.",
   "main": "dist/golden-grids.cjs.js",
   "module": "dist/golden-grids.es.js",
   "types": "dist/index.d.ts",
@@ -88,9 +88,19 @@
   },
   "keywords": [
     "react",
+    "react-native",
+    "swiftui",
+    "jetpack-compose",
+    "golden-ratio",
     "golden ratio",
+    "fibonacci",
+    "spiral",
     "grid",
-    "layout"
+    "layout",
+    "layout-engine",
+    "cross-platform",
+    "responsive",
+    "typescript"
   ],
   "author": "Gregory Edgerton",
   "license": "MIT",

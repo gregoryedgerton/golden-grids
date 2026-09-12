@@ -1,0 +1,61 @@
+name: Bug report
+description: A layout, transform, or build that came out wrong.
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks. Most layout reports cannot be acted on without the version, the platform, and the exact range, so those three are required.
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      description: "`npm ls @gifcommit/golden-grids`, or the Swift package / Gradle version."
+      placeholder: "5.0.0"
+    validations:
+      required: true
+  - type: dropdown
+    id: platform
+    attributes:
+      label: Platform
+      multiple: true
+      options:
+        - React (web)
+        - React Native
+        - SwiftUI (iOS)
+        - Jetpack Compose (Android)
+        - The generator (GitHub Pages)
+    validations:
+      required: true
+  - type: input
+    id: range
+    attributes:
+      label: Range
+      description: The exact props in use.
+      placeholder: 'from=3 to=7 placement="bottom" clockwise={false}'
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What you expected
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: What happened instead
+      description: A screenshot helps. A screenshot of the same range in the generator helps more — it isolates the library from your CSS.
+    validations:
+      required: true
+  - type: input
+    id: repro
+    attributes:
+      label: Reproduction
+      description: A StackBlitz, a repo, or a branch. The study template is the quickest starting point.
+      placeholder: https://stackblitz.com/github/gregoryedgerton/golden-grids-study-template
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: React / RN / Xcode / Android Studio versions, browser, device — whatever seems relevant.
