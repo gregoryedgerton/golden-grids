@@ -1,0 +1,32 @@
+name: Feature request
+description: Something the library should do that it does not.
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: The layout you are trying to build
+      description: Describe the page, not the API. What does the library currently make hard?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: What you would like it to do
+    validations:
+      required: true
+  - type: dropdown
+    id: platforms
+    attributes:
+      label: Platforms this applies to
+      multiple: true
+      options:
+        - React (web)
+        - React Native
+        - SwiftUI (iOS)
+        - Jetpack Compose (Android)
+        - All of them
+  - type: markdown
+    attributes:
+      value: |
+        Two things are out of scope by design and the README explains why: built-in breakpoints, and styling beyond box positioning. Proposals for either are welcome to argue against that position, but should engage with it.
