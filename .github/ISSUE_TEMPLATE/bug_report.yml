@@ -53,7 +53,7 @@ body:
     attributes:
       label: Reproduction
       description: A StackBlitz, a repo, or a branch. The study template is the quickest starting point.
-      placeholder: https://stackblitz.com/github/gregoryedgerton/golden-grids-study-template
+      placeholder: https://stackblitz.com/~/github.com/gregoryedgerton/golden-grids-study-template
   - type: textarea
     id: environment
     attributes:

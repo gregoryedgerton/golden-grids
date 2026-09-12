@@ -46,7 +46,7 @@ Most layout reports cannot be acted on without these:
   from the [generator](https://gregoryedgerton.github.io/golden-grids/) with
   the same range helps more, because it isolates the library from your CSS.
 - **A minimal reproduction**, if it is not just a range — a StackBlitz from the
-  [study template](https://stackblitz.com/github/gregoryedgerton/golden-grids-study-template)
+  [study template](https://stackblitz.com/~/github.com/gregoryedgerton/golden-grids-study-template)
   is the quickest way to make one.
 
 The issue template asks for all of this.
