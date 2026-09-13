@@ -5,7 +5,7 @@ written from the published README. This log records what was checked against
 the source and what changed as a result. Update it whenever a claim in those
 documents is re-verified or corrected.
 
-## 2026-09-12 — checked against `@gifcommit/golden-grids` 5.0.0
+## 2026-09-12 and 2026-09-13 — checked against `@gifcommit/golden-grids` 5.0.0
 
 | Claim | Source of truth | Result |
 | --- | --- | --- |
@@ -18,6 +18,8 @@ documents is re-verified or corrected.
 | `GoldenBox` styling | `src/components/GoldenBox.tsx` | Renders a `100% × 100%`, `position: relative` div and nothing else. `object-fit` belongs to the consumer. |
 | Spiral camera public surface | `src/index.ts` | `spiralCamera`, `toCssTransform`, `toNativeTransform`, `spiralWindow`, `windowFadeDepth`, `spiralEye`, `focusIndexAt`, `trailToRotateDeg`, `trailForRotation`, `tileTransform`, `toCssTileTransform`, `toNativeTileTransform`, `tileOnScreen`, `contentTransform`, `toCssContentTransform`, `toNativeContentTransform`. Also exported from `/native`. |
 | Maximum usable range | README "How big can I go?", `src/utils/fibonacci.ts` | Web: sequence positions 1–78 (`Number.MAX_SAFE_INTEGER`). Native: 91 squares is the layout ceiling (`Int64`). |
+| `from={2}` | `src/utils/fibonacci.ts:42`, `src/utils/renderModel.ts:105-127` | Not a shortcut for `from={1}`: position 1 alone is skipped and becomes a 1×1 placeholder (rendered first, filled by the last child, raw base colour). Same rectangles, different child mapping and colours. Only `from={1}` has no placeholder. Found by the 2026-09-13 catalogue review. |
+| `color` progression | `src/utils/renderModel.ts:133-150` | Hue range 180° plus 15° per box past four (cap 330°); total lightness spread 3% × box count centred on the base (±6% over four boxes); the smallest box sits nearest the base hue. Placeholder gets the raw base colour. |
 | Type resolution from npm | Template build; `tsc` under `bundler` and `node16` resolution | Both resolve `dist/index.d.ts` despite `types` being listed last in `exports`. No issue. |
 | npm keywords | `package.json` | Were `react`, `golden ratio`, `grid`, `layout`. Expanded in the library-metadata change. |
 | GitHub topics, description, homepage | `gh repo view` | Were empty / stale. Set in the library-metadata change. |
