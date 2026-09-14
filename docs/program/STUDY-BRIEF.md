@@ -155,6 +155,15 @@ type to hide it. Naming a real constraint costs less than concealing it.
 **Post angle:** listing pages already have a golden hierarchy; the twelve-column
 grid flattens it below the fold.
 
+**Correction, 2026-09-13, from the live capture** (Study 01 repo,
+`captures/`): signed out with no dates the page shows no price anywhere —
+"Add dates for prices" in the booking card. The peer set for the facts band
+is capacity, rating, review count and host, not price and capacity. The
+reviews section is the largest text block on the page, not "small and
+restrained". The date picker is its own headed section. Mobile replaces the
+mosaic with a one-photo carousel. See the study's README for the full
+inventory.
+
 ---
 
 ## Study 02 — Spotify on the spiral dial

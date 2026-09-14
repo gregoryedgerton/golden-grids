@@ -174,7 +174,7 @@ They start from the [study template](https://github.com/gregoryedgerton/golden-g
 
 | Study | Live | Repo | Demonstrates |
 | --- | --- | --- | --- |
-| 01 — Airbnb listing page | _in progress_ | _in progress_ | Production viability: a listing's hierarchy is already golden; the twelve-column grid flattens it below the fold. |
+| 01 — Airbnb listing page | [live](https://gregoryedgerton.github.io/golden-grids-study-01-airbnb/) (pass one: structure and asset spec) | [repo](https://github.com/gregoryedgerton/golden-grids-study-01-airbnb) | Production viability: a listing's hierarchy is already golden; the twelve-column grid flattens it below the fold. |
 | 02 — Spotify on the spiral dial | _in progress_ | _in progress_ | A collection of squares is the case a grid handles worst and the spiral handles natively. |
 | 03 — Netflix, hybrid | _in progress_ | _in progress_ | Bands for browse, the dial for one title's frames — both capabilities on one page. |
 
