@@ -288,6 +288,16 @@ the page looks good.
 **Post angle:** rows of identical thumbnails are a layout lying about what the
 product is doing.
 
+**Correction, 2026-10-05, from the live capture** (Study 03 repo,
+`captures/`): signed out, `netflix.com/browse` redirects to login, so the
+browse homepage was not captured. The reference is the signed-out home page,
+whose one content row is *Trending Now* — ten tiles numbered 1 to 10 and
+drawn at one size (224×268 at 1440, 132×166 at both 820 and 390) — and a
+signed-out title page, which carries the billboard. The ranked row replaces
+"tier one / tier two" as the subject: the tiers are ranks 1–5 and 6–10. The
+dial is inline. See the study's README for the inventory and for what the
+two-band ranking does not solve.
+
 ---
 
 ## Backlog

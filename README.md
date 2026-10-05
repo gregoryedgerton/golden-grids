@@ -176,11 +176,11 @@ They start from the [study template](https://github.com/gregoryedgerton/golden-g
 | --- | --- | --- | --- |
 | 01 — Airbnb listing page | [live](https://gregoryedgerton.github.io/golden-grids-study-01-airbnb/) | [repo](https://github.com/gregoryedgerton/golden-grids-study-01-airbnb) | Production viability: a listing's hierarchy is already golden; the twelve-column grid flattens it below the fold. |
 | 02 — A collection on the spiral dial | [live](https://gregoryedgerton.github.io/golden-grids-study-02-spotify/) (pass one) | [repo](https://github.com/gregoryedgerton/golden-grids-study-02-spotify) | A collection of squares is the case a grid handles worst and the spiral handles natively. |
-| 03 — Netflix, hybrid | _in progress_ | _in progress_ | Bands for browse, the dial for one title's frames — both capabilities on one page. |
+| 03 — Netflix, bands and the dial | [live](https://gregoryedgerton.github.io/golden-grids-study-03-netflix/) | [repo](https://github.com/gregoryedgerton/golden-grids-study-03-netflix) | A row that numbers its titles one to ten and draws them all one size, rebuilt so rank is size — then one film opened into its own frames on the dial. Both capabilities on one page. |
 
-The studies name the sites they rebuild and are unaffiliated with them. Their
-imagery and copy are entirely original; nothing from a reference site is
-reproduced. Built one? Open a PR adding a row.
+The studies name the sites they rebuild and are unaffiliated with them.
+Nothing from a reference site is reproduced, and each study states where its
+imagery comes from. Built one? Open a PR adding a row.
 
 ## Configuration
 
