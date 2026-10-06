@@ -138,6 +138,32 @@ The template's README is a fill-in-the-blank instrument. It must contain:
 - MIT licensed.
 - Topics applied: `golden-grids`, `fibonacci`, `layout`, `react`.
 
+
+### The standard, added 2026-10-06
+
+From Studies 03 and 04, and now required of every study. The template's
+`CLAUDE.md` states each as a rule with its conditions; the template ships
+the code.
+
+- **Copy is the subject's.** Band titles, lessons and captions describe what
+  the reference page is about, in a plain register; grid geometry goes in
+  hidden notes and the README. No cheek.
+- **Marketing and account modules** are rebuilt where the format has them,
+  placed as the reference places them, with straight copy for a fictional
+  service; forms send nothing and say so; flat modules are lists.
+- **Type fits its square** (`src/lib/fit.tsx`, `src/lib/boxes.tsx`): one
+  fact per square, as large as the square allows; nothing is ever clipped;
+  the fitted line's container is a definite box (`flex: 1 1 0`).
+- **Depth in flow:** expansion in place, an item from a row opening its own
+  band, section links, several pages when the reference has several.
+- **Media supports the format:** clips in squares where the subject moves,
+  the whole work on request; original figures where the subject is text.
+- **Both colour schemes** by device preference; **reduced motion** honoured
+  with `transition: none` and static layouts; **web fonts** gated so display
+  type does not flash.
+- **Accessibility audited** with `captures/scan.cjs` in Chrome and WebKit,
+  both schemes, three widths, plus the manual checks listed in `CLAUDE.md`.
+
 ## Non-goals
 
 - No CSS framework, no component library, no design system. Each study has its
