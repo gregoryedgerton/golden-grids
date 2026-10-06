@@ -312,6 +312,13 @@ two-band ranking does not solve.
   content is also openly licensed, so it is the one study that can legitimately
   use the original's actual text — which sharpens the comparison precisely
   where the library performs worst.
+  **Built as Study 04, 2026-10-05**, on Greg's direction and ahead of the
+  "no backlog until distribution" rule: six pages rather than one, the
+  article cut into one fact per square with type fitted to the square, and
+  the article's text used under CC BY-SA 4.0 with attribution. The failure
+  prediction held in part: a derivation and a chronology were ranked by a
+  grid that cannot do otherwise, unit squares hold a word or a number and
+  no more, and the proofs were left out. See the study's README.
 - **Unsplash** — dropped as a dial subject in favour of Spotify. If it returns,
   it should return as a *bands* study of the masonry wall, not as a dial.
 
