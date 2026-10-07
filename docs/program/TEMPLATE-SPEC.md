@@ -155,7 +155,9 @@ the code.
   fact per square, as large as the square allows; nothing is ever clipped;
   the fitted line's container is a definite box (`flex: 1 1 0`).
 - **Depth in flow:** expansion in place, an item from a row opening its own
-  band, section links, several pages when the reference has several.
+  band, section links, several pages when the reference has several. Every
+  drill-down exits three ways: a labelled Close at the head, a Close at the
+  foot, and Escape.
 - **Media supports the format:** clips in squares where the subject moves,
   the whole work on request; original figures where the subject is text.
 - **Both colour schemes** by device preference; **reduced motion** honoured
