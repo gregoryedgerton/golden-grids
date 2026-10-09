@@ -189,3 +189,33 @@ the code.
   skipped-range band, and holds up at 390px, 820px, and 1440px.
 - The README's fill-in-the-blanks are obvious enough that a study author cannot
   accidentally publish with placeholders intact.
+
+## Disclosure, metadata and neutrality (added 2026-10-09)
+
+Every study ships these, and the template provides them:
+
+- `src/study.json` — the single source: study number, the reference's name, the
+  one-sentence notice ("A layout study, not X: … Not affiliated with X; …"), a
+  label for each HTML entry, a summary, the pages reviewed with the date and
+  the method, what is real, what is invented or changed, each kind of asset
+  with its source and licence, who the study is not affiliated with, the repo
+  and the date last updated.
+- `study.meta.ts` — a Vite plugin that writes every entry's `<title>`
+  (`{Page} · {Reference} · Golden Grids layout study {NN}`), its description
+  and Open Graph tags (the notice, word for word) and its favicon link. Entries
+  carry no title, description or icon of their own.
+- `src/lib/study.tsx` and `study.css` — `StudyBanner`, a sticky notice at the
+  top of every page with the same sentence as the description, and
+  `StudyDisclosure`, the last element on every page. Their styles are their
+  own and identical in every study, so the notice never looks like part of the
+  site being studied. A page's own credit list is passed to the disclosure as
+  children.
+- The banner publishes its height as `--study-banner-h`. Anything else that
+  sticks to the top of the viewport (an opened cell's head, a category strip,
+  a rail, a dial stage) offsets by it.
+- `public/favicon.svg` — one shape for every study: a 32-unit tile with 6-unit
+  corners and one letter, in the study's colours and typeface.
+- The README has "Approach" (how the reference arranges the content and how
+  the study does, described and not argued) and "Notes for review" (plain
+  observations, no verdict). A study does not say whether Golden Grids suited
+  the page; see rule 3 in `PROGRAM.md`.

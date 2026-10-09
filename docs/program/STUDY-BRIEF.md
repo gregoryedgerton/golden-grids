@@ -3,9 +3,9 @@
 Each study is a standalone repo forked from the template. This document holds
 the brief format, the three studies already committed to, and the backlog.
 
-**Read `PROGRAM.md` first**, particularly the three rules governing studies:
-select by content hierarchy rather than fame, name the target while
-substituting the assets, and publish at least one failure.
+**Read `PROGRAM.md` first**, particularly the rules governing studies: select
+by content hierarchy rather than fame, name the target while substituting the
+assets, record without judging, and say in three places that it is a study.
 
 ---
 
@@ -96,10 +96,9 @@ side-by-side and the evidence for the structural argument.
 ## Brief format
 
 - **Reference** — the specific page, named, with a URL.
-- **Why this page** — what its content hierarchy looks like, and the specific
-  reason it should or should not suit Fibonacci proportions.
-- **What it proves** — the one claim a reader should leave with. If a study has
-  no distinct claim, it is redundant.
+- **Why this page** — what its content hierarchy looks like.
+- **What it shows** — the arrangement the study builds, described without a
+  prediction of how well it will work. Reviewers decide that afterwards.
 - **Structural inventory** — the original's blocks, their relative weights, and
   what its grid does with them.
 - **Bands** — the proposed stack replacing that grid: range, placement,
@@ -107,7 +106,8 @@ side-by-side and the evidence for the structural argument.
   until the build.
 - **Asset spec** — images by resolution and role, copy by word count and role.
   The handoff artifact.
-- **The honest risk** — what is most likely to look worse than the original,
+- **Open question** — what a reviewer should look at first, stated as a question and not a prediction;
+  formerly "the honest risk": what was thought most likely to differ from the original,
   named in advance so the writeup cannot quietly omit it.
 - **Post angle** — the structural argument, in one sentence.
 
@@ -147,7 +147,7 @@ upstream onto whoever shoots the property, and that this rebuild imposes none.
 Plus property name, location line, host blurb, amenity list, and review
 excerpts, each at the word count its box can hold.
 
-**The honest risk:** the facts band. Price and capacity are peer information —
+**Open question for review:** the facts band. Price and capacity are peer information —
 nothing about a nightly rate outranks the guest count — and Fibonacci boxes
 will insist one dominates. If it looks forced, say so rather than shrinking the
 type to hide it. Naming a real constraint costs less than concealing it.
@@ -214,7 +214,7 @@ handles anything — the point is that square art happens to lose nothing.
 Strong, simple compositions that read at small scale; a busy cover becomes
 noise at depth. Specify count, dimension, and the artist and album names.
 
-**The honest risk:** performance on mid-range mobile, and motion comfort.
+**Open question for review:** performance on mid-range mobile, and motion comfort.
 Scroll-bound rotation is genuinely unpleasant for some people.
 `prefers-reduced-motion` must produce a real static fallback layout, not a
 slower dial. Requirement, not polish.
@@ -279,7 +279,7 @@ The public-domain route is the better story — dialling through *Nosferatu* or
 the frames are visually strong, and the legal question disappears entirely.
 Recommend it in the spec.
 
-**The honest risk:** the hybrid could read as two demos bolted together. The
+**Open question for review:** the hybrid could read as two demos bolted together. The
 writeup has to do the reconciling work explicitly — state why bands suit browse
 and the dial suits a single title, and why using either for both would be
 worse. If the post cannot make that case cleanly, the study has failed even if
@@ -305,13 +305,9 @@ two-band ranking does not solve.
 - **A design studio portfolio** — Pentagram or similar. The genre that already
   wants to look like this, which makes it an easy win and slightly less
   interesting for exactly that reason.
-- **A Wikipedia article page** — the committed failure study. Flat,
-  text-heavy, no hierarchy to exploit, and long-form reading has requirements
-  about measure and vertical rhythm that proportional boxes actively fight.
-  Write it honestly; it is the study that makes the others believable. Its
-  content is also openly licensed, so it is the one study that can legitimately
-  use the original's actual text — which sharpens the comparison precisely
-  where the library performs worst.
+- **A Wikipedia article page** — flat, text-heavy long-form reading. Its
+  content is openly licensed, so it is the one study that can legitimately use
+  the original's actual text.
   **Built as Study 04, 2026-10-05**, on Greg's direction and ahead of the
   "no backlog until distribution" rule: six pages rather than one, the
   article cut into one fact per square with type fitted to the square, and
@@ -326,9 +322,8 @@ two-band ranking does not solve.
 
 Three studies now include the spiral camera and only one so far does not. Watch
 that ratio. If the series becomes mostly dial, the library reads as a
-spectacle engine and Study 01's credibility work is diluted — which is the
-exact failure mode the whole program exists to avoid. Keep the next two studies
-after Netflix band-only, including the Wikipedia failure study.
+spectacle engine and Study 01's credibility work is diluted — which the program means to avoid. Keep the next two studies
+after Netflix band-only, including the Wikipedia study.
 
 Do not start a backlog study until 01, 02, and 03 are live and the first
 distribution round has run. Three finished studies with a written argument beat

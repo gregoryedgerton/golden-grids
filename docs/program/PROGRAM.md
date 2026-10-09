@@ -86,11 +86,10 @@ marketing copy. Republishing those as a live deploy is infringement regardless
 of the project being free and educational, and the practical cost is that a
 takedown erases the asset you spent weeks building.
 
-This costs the argument nothing, because the argument is **structural**. The
-claim is that a twelve-column grid flattens a hierarchy Fibonacci proportions
-express better, and that claim is carried by block structure, relative sizes,
-box proportions, and word counts — not by which specific photograph sits in the
-hero. Match the original's structure exactly and substitute the content.
+This costs the study nothing, because what it shows is **structural**: block
+structure, relative sizes, box proportions and word counts, not which specific
+photograph sits in the hero. Match the original's structure exactly and
+substitute the content.
 
 Each study therefore produces an **asset specification** before it produces a
 page: the inventory of image slots and the copy slots at their required word
@@ -107,11 +106,27 @@ do not adjust the structure to suit content that has not arrived yet.
 Every study carries a visible line, on the page and in the README, stating it
 is an unaffiliated study and that the assets are original.
 
-**3. Publish at least one failure.**
+**3. A study records; it does not judge.**
 
-A series where every study succeeds reads as advertising and readers discount
-all of it. One study should honestly document a pattern the library handles
-badly, with a clear account of why. That study buys credibility for the rest.
+A study shows a layout as it was built and says plainly what it is, what was
+reviewed and where everything came from. It does not decide in advance, or
+conclude on its own page, whether Golden Grids suits that kind of content.
+No study is designated a success or a failure. Each README keeps a "Notes for
+review" section of plain observations (what differs from the reference, what
+is missing, what was not measured or tested) with no verdict attached. The
+assessment of what the library is and is not good for is made once, at the
+end, after people have reviewed all of the studies.
+
+**4. Every study says it is a study, in three places.**
+
+In the metadata of every page, in a sticky notice at the top of every page,
+and in a disclosure at the very end of every page. The notice is one sentence
+and is the same in the metadata and the banner: this is a layout study, not
+the real site, and who it is not affiliated with. The closing disclosure is as
+open as it can be: the pages reviewed and when, how they were read, what on
+the page is real, what is invented or changed, where each kind of asset came
+from and under what licence, and how to report a problem. `src/study.json`
+holds all of it; `TEMPLATE-SPEC.md` has the mechanics.
 
 ## Sequence
 
