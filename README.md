@@ -169,10 +169,10 @@ screenshots.
 
 Layout studies rebuild specific, well-known pages with stacked golden grids — a
 short vertical stack of small-range bands, each with one editorial job. Each
-study is a standalone repo with a live deploy and a written structural argument.
+study is a standalone repo with a live deploy. A study says on every page that it is a study and not the real site, and describes what was built without judging it; what the library suits is assessed after all of them have been reviewed.
 They start from the [study template](https://github.com/gregoryedgerton/golden-grids-study-template).
 
-| Study | Live | Repo | Demonstrates |
+| Study | Live | Repo | What it rebuilds |
 | --- | --- | --- | --- |
 | 01 — Airbnb listing page | [live](https://gregoryedgerton.github.io/golden-grids-study-01-airbnb/) | [repo](https://github.com/gregoryedgerton/golden-grids-study-01-airbnb) | One Airbnb listing page as ten stacked golden grids: gallery, facts, booking, description, amenities, dates, reviews, map, host and house rules, each with a largest square. The listing is fictional. |
 | 02 — A collection on the spiral dial | [live](https://gregoryedgerton.github.io/golden-grids-study-02-spotify/) (pass one) | [repo](https://github.com/gregoryedgerton/golden-grids-study-02-spotify) | Sixteen record covers on one scroll-bound spiral, after the rows of album squares on a Spotify artist page. Each record is one square; scrolling moves through them. |
