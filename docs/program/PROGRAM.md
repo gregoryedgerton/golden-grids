@@ -151,8 +151,11 @@ in its own name. This holds when the subject is real and when the facts are a
 third party's. The real name, whose facts or reporting these are, and anything
 the brand's own site would leave out belong in the notice and the disclosure.
 A third-party work about the subject (a documentary, a review) may supply
-short attributed quotations, never a section, a headline or a fact, and it is
-named in the disclosure, not in the copy. (Greg, 2026-10-10, Study 16.)
+short attributed quotations, never a section, a headline or a fact. It is
+named only in the credits of a page that shows one of its quotations; a page
+that shows none does not mention it. Where a quotation names the real subject,
+the parody name takes its place, without brackets, and that page's credits say
+the quotation was altered. (Greg, 2026-10-10, Study 16.)
 
 The name is also the page's title (`GIFbnb - a Golden Grids layout study`,
 with the page's label in front when a study has several pages) and its icon is
