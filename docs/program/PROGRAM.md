@@ -135,13 +135,13 @@ named for the reference: `GIF` in capitals, then the tail of the reference's
 name in lower case. GIFbnb for Airbnb, GIFify for Spotify, GIFspn for ESPN, GIFflix for Netflix,
 GIFrs for the IRS, GIFx for X, GIFbase for Coinbase, GIFmutual for
 Northwestern Mutual, GIFn'now for Hot 'n Now, GIFbell for Taco Bell,
-GIFipedia for Wikipedia. Where the reference has a premium tier or a named
+GIFipedia for Wikipedia, and GIFmilk Records for the author's own label, No
+Milk Records. Where the reference has a premium tier or a named
 service, the study's play on it carries the parody name and keeps the
 reference's alteration: GIFspn+, GIFbase One, GIFx Premium. The name is
 written exactly so and never changed in case by a stylesheet; the notice on
 every page says it is a parody name, and the disclosure lists it among what
-is invented. A study of the author's own work (No Milk Records) keeps its
-own name.
+is invented.
 
 The name is also the page's title (`GIFbnb - a Golden Grids layout study`,
 with the page's label in front when a study has several pages) and its icon is
