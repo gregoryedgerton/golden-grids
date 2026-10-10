@@ -223,3 +223,4 @@ Every study ships these, and the template provides them:
   the study does, described and not argued) and "Notes for review" (plain
   observations, no verdict). A study does not say whether Golden Grids suited
   the page; see rule 3 in `PROGRAM.md`.
+- `captures/cells.cjs` — opens every expandable square at a phone width and fails on horizontal overflow or a head that does not stay locked under the notice.
