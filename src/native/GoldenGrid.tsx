@@ -7,6 +7,7 @@ import { pct, fillToCss } from "../core/style";
 import { assignChildren } from "../core/assignChildren";
 import type { GoldenGridProps } from "../core/types";
 import { GoldenBox } from "./GoldenBox";
+import { collectBoxChildren } from "../utils/collectBoxChildren";
 
 export type { PlacementValue, GoldenGridProps };
 
@@ -65,9 +66,7 @@ const GoldenGrid: React.FC<GoldenGridProps> = (props) => {
     : {};
 
   // --- child collection (the model + assignChildren supply the ordering) ---
-  const allBoxChildren = React.Children.toArray(props.children).filter(
-    (child): child is React.ReactElement => React.isValidElement(child) && child.type === GoldenBox
-  );
+  const allBoxChildren = collectBoxChildren(props.children, GoldenBox);
 
   const model = computeRenderModel({
     from: props.from,
