@@ -93,6 +93,13 @@ order impossible to miss.
   author forking the template should never have to edit a build config.
 - Document the one manual step — pointing the repo's Pages source at Actions —
   in the README, since it cannot be automated from within the repo.
+- Publishing a study tells the marketing site. Once a study's first deploy is
+  live, an issue goes on the site's board (`gregoryedgerton/golden-grids-site`)
+  asking for the study to be added to the gallery, with the live URL, the day
+  it was published and what the site's study file needs.
+  `captures/site-issue.cjs` reads `src/study.json` and opens it, once per
+  study. The site is changed in its own repository, by its own loop; a study
+  only opens the issue. (Greg, 2026-10-10.)
 
 ### Quality floor
 

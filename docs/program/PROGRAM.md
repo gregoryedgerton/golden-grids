@@ -135,13 +135,24 @@ named for the reference: `GIF` in capitals, then the tail of the reference's
 name in lower case. GIFbnb for Airbnb, GIFify for Spotify, GIFspn for ESPN, GIFflix for Netflix,
 GIF.gov for IRS.gov (the one name that keeps the reference's own .gov, at Greg's choice), GIFx for X, GIFbase for Coinbase, GIFmutual for
 Northwestern Mutual, GIFn'now for Hot 'n Now, GIFbell for Taco Bell,
-GIFipedia for Wikipedia, and GIFmilk Records for the author's own label, No
-Milk Records. Where the reference has a premium tier or a named
+GIFipedia for Wikipedia, GIFdepot for The Home Depot, GIFvidia for Nvidia,
+GIFpark for Action Park, GIF.org for NPR (which keeps the reference's own
+.org, as GIF.gov keeps .gov), and GIFmilk Records for the author's own label,
+No Milk Records. Where the reference has a premium tier or a named
 service, the study's play on it carries the parody name and keeps the
 reference's alteration: GIFspn+, GIFbase One, GIFx Premium. The name is
 written exactly so and never changed in case by a stylesheet; the notice on
 every page says it is a parody name, and the disclosure lists it among what
 is invented.
+
+The parody name is the subject's name everywhere in the copy, and the pages
+speak as that brand would: a park's site promotes the park, a newsroom reports
+in its own name. This holds when the subject is real and when the facts are a
+third party's. The real name, whose facts or reporting these are, and anything
+the brand's own site would leave out belong in the notice and the disclosure.
+A third-party work about the subject (a documentary, a review) may supply
+short attributed quotations, never a section, a headline or a fact, and it is
+named in the disclosure, not in the copy. (Greg, 2026-10-10, Study 16.)
 
 The name is also the page's title (`GIFbnb - a Golden Grids layout study`,
 with the page's label in front when a study has several pages) and its icon is
