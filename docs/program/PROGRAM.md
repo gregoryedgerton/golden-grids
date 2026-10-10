@@ -148,7 +148,9 @@ with the page's label in front when a study has several pages) and its icon is
 the letters GIF in the study's colours. The header is the reference's own
 header and nav with the parody name where its logo is; it does not say
 "layout study" or name the reference, because the notice above it and the
-disclosure below it do.
+disclosure below it do. Its nav items are for show; only one that leads to
+one of the study's own pages or sections is a link. Nothing on the page links
+to the site being studied except the notice and the disclosure.
 
 ## Sequence
 
