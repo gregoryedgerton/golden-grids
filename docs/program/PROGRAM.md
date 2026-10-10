@@ -132,7 +132,7 @@ holds all of it; `TEMPLATE-SPEC.md` has the mechanics.
 
 The service a study invents to stand where the reference's name would be is
 named for the reference: `GIF` in capitals, then the tail of the reference's
-name in lower case. GIFbnb for Airbnb, GIFspn for ESPN, GIFflix for Netflix,
+name in lower case. GIFbnb for Airbnb, GIFify for Spotify, GIFspn for ESPN, GIFflix for Netflix,
 GIFrs for the IRS, GIFx for X, GIFbase for Coinbase, GIFmutual for
 Northwestern Mutual, GIFn'now for Hot 'n Now, GIFbell for Taco Bell,
 GIFipedia for Wikipedia. Where the reference has a premium tier or a named
@@ -142,6 +142,13 @@ written exactly so and never changed in case by a stylesheet; the notice on
 every page says it is a parody name, and the disclosure lists it among what
 is invented. A study of the author's own work (No Milk Records) keeps its
 own name.
+
+The name is also the page's title (`GIFbnb - a Golden Grids layout study`,
+with the page's label in front when a study has several pages) and its icon is
+the letters GIF in the study's colours. The header is the reference's own
+header and nav with the parody name where its logo is; it does not say
+"layout study" or name the reference, because the notice above it and the
+disclosure below it do.
 
 ## Sequence
 

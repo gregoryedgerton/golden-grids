@@ -201,8 +201,9 @@ Every study ships these, and the template provides them:
   with its source and licence, who the study is not affiliated with, the repo
   and the date last updated.
 - `study.meta.ts` — a Vite plugin that writes every entry's `<title>`
-  (`{Page} · {Reference} · Golden Grids layout study {NN}`), its description
-  and Open Graph tags (the notice, word for word) and its favicon link. Entries
+  (`{Brand} - a Golden Grids layout study`, with the page's label in front when
+  there is more than one page), its description and Open Graph tags (the notice,
+  word for word), the share card and the icon links. Entries
   carry no title, description or icon of their own.
 - `src/lib/study.tsx` and `study.css` — `StudyBanner`, a sticky notice at the
   top of every page with the same sentence as the description, and
@@ -213,8 +214,11 @@ Every study ships these, and the template provides them:
 - The banner publishes its height as `--study-banner-h`. Anything else that
   sticks to the top of the viewport (an opened cell's head, a category strip,
   a rail, a dial stage) offsets by it.
-- `public/favicon.svg` — one shape for every study: a 32-unit tile with 6-unit
-  corners and one letter, in the study's colours and typeface.
+- `public/favicon.svg`, `favicon-96.png`, `apple-touch-icon.png`, `og.png` — the
+  letters GIF in capitals in the study's colours and typeface (the tile has
+  6-unit corners on a 32-unit square), and a share card with the parody name.
+- The header is the reference's own header and nav with the parody name where
+  its logo is; it does not say "layout study" or name the reference.
 - The README has "Approach" (how the reference arranges the content and how
   the study does, described and not argued) and "Notes for review" (plain
   observations, no verdict). A study does not say whether Golden Grids suited
