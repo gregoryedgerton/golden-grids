@@ -62,7 +62,7 @@ that argues a structural case about the original's layout.
 Studies answer the credibility objection in the only way that works: by showing
 real, recognizable layouts built with the thing.
 
-### Three rules that govern every study
+### Five rules that govern every study
 
 **1. Select by content hierarchy, not by fame.**
 
@@ -127,6 +127,21 @@ open as it can be: the pages reviewed and when, how they were read, what on
 the page is real, what is invented or changed, where each kind of asset came
 from and under what licence, and how to report a problem. `src/study.json`
 holds all of it; `TEMPLATE-SPEC.md` has the mechanics.
+
+**5. A study's brand is a parody name.**
+
+The service a study invents to stand where the reference's name would be is
+named for the reference: `GIF` in capitals, then the tail of the reference's
+name in lower case. GIFbnb for Airbnb, GIFspn for ESPN, GIFflix for Netflix,
+GIFrs for the IRS, GIFx for X, GIFbase for Coinbase, GIFmutual for
+Northwestern Mutual, GIFn'now for Hot 'n Now, GIFbell for Taco Bell,
+GIFipedia for Wikipedia. Where the reference has a premium tier or a named
+service, the study's play on it carries the parody name and keeps the
+reference's alteration: GIFspn+, GIFbase One, GIFx Premium. The name is
+written exactly so and never changed in case by a stylesheet; the notice on
+every page says it is a parody name, and the disclosure lists it among what
+is invented. A study of the author's own work (No Milk Records) keeps its
+own name.
 
 ## Sequence
 
