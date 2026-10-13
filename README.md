@@ -1,3 +1,5 @@
+GIFcommit00001
+
 # Golden Grids
 
 **One layout model, four platforms.** Golden Grids lays out Fibonacci-proportioned boxes on a golden spiral for **React, React Native, SwiftUI, and Jetpack Compose** — the same `from`/`to` range renders identically on all four, verified against one shared golden master. It ships a **spiral camera**: a dial that treats the layout as a space you zoom and rotate through rather than a page you scroll past. And there is a **[live generator](https://gregoryedgerton.github.io/golden-grids/)** — define a range, see it, export it.
