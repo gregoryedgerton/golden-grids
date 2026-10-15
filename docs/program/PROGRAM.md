@@ -137,7 +137,8 @@ GIF.gov for IRS.gov (the one name that keeps the reference's own .gov, at Greg's
 Northwestern Mutual, GIFn'now for Hot 'n Now, GIFbell for Taco Bell,
 GIFipedia for Wikipedia, GIFdepot for The Home Depot, GIFvidia for Nvidia,
 GIFpark for Action Park, GIF.org for NPR (which keeps the reference's own
-.org, as GIF.gov keeps .gov), and GIFmilk Records for the author's own label,
+.org, as GIF.gov keeps .gov), GIFea for IKEA, and GIFmilk Records for the
+author's own label,
 No Milk Records. Where the reference has a premium tier or a named
 service, the study's play on it carries the parody name and keeps the
 reference's alteration: GIFspn+, GIFbase One, GIFx Premium. The name is
