@@ -133,11 +133,11 @@ holds all of it; `TEMPLATE-SPEC.md` has the mechanics.
 The service a study invents to stand where the reference's name would be is
 named for the reference: `GIF` in capitals, then the tail of the reference's
 name in lower case. GIFbnb for Airbnb, GIFify for Spotify, GIFspn for ESPN, GIFflix for Netflix,
-GIF.gov for IRS.gov (the one name that keeps the reference's own .gov, at Greg's choice), GIFx for X, GIFbase for Coinbase, GIFmutual for
+GIF;gov for IRS.gov (the reference's .gov with a semicolon for the dot, Greg's choice on 2026-10-17; it was GIF;gov), GIFx for X, GIFbase for Coinbase, GIFmutual for
 Northwestern Mutual, GIFn'now for Hot 'n Now, GIFbell for Taco Bell,
 GIFipedia for Wikipedia, GIFdepot for The Home Depot, GIFvidia for Nvidia,
 GIFpark for Action Park, GIF.org for NPR (which keeps the reference's own
-.org, as GIF.gov keeps .gov), GIFea for IKEA, GIFbank for TD Bank, GIFin for LinkedIn, and GIFmilk
+.org, as GIF;gov keeps .gov), GIFea for IKEA, GIFbank for TD Bank, GIFin for LinkedIn, and GIFmilk
 Records for the
 author's own label,
 No Milk Records. Where the reference has a premium tier or a named
