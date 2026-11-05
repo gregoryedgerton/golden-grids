@@ -62,6 +62,7 @@ export default defineConfig(({ command }) => {
       port: 5173,
     },
     build: {
+      copyPublicDir: false, // public/ contains demo assets, not library exports
       lib: {
         entry: "src/index.ts",
         name: "GoldenGrids",
