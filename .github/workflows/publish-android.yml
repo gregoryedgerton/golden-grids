@@ -1,0 +1,86 @@
+name: Publish Android
+
+# Publishes the Android artifacts to Maven Central on a released version.
+#
+# Fires on `release: published` rather than on push to main, because that is
+# the point at which semantic-release has bumped package.json and tagged the
+# commit — and the Gradle build reads its version straight out of package.json
+# so that npm, SwiftPM and Maven Central all say the same number for the same
+# render model. Checking out the tag is what makes that true.
+#
+# `publishToMavenCentral` STAGES a deployment and stops. Releasing it is a
+# click in the Central Portal. That is deliberate for now: Maven Central is
+# immutable, a bad version can never be withdrawn, and the first few releases
+# are worth looking at. To make it fully automatic later, change the task to
+# `publishAndReleaseToMavenCentral` — no Gradle change is needed, both tasks
+# already exist.
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Tag to publish (e.g. v5.0.0)'
+        required: true
+        type: string
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fail early if publishing credentials are missing
+        # Without these the build would still run and then either produce an
+        # unsigned bundle or fail deep inside Gradle. Neither is a useful
+        # thing to read in a log, and an unsigned bundle is rejected by the
+        # Portal anyway — so say which secret is absent, at the top.
+        env:
+          USERNAME: ${{ secrets.MAVEN_CENTRAL_USERNAME }}
+          PASSWORD: ${{ secrets.MAVEN_CENTRAL_PASSWORD }}
+          SIGNING_KEY: ${{ secrets.SIGNING_KEY }}
+          SIGNING_PASSWORD: ${{ secrets.SIGNING_PASSWORD }}
+        run: |
+          missing=()
+          [ -n "$USERNAME" ] || missing+=(MAVEN_CENTRAL_USERNAME)
+          [ -n "$PASSWORD" ] || missing+=(MAVEN_CENTRAL_PASSWORD)
+          [ -n "$SIGNING_KEY" ] || missing+=(SIGNING_KEY)
+          [ -n "$SIGNING_PASSWORD" ] || missing+=(SIGNING_PASSWORD)
+          if [ ${#missing[@]} -gt 0 ]; then
+            echo "Missing repository secrets: ${missing[*]}" >&2
+            echo "See android/README.md for how each one is produced." >&2
+            exit 1
+          fi
+
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.release.tag_name || inputs.tag }}
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      - name: Confirm the version being published
+        # The Gradle build derives this from package.json; printing it means a
+        # mismatch between the tag and the artifact version is visible in the
+        # log rather than discovered on Maven Central, where it cannot be
+        # undone.
+        working-directory: android
+        run: |
+          ./gradlew :core:properties --quiet | grep -E '^(group|version):'
+          echo "tag: ${{ github.event.release.tag_name || inputs.tag }}"
+
+      - name: Publish to Maven Central
+        working-directory: android
+        env:
+          ORG_GRADLE_PROJECT_mavenCentralUsername: ${{ secrets.MAVEN_CENTRAL_USERNAME }}
+          ORG_GRADLE_PROJECT_mavenCentralPassword: ${{ secrets.MAVEN_CENTRAL_PASSWORD }}
+          ORG_GRADLE_PROJECT_signingInMemoryKey: ${{ secrets.SIGNING_KEY }}
+          ORG_GRADLE_PROJECT_signingInMemoryKeyPassword: ${{ secrets.SIGNING_PASSWORD }}
+        run: ./gradlew publishToMavenCentral --no-configuration-cache
+
+      - name: What happens next
+        run: |
+          echo "Deployment staged. It is NOT public yet."
+          echo "Open https://central.sonatype.com/publishing/deployments and release it."
